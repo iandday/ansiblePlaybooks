@@ -1,0 +1,40 @@
+---
+#Splunk build
+    
+- name: update apt cache and install NFS client packages
+  apt: 
+    name: nfs-common
+    state: present
+    update_cache: yes
+      
+- name: download and install splunk package
+  apt:
+    deb: "{{ splunk_url }}"
+    install_recommends: yes
+ 
+- name: create splunk user
+  user:
+    name: splunk
+    group: splunk
+
+- name: mount network share
+  mount: 
+    path: /opt/splunk/var/lib/splunk 
+    src: "{{ network_path }}"
+    fstype: nfs 
+    state: mounted    
+    
+- name: modify splunk directory permissions
+  file:
+    path: /opt/splunk
+    owner: splunk
+    group: splunk
+    recurse: yes
+    
+- name: initial splunk start
+  command: /opt/splunk/bin/splunk start --accept-license
+  become: true
+  become_user: splunk
+  
+- name: start splunk at boot
+  command: /opt/splunk/bin/splunk enable boot-start -user splunk 

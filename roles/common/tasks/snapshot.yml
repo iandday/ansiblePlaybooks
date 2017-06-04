@@ -1,0 +1,17 @@
+---
+- name: Import vault variables
+  include_vars: "vault.yml"
+  no_log: true
+  
+- name: create snapshot
+  vmware_guest_snapshot:
+    hostname: "{{ vcenter_host }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    datacenter: "{{ vcenter_datacenter }}"
+    validate_certs: False
+    name: "{{ vm_name }}"
+    state: present
+    snapshot_name: "{{ snapshot_name }}"
+    description: "Created by Ansible: {{ snapshot_details }}"
+  delegate_to: 127.0.0.1

@@ -1,0 +1,5 @@
+- name: Install php
+  sudo: yes
+  apt: 
+    pkg: php 
+    state: latest

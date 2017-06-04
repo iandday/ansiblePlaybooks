@@ -1,0 +1,109 @@
+---
+#NextCloud
+    
+- name: update apt cache and install required packages
+  apt: 
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items: "{{ apt_packages }}"
+
+- name: download tarball hash file
+  get_url:
+    url: "{{ tar_hash_url }}"
+    dest: "{{ hash_path }}"
+    
+    
+- name: extract hash value from downloaded file
+  slurp:
+    src: "{{ hash_path }}"
+  register: hash
+- name: download and verify NextCloud tarball
+  get_url:
+    url: "{{ tar_url }}"
+    dest: "{{ tar_path }}"
+    checksum: "md5:{{ (hash.content | b64decode).split(' ')[0] }}"
+
+- name: unpack NextCloud tarball
+  unarchive:
+    remote_src: True
+    src: "{{ tar_path }}"
+    dest: "{{ install_path }}"
+    group: www-data
+    owner: www-data   
+- name: remove downloaded files
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ hash_path }}"
+    - "{{ tar_path }}"
+- name: enable binary logging in mariadb
+  blockinfile:
+    path: /etc/ssh/sshd_config
+    insertafter: EOF
+    block: |
+      log-bin        = /var/log/mysql/mariadb-bin
+      log-bin-index  = /var/log/mysql/mariadb-bin.index
+      binlog_format  = mixed
+
+- name: copy apache config
+  become: true
+  template:
+    src: roles/nextCloud/templates/nextcloud.conf.j2
+    dest: /etc/apache2/sites-available/nextcloud.conf
+- name: link apache config
+  file:
+    src: /etc/apache2/sites-available/nextcloud.conf
+    dest: /etc/apache2/sites-enabled/nextcloud.conf
+    state: link
+- name: remove default site
+  file:
+    state: absent
+    path: /etc/apache2/sites-enabled/000-default.conf
+- name: restart mariadb & Apache
+  service:
+    name: "{{ item }}"
+    state: restarted
+  with_items:
+    - mysql
+    - apache2
+
+- name: mount network share
+  mount: 
+    path: "{{ nextcloud_data_dir }}"
+    src: "{{ network_path }}"
+    fstype: nfs 
+    state: mounted    
+    
+- name: modify splunk directory permissions
+  file:
+    path: "{{ nextcloud_data_dir }}"
+    owner: www-data
+    group: www-data
+    recurse: yes
+    
+- name: configure nextcloud
+  become: true
+  become_user: www-data
+  command: "{{ item }}"
+  args:
+    chdir: /var/www/nextcloud
+  with_items:
+      - 'php occ maintenance:install --database mysql --database-name "{{ mysql_database }}" --database-user "{{ mysql_user}}" --database-pass "{{ mysql_password }}" --admin-user "{{ nextcloud_admin_username }}" --admin-pass "{{ nextcloud_admin_password }}" --data-dir "{{ nextcloud_data_dir }}"'
+      - 'php occ config:system:set trusted_domains 2 --value={{ server_name }}'
+      - 'php occ config:system:set trusted_domains 3 --value={{ ansible_hostname }}'
+      - 'php occ config:system:set memcache.local --value=\\OC\\Memcache\\APCu'
+
+- name: enable PHP opcache
+  blockinfile:
+    path: /etc/php/7.0/apache2/php.ini
+    insertafter: EOF
+    block: |
+      opcache.enable=1
+      opcache.enable_cli=1
+      opcache.interned_strings_buffer=8
+      opcache.max_accelerated_files=10000
+      opcache.memory_consumption=128
+      opcache.save_comments=1
+      opcache.revalidate_freq=1

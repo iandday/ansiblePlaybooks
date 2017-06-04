@@ -1,0 +1,76 @@
+
+---
+# vim: set ft=ansible et ts=2 sw=2:
+#
+# Clone a new  VM from a template    
+- name: Clone VM
+  hosts: 127.0.0.1
+  gather_facts: false
+  connection: local
+  vars:
+    vcenter_hostname: "{{ vcenter_host }}"
+    esxhost: 10.168.1.111
+    datastore: esxi0SSD
+    network: "dLAN"
+    notes: Created by Ansible
+    dumpfacts: False
+#    disk_size: 30
+
+  tasks:
+    - name: Check for required variables
+      fail: msg="Must pass name and group to -e"
+      when: name is not defined or group is not defined
+
+    - name: Check for vSphere access parameters
+      fail: msg="Must set vcenter_username and vcenter_password in a Vault"
+      when: (vcenter_username is not defined) or (vcenter_password is not defined)
+
+    - name: Create VM from template
+      vmware_guest:
+        validate_certs: False
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        esxi_hostname: "{{ esxhost }}"
+        datacenter: Daynet
+        name: "{{ name }}"
+        template: "{{ vcenter_vmtemplate }}"
+        networks:
+        - name: "{{ network }}" 
+        #  device_type: vmxnet3   
+        #- name: "{{ network }}" 
+         # device_type: vmxnet3 
+        customization:
+          hostname: MyNewVM3
+        state: poweredoff
+      register: newvm
+   
+    # - name: Add NIC
+      # vmware_guest:
+        # validate_certs: False
+        # hostname: "{{ vcenter_hostname }}"
+        # username: "{{ vcenter_username }}"
+        # password: "{{ vcenter_password }}"
+        # uuid: "{{ newvm.instance.hw_product_uuid }}"
+        # name: "{{ name }}"
+     
+        # state: poweredoff
+     
+    # - name: Power On
+      # vmware_guest:
+        # validate_certs: False
+        # hostname: "{{ vcenter_hostname }}"
+        # username: "{{ vcenter_username }}"
+        # password: "{{ vcenter_password }}"
+        # uuid: "{{ newvm.instance.hw_product_uuid }}"
+        # name: "{{ name }}"     
+        # state: poweredon
+        # wait_for_ip_address: yes
+      # register: completevm
+    
+    # - name: Output
+      # debug:
+        # var: completevm
+
+
+        

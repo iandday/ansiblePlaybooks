@@ -1,0 +1,43 @@
+---
+apt_packages: 
+    - php-bz2 
+    - php-common
+    - php-curl 
+    - php-gd 
+    - php-imagick 
+    - php-intl 
+    - php-mbstring 
+    - php-xml 
+    - php-zip
+    - php-json
+    - php-pear
+    - php-mysql
+    - libapache2-mod-php 
+    - php-mcrypt
+    - php-apcu
+    - redis-server 
+    - php-redis
+    - php-dompdf
+    - unzip
+    - php-ldap
+apache_modules: 
+    - rewrite 
+    - headers 
+    - env 
+    - dir 
+    - mime 
+    - setenvif 
+    - ssl
+tar_url: https://download.nextcloud.com/server/releases/nextcloud-12.0.0.tar.bz2
+tar_hash_url: https://download.nextcloud.com/server/releases/nextcloud-12.0.0.tar.bz2.md5
+mysql_database: nextcloud
+mysql_user: nextclouduser
+mysql_password: "{{ vault_mysql_password }}"
+mysql_root_password: "{{ vault_mysql_root_password }}"
+server_name:  "{{ vault_server_name }}"
+install_path: /var/www/
+nextcloud_admin_password: "{{ vault_nextcloud_admin_password}}"
+nextcloud_admin_username: admin
+nextcloud_data_dir: /var/www/nextcloud/data
+#network_path: "{{ vault_network_path }}"
+php_config_path: /etc/php/7.0/apache2/php.ini

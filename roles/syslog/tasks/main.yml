@@ -1,0 +1,40 @@
+---
+#syslog
+
+- name: add syslog-ng signing key
+  apt_key:
+    url: "{{ syslog_key }}"
+    state: present
+    
+- name: add syslog repository to sources list
+  apt_repository:
+    repo: "{{ syslog_repo }}"
+    state: present
+    filename: 'syslog-ng'
+    
+- name: update apt cache and install required packages
+  apt: 
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items: "{{ apt_packages }}"
+
+- name: copy syslog config file
+  template:
+    src: roles/syslog/templates/utm.conf.j2
+    dest: /etc/syslog-ng/conf.d/utm.conf
+    owner: root
+    group: root
+    mode: 0644
+ 
+- name: mount log directory
+  mount: 
+    path: "{{ log_dir }}"
+    src: "{{ nfs_server }}:{{ nfs_path }}"
+    fstype: nfs 
+    state: mounted    
+
+- name: restart syslog-ng
+  service:
+    name: syslog-ng
+    state: restarted   

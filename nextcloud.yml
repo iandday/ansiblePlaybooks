@@ -1,0 +1,24 @@
+---
+#configure base VM to host NextCloud server
+- hosts: nextcloud
+  vars:
+    #snapshot_details: "snapshot after install and initial start"
+    hostname: "ansibleTest"
+    #vm_name: "splunk"
+    #snapshot_name: "Clean Splunk"
+    ansible_python_interpreter: /usr/bin/python2.7
+  vars_files:
+    - roles/nextCloud/vars/main.yml
+    - roles/nextCloud/vars/vault.yml
+  become: true
+  gather_facts: false
+  pre_tasks:
+  - name: Install python2.7 since Ubuntu 16.04 doesn't ship it
+    raw: "sudo apt-get update -y && sudo apt-get install -y python2.7 aptitude"
+  - name: gather facts
+    setup:
+  roles:
+    - apache
+    - php
+    - mysql   
+    - nextCloud
