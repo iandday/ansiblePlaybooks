@@ -1,0 +1,45 @@
+---
+#emby
+    
+- name: add emby signing key
+  apt_key:
+    url: '{{ emby_repo_key }}'
+    state: present
+    
+- name: add emby repository to sources list
+  apt_repository:
+    repo: '{{ emby_repo }}'
+    state: present
+    filename: 'emby'
+        
+- name: update apt cache and install required packages
+  apt: 
+    name: '{{ item }}'
+    state: present
+    update_cache: yes
+  with_items: '{{ apt_packages }}'
+
+- name: mount media share
+  mount: 
+    state: mounted 
+    fstype: cifs
+    src: '{{ media_path}}'
+    path: '{{ media_dest }}'
+    opts: "domain={{mount_domain}},username={{mount_user}},password={{mount_pass}}"
+  become_user: root
+  become: true
+
+- name: mount backup share
+  mount: 
+    state: mounted 
+    fstype: cifs
+    src: '{{ backup_path}}'
+    path: /mnt/backup
+    opts: "domain={{mount_domain}},username={{mount_user}},password={{mount_pass}},uid=emby,gid=emby"
+  become_user: root
+  become: true
+  
+- name: start emby
+  service:
+    name: emby-server
+    state: restarted

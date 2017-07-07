@@ -1,0 +1,12 @@
+---
+emby_repo: "deb http://download.opensuse.org/repositories/home:/emby/xUbuntu_16.04/ /"
+emby_repo_key: http://download.opensuse.org/repositories/home:emby/xUbuntu_16.04/Release.key
+apt_packages: 
+    - cifs-utils
+    - emby-server
+media_path: "{{ vault_media_path }}"
+media_dest: /mnt/media
+backup_path: "{{ vault_backup_path }}"
+mount_user: "{{ vault_mount_user }}"
+mount_pass: "{{ vault_mount_pass }}"
+mount_domain: "{{ vault_mount_domain }}"

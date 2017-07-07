@@ -40,7 +40,7 @@
     - "{{ tar_path }}"
 - name: enable binary logging in mariadb
   blockinfile:
-    path: /etc/ssh/sshd_config
+    path: /etc/mysql/mariadb.conf.d/50-server.cnf
     insertafter: EOF
     block: |
       log-bin        = /var/log/mysql/mariadb-bin
@@ -75,14 +75,6 @@
     src: "{{ network_path }}"
     fstype: nfs 
     state: mounted    
-    
-- name: modify splunk directory permissions
-  file:
-    path: "{{ nextcloud_data_dir }}"
-    owner: www-data
-    group: www-data
-    recurse: yes
-    
 - name: configure nextcloud
   become: true
   become_user: www-data
@@ -91,10 +83,9 @@
     chdir: /var/www/nextcloud
   with_items:
       - 'php occ maintenance:install --database mysql --database-name "{{ mysql_database }}" --database-user "{{ mysql_user}}" --database-pass "{{ mysql_password }}" --admin-user "{{ nextcloud_admin_username }}" --admin-pass "{{ nextcloud_admin_password }}" --data-dir "{{ nextcloud_data_dir }}"'
-      - 'php occ config:system:set trusted_domains 2 --value={{ server_name }}'
-      - 'php occ config:system:set trusted_domains 3 --value={{ ansible_hostname }}'
+      - 'php occ config:system:set trusted_domains 1 --value={{ server_name }}'
+      - 'php occ config:system:set trusted_domains 3 --value={{ hostvars[inventory_hostname]["ansible_default_ipv4"]["address"] }}'
       - 'php occ config:system:set memcache.local --value=\\OC\\Memcache\\APCu'
-
 - name: enable PHP opcache
   blockinfile:
     path: /etc/php/7.0/apache2/php.ini
@@ -107,3 +98,7 @@
       opcache.memory_consumption=128
       opcache.save_comments=1
       opcache.revalidate_freq=1
+- name: restart Apache
+  service:
+    name: apache2
+    state: restarted

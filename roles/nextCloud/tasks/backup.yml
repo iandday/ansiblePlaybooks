@@ -1,0 +1,43 @@
+---
+#NextCloud backup tasks
+
+- name: timestamp
+  command: date +%Y%m%d%H%M
+  register: timestamp
+    
+- name: backup database
+  become: true
+  mysql_db:
+    login_user: root
+    login_password:  '{{ mysql_root_password }}'
+    state: dump
+    name: '{{ mysql_database }}'
+    target: '{{ nextcloud_data_dir }}/backup/nextcloudDB-{{ timestamp.stdout }}.sql.gz'
+
+- name: backup config directory
+  become: true
+  archive:
+    path: '{{ install_path }}/nextcloud/config'
+    dest: '{{ nextcloud_data_dir }}/backup/nextcloudConfig-{{ timestamp.stdout }}.gz'
+    format: gz
+
+- name: backup theme directory
+  become: true
+  archive:
+    path: '{{ install_path }}/nextcloud/themes'
+    dest: '{{ nextcloud_data_dir }}/backup/nextcloudTheme-{{ timestamp.stdout }}.gz'
+    format: gz
+    
+- name: find old backup files
+  find:
+    paths: '{{ nextcloud_data_dir }}/backup'
+    age: "1w"
+  register: files_to_delete
+
+- name: purge old backup files
+  become: true
+  file:
+    path: '{{ item.path }}'
+    state: absent
+  with_items:
+    - '{{ files_to_delete.files }}'

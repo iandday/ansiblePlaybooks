@@ -1,15 +1,15 @@
 ---
-#configure base VM to host NextCloud server
-- hosts: nextcloud-nc
+#configure base VM to host emby server
+- hosts: emby
   vars:
     snapshot_details: "snapshot after install and initial start"
-    hostname: "nextcloud"
-    vm_name: "nextcloud"
-    snapshot_name: "Base nextcloud"
+    hostname: "media"
+    vm_name: "media"
+    snapshot_name: "Base emby"
     ansible_python_interpreter: /usr/bin/python2.7
   vars_files:
-    - roles/nextCloud/vars/main.yml
-    - roles/nextCloud/vars/vault.yml
+    - roles/emby/vars/main.yml
+    - roles/emby/vars/vault.yml
   become: true
   gather_facts: false
   pre_tasks:
@@ -22,14 +22,9 @@
   - name: gather facts
     setup:
   roles:
-    - apache
-    - php
-    - mysql   
-    - nextCloud
+    - emby
   post_tasks:
   - name: take clean snapshot
     include_role:
       name: common
       tasks_from: snapshot
-  - name: reboot the server
-    command: /sbin/reboot
