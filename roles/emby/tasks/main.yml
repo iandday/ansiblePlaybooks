@@ -1,6 +1,7 @@
 ---
-#emby
-    
+# roles/emby/tasks/main.yml
+
+- include_vars: vault.yml    
 - name: add emby signing key
   apt_key:
     url: '{{ emby_repo_key }}'
@@ -29,16 +30,15 @@
   become_user: root
   become: true
 
-- name: mount backup share
-  mount: 
-    state: mounted 
-    fstype: cifs
-    src: '{{ backup_path}}'
-    path: /mnt/backup
-    opts: "domain={{mount_domain}},username={{mount_user}},password={{mount_pass}},uid=emby,gid=emby"
-  become_user: root
-  become: true
-  
+- name: mount backup path
+  include_role:
+    name: common
+    tasks_from: mount_backup
+  vars:
+    backup_path: "{{ backup_root_path}}/emby/"
+    backup_uid: emby
+    backup_gid: emby  
+   
 - name: start emby
   service:
     name: emby-server

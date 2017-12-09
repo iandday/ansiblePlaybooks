@@ -6,7 +6,6 @@ apt_packages:
     - emby-server
 media_path: "{{ vault_media_path }}"
 media_dest: /mnt/media
-backup_path: "{{ vault_backup_path }}"
 mount_user: "{{ vault_mount_user }}"
 mount_pass: "{{ vault_mount_pass }}"
 mount_domain: "{{ vault_mount_domain }}"
