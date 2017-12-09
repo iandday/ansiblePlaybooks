@@ -1,0 +1,57 @@
+---
+#roles/unifi/tasks/backup.yml
+# adapted from https://dl.ubnt.com/unifi/5.5.19/unifi_sh_api
+
+- include_vars: vault.yml
+
+- name: mount backup path
+  include_role:
+    name: common
+    tasks_from: mount_backup
+  vars:
+    backup_path: "{{ backup_root_path}}/unifi/"
+    backup_uid: ansible
+    backup_gid: ansible
+    
+- name: login
+  uri:
+    url: "{{ baseurl }}/api/login"
+    method: POST
+    body: "{'username':'{{username}}','password':'{{password}}'}"
+    body_format: json
+    validate_certs: no
+  register: login
+
+- name: initiate backup
+  uri:
+    url: '{{baseurl}}/api/s/{{site}}/cmd/backup'
+    method: POST
+    body: "json={'cmd':'backup'}"
+    return_content: yes
+    headers:
+      Cookie: "{{login.set_cookie}}" 
+    validate_certs: no
+  register: backup
+  
+- name: download backup 
+  uri:
+    url: '{{ baseurl }}{{ (backup.content|from_json)["data"][0]["url"] }}'
+    method: GET
+    dest: '{{ backup_path }}'
+    validate_certs: no
+    headers:
+      Cookie: "{{login.set_cookie}}" 
+      
+- name: logout
+  uri:
+    url: '{{baseurl}}/logout'
+    method: POST
+    validate_certs: no
+    status_code: 302
+    headers:
+      Cookie: "{{login.set_cookie}}" 
+      
+- name: unmount backup path
+  include_role:
+    name: common
+    tasks_from: unmount_backup
