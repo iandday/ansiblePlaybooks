@@ -1,0 +1,24 @@
+---
+hash_path: /tmp/nextCloud.md5
+tar_path: /tmp/nextCloud.tar.bz2
+install_path: /var/www
+solr_tar_url: "http://mirrors.koehn.com/apache/lucene/solr/{{ solr_version }}/solr-{{ solr_version }}.tgz"
+solr_tar_path: /tmp/solr.tgz
+solr_path: /usr/local/lib/solr
+solr_data_path: "{{ nextcloud_data_dir }}/solr"
+solr_user: solr
+nextant_tar_url: https://github.com/nextcloud/nextant/releases/download/v{{ nextant_version }}/nextant-{{ nextant_version }}.tar.gz
+nextant_tar_path: /tmp/nextant.tgz
+php_config_path: /etc/php/7.0/fpm/php.ini
+php_pool_path: /etc/php/7.0/fpm/pool.d/www.conf
+nextcloud_path: "{{ install_path }}/nextcloud"
+bookmarks_tar_url: https://github.com/nextcloud/bookmarks/releases/download/v{{ bookmarks_version }}/bookmarks-{{ bookmarks_version }}.tar.gz
+bookmarks_tar_path: /tmp/bookmarks.tgz
+contacts_tar_url: https://github.com/nextcloud/contacts/releases/download/v{{ contacts_version }}/contacts.tar.gz
+contacts_tar_path: /tmp/contacts.tgz
+calendar_tar_url: https://github.com/nextcloud/calendar/releases/download/v{{ calendar_version }}/calendar.tar.gz
+calendar_tar_path: /tmp/calendar.tgz
+spreed_tar_url: https://github.com/nextcloud/spreed/releases/download/v{{ spreed_version }}/spreed-{{ spreed_version }}.tar.gz
+spreed_tar_path: /tmp/spreed.tgz
+totp_tar_url: https://github.com/nextcloud/twofactor_totp/releases/download/{{ totp_version }}/twofactor_totp.tar.gz
+totp_tar_path: /tmp/totp.tgz

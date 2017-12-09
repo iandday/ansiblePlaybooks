@@ -1,0 +1,17 @@
+---
+#
+# Nextcloud role 
+# roles/nextCloud/tasks/main.yml
+#
+
+- name: load vault variables
+  include_vars: vault.yml tags=nextcloud:install, nextcloud:backup
+
+- name: check required variables
+  import_tasks: check_vars.yml tags=nextcloud:install, nextcloud:backup
+  
+- name: load nextcloud install tasks
+  include_tasks: "nextcloud-install.yml" tags=nextcloud:install
+
+- name: load nextcloud backup tasks
+  include_tasks: "nextcloud-backup.yml" tags=nextcloud:backup

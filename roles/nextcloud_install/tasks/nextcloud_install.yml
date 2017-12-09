@@ -1,0 +1,297 @@
+---
+#NextCloud
+# https://www.rosehosting.com/blog/install-nextcloud-on-ubuntu-16-04/
+
+- name: update apt cache and install required packages
+  apt: 
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items: "{{ apt_packages }}"
+
+- name: mount network share
+  mount: 
+    path: "{{ nextcloud_data_dir }}"
+    src: "{{ network_path }}"
+    fstype: nfs 
+    state: mounted  
+
+- name: create solr user
+  user:
+    name: solr
+    system: yes
+    createhome: no
+
+- name: download solr tarball  
+  get_url:
+    url: "{{ solr_tar_url }}"
+    dest: "{{ solr_tar_path }}"
+    checksum: "sha1:{{ solr_tar_hash }}"  
+
+- name: unpack solr tarball
+  unarchive:
+    remote_src: True
+    src: "{{ solr_tar_path }}"
+    dest: /usr/local/lib/
+    group: "{{ solr_user }}"
+    owner: "{{ solr_user }}"   
+
+- name: link current solr version to solar_path variable
+  file:
+    src:  "/usr/local/lib/solr-{{ solr_version }}"
+    path: "{{ solr_path }}"
+    state: link
+
+- name: change solr directory owner
+  file: 
+    path: "/usr/local/lib/solr-{{ solr_version }}"
+    owner: solr
+    state: directory
+    recurse: yes  
+
+- name: start solr manually
+  become: yes
+  become_user: solr
+  command: "{{ solr_path }}/bin/solr start -m 256m"
+
+- name: create nextant index
+  become: yes
+  become_user: solr
+  command: "{{ solr_path }}/bin/solr create -c nextant"
+
+- name: stop solr
+  become: yes
+  become_user: solr
+  command: "{{ solr_path }}/bin/solr stop"
+
+- name: install solr systemd service file
+  template:
+    src: solr.service.j2
+    dest: /etc/systemd/system/solr.service
+
+- name: start solr service
+  systemd:
+    state: started
+    name: solr
+    enabled: yes
+    daemon_reload: yes
+
+- name: download tarball hash file
+  get_url:
+    url: "{{ tar_hash_url }}"
+    dest: "{{ hash_path }}" 
+
+- name: extract hash value from downloaded file
+  slurp:
+    src: "{{ hash_path }}"
+  register: hash
+
+- name: download and verify NextCloud tarball
+  get_url:
+    url: "{{ tar_url }}"
+    dest: "{{ tar_path }}"
+    checksum: "md5:{{ (hash.content | b64decode).split(' ')[0] }}"
+
+- name: unpack NextCloud tarball
+  unarchive:
+    remote_src: True
+    src: "{{ tar_path }}"
+    dest: "{{ install_path }}"
+    group: www-data
+    owner: www-data   
+
+- name: enable binary logging in mariadb
+  blockinfile:
+    path: /etc/mysql/mariadb.conf.d/50-server.cnf
+    insertafter: EOF
+    block: |
+      log-bin        = /var/log/mysql/mariadb-bin
+      log-bin-index  = /var/log/mysql/mariadb-bin.index
+      binlog_format  = mixed
+
+- name: copy nginx config
+  become: true
+  template:
+    src: roles/nextcloud_install/templates/nextcloud.j2
+    dest: /etc/nginx/sites-available/nextcloud
+
+- name: link nginx config
+  file:
+    src: /etc/nginx/sites-available/nextcloud
+    dest: /etc/nginx/sites-enabled/nextcloud
+    state: link
+
+- name: remove default site
+  file:
+    state: absent
+    path: /etc/nginx/sites-enabled/default
+
+- name: enable PHP opcache
+  lineinfile:
+    path: '{{ php_config_path }}'
+    line: '{{ item }}'
+    state: present
+  with_items:
+    - 'opcache.enable=1'
+    - 'opcache.enable_cli=1'
+    - 'opcache.interned_strings_buffer=8'
+    - 'opcache.max_accelerated_files=10000'
+    - 'opcache.memory_consumption=128'
+    - 'opcache.save_comments=1'
+    - 'opcache.revalidate_freq=1'
+
+- name: remove unix sockets in php-fpm pool
+  lineinfile:
+    path: '{{ php_pool_path }}'
+    line: 'listen = /run/php/php7.0-fpm.sock'
+    state: absent
+
+- name: add environment variables and tcp socket to php-fpm pool
+  lineinfile:
+    path: '{{ php_pool_path }}'
+    line: '{{ item }}'
+    state: present
+  with_items:
+    - 'listen = 127.0.0.1:9000'
+    - 'env[HOSTNAME] = $HOSTNAME'
+    - 'env[PATH] = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+    - 'env[TMP] = /tmp'
+    - 'env[TMPDIR] = /tmp'
+    - 'env[TEMP] = /tmp'
+
+- name: download additional nextcloud apps
+  get_url:
+    url: '{{ item.u }}'
+    dest: '{{ item.d }}'
+  with_items:
+    - {u: '{{ nextant_tar_url }}', d: '{{ nextant_tar_path }}'}
+    - {u: '{{ bookmarks_tar_url }}', d: '{{ bookmarks_tar_path }}'}
+    - {u: '{{ calendar_tar_url }}', d: '{{ calendar_tar_path }}'}
+    - {u: '{{ spreed_tar_url }}', d: '{{ spreed_tar_path }}'}
+    - {u: '{{ contacts_tar_url }}', d: '{{ contacts_tar_path }}'}
+    - {u: '{{ totp_tar_url }}', d: '{{ totp_tar_path }}'}
+
+- name: extract downloaded nextcloud apps
+  unarchive:
+      remote_src: True
+      src: "{{ item }}"
+      dest: "{{ nextcloud_path }}/apps"
+      group: www-data
+      owner: www-data
+  with_items:
+    - '{{ nextant_tar_path }}'
+    - '{{ bookmarks_tar_path }}'
+    - '{{ calendar_tar_path }}'
+    - '{{ spreed_tar_path }}'
+    - '{{ contacts_tar_path }}'
+    - '{{ totp_tar_path }}'     
+
+- name: configure nextcloud
+  become: true
+  become_user: www-data
+  command: "{{ item }}"
+  args:
+    chdir: /var/www/nextcloud
+  with_items:
+      - 'php occ maintenance:install --database mysql --database-name "{{ mysql_database }}" --database-user "{{ mysql_user}}" --database-pass "{{ mysql_password }}" --admin-user "{{ nextcloud_admin_username }}" --admin-pass "{{ nextcloud_admin_password }}" --data-dir "{{ nextcloud_data_dir }}"'
+      - 'php occ config:system:set trusted_domains 1 --value={{ server_name }}'
+      - 'php occ config:system:set trusted_domains 2 --value={{ hostname }}'
+      - 'php occ config:system:set trusted_domains 3 --value={{ hostvars[inventory_hostname]["ansible_default_ipv4"]["address"] }}'
+      - 'php occ config:system:set memcache.local --value=\\OC\\Memcache\\APCu'
+      - 'php occ config:system:set skeletondirectory --value none'
+
+- name: enable nextcloud apps
+  become: true
+  become_user: www-data
+  command: "php console.php app:enable {{ item }}"
+  args:
+    chdir: "{{ nextcloud_path }}"
+  with_items:
+    - nextant
+    - calendar
+    - contacts
+    - bookmarks
+    - spreed
+    - user_ldap
+    - twofactor_totp
+    - files_external
+
+- name: configure nextant
+  become: true
+  become_user: www-data
+  command: "{{ item }}"
+  args:
+    chdir: /var/www/nextcloud
+  with_items:
+      - 'php occ nextant:test http://127.0.0.1:8983/solr/ nextant --save'
+      - 'php occ config:app:set --value 1 nextant index_bookmarks'
+      - 'php occ config:app:set --value 1 nextant index_files_tree'
+      - 'php occ nextant:index'
+
+- name: configure ldap connection
+  become: true
+  become_user: www-data
+  command: "{{ item }}"
+  args:
+    chdir: /var/www/nextcloud
+  with_items:
+      - 'php occ ldap:create-empty-config'
+      - 'php occ ldap:set-config s01  hasMemberOfFilterSupport "{{ ldap_member_filter }}"'
+      - 'php occ ldap:set-config s01  ldapAgentName "{{ ldap_bind_name }}"'
+      - 'php occ ldap:set-config s01  ldapAgentPassword "{{ ldap_bind_password }}"'
+      - 'php occ ldap:set-config s01  ldapBase "{{ ldap_base_dn }}"'
+      - 'php occ ldap:set-config s01  ldapBaseGroups "{{ ldap_base_groups }}"'
+      - 'php occ ldap:set-config s01  ldapBaseUsers "{{ldap_base_users }}"'
+      - 'php occ ldap:set-config s01  ldapGroupFilter "{{ ldap_group_filter }}"'
+      - 'php occ ldap:set-config s01  ldapGroupFilterGroups "{{ ldap_group_filter_groups }}"'
+      - 'php occ ldap:set-config s01  ldapHost "{{ ldap_host }}"'
+      - 'php occ ldap:set-config s01  ldapLoginFilter "{{ ldap_login_filter }}"'
+      - 'php occ ldap:set-config s01  ldapLoginFilterEmail "{{ ldap_filter_email }}"'
+      - 'php occ ldap:set-config s01  ldapPort "{{ ldap_port }}"'
+      - 'php occ ldap:set-config s01  ldapUserDisplayName "{{ ldap_display_name }}"'
+      - 'php occ ldap:set-config s01  ldapUserDisplayName2 "{{ ldap_display_name2 }}"'
+      - 'php occ ldap:set-config s01  ldapUserFilter "{{ ldap_user_filter }}"'
+      - 'php occ ldap:set-config s01  ldapUserFilterGroups "{{ ldap_user_filter_groups }}"'
+      - 'php occ ldap:set-config s01  ldapUserFilterObjectclass "{{ ldap_user_filter_class }}"'
+      - 'php occ ldap:set-config s01  ldapExpertUsernameAttr SAMAccountName'
+      - 'php occ ldap:test-config s01'
+      - 'php occ ldap:set-config s01  ldapConfigurationActive 1' 
+
+- name: copy external share config
+  copy:
+    src: externalShares.json
+    dest: '{{ external_share_config }}'
+
+- name: configure external shares
+  become: true
+  become_user: www-data
+  command: '{{ item }}' 
+  with_items:
+    - 'php occ config:app:set --value  ftp,dav,owncloud,sftp,amazons3,dropbox,googledrive,swift,smb,\OC\Files\Storage\SFTP_Key,\OC\Files\Storage\SMB_OC files_external user_mounting_backends'
+    - 'php occ files_external:import  {{ external_share_config }}'
+  args:
+    chdir: /var/www/nextcloud
+
+- name: restart nginx & php-fpm
+  service:
+    name: '{{ item }}'
+    state: restarted 
+  with_items:
+    - nginx
+    - php7.0-fpm  
+
+- name: remove downloaded files
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - '{{ hash_path }}'
+    - '{{ tar_path }}'
+    - '{{ solr_tar_path }}'
+    - '{{ nextant_tar_path }}'
+    - '{{ contacts_tar_path }}'
+    - '{{ bookmarks_tar_path }}'
+    - '{{ calendar_tar_path }}'
+    - '{{ spreed_tar_path }}'
+    - '{{ totp_tar_path }}'
+    - '{{ external_share_config }}'

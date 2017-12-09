@@ -1,0 +1,11 @@
+---
+#
+# Nextcloud role 
+# roles/nextcloud_Install/tasks/main.yml
+#
+
+- name: check required variables
+  import_tasks: check_vars.yml 
+  
+- name: load nextcloud install tasks
+  include_tasks: nextcloud_install.yml
