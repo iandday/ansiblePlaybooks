@@ -1,0 +1,8 @@
+- name: load vault variables
+  include_vars: vault.yml
+
+- name: check required variables
+  import_tasks: check_vars.yml
+  
+- name: main lets encrypt routine
+  include_tasks: "letsencrypt_{{ install_type }}.yml" 

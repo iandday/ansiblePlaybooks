@@ -1,0 +1,5 @@
+install_type: staging
+web_user: www-data
+dehydrated_dest: /etc/dehydrated
+dehydrated_repo: https://github.com/lukas2511/dehydrated.git
+cert_out_directory: /etc/apache2/ssl

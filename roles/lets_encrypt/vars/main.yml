@@ -1,0 +1,10 @@
+godaddy_key: '{{ vault_godaddy_key }}'
+godaddy_secret: '{{ vault_godaddy_secret }}'
+domains:
+  - www.ianday.me
+  - hass.ianday.me
+  - dvr.ianday.me
+  - media.ianday.me
+  - splunk.ianday.me
+  - cloud.ianday.me
+  - unifi.ianday.me
