@@ -1,0 +1,51 @@
+#
+# Managed by Ansible
+# Emby
+#
+
+<VirtualHost *:80>
+    ServerName {{ item.sub_domain }}.{{ item.domain }}
+    ServerAdmin {{ server_admin }}
+
+    ErrorLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-error.log
+    CustomLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-access.log combined
+
+    RewriteEngine on
+  	RewriteCond %{HTTPS} !=on
+    RewriteRule .* https://%{SERVER_NAME}%{REQUEST_URI} [NE,R,L]
+</VirtualHost>
+
+<VirtualHost *:443>
+	<IfModule mod_ssl.c>
+		ServerName {{ item.sub_domain }}.{{ item.domain }}
+    	ServerAdmin {{ server_admin }}
+		
+    ErrorLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-error.log
+    CustomLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-access.log combined
+
+		SSLEngine On
+		SSLCertificateFile /etc/apache2/ssl/{{ item.sub_domain }}.{{ item.domain }}/fullchain.pem
+		SSLCertificateKeyFile /etc/apache2/ssl/{{ item.sub_domain }}.{{ item.domain }}/privkey.pem
+		
+		<proxy *>
+			AddDefaultCharset off
+			Order Allow,Deny
+			Allow from all
+		</proxy>
+
+		ProxyRequests     Off
+		ProxyPreserveHost On
+
+		ProxyPass "/embywebsocket" "ws://{{ item.target_host }}:8096/embywebsocket"
+		ProxyPassReverse "/embywebsocket" "ws://{{ item.target_host }}:8096/embywebsocket"
+
+		ProxyPass "/" "http://{{ item.target_host }}:8096/"
+		ProxyPassReverse "/" "http://{{ item.target_host }}:8096/"
+
+		RewriteEngine on
+		RewriteCond %{HTTP:UPGRADE} ^WebSocket$ [NC]
+		RewriteCond %{HTTP:CONNECTION} ^Upgrade$ [NC]
+		RewriteRule .* ws://{{ item.target_host }}:8123%{REQUEST_URI} [P]
+	</IfModule>
+</VirtualHost>
+

@@ -1,0 +1,29 @@
+---
+#
+# roles/apache_reverse_proxy/vars/main.yml
+#
+
+apt_packages:
+    - apache2
+    - apache2-utils
+    - apache2-bin
+    - apache2-data
+    - npm
+apache_modules:
+    - proxy 
+    - proxy_http 
+    - headers 
+    - rewrite 
+    - ssl 
+    - substitute 
+    - proxy_html 
+    - proxy_wstunnel 
+    - xml2enc 
+    - authnz_ldap
+server_admin: webmaster@ianday.me
+domain: ianday.me
+ldap_url: '{{ vault_ldap_url }}'
+ldap_dn: '{{ vault_ldap_dn }}'
+ldap_password: '{{ vault_ldap_password }}'
+websites: '{{ vault_websites }}'
+            

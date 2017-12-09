@@ -1,0 +1,32 @@
+#
+# Managed by Ansible
+# Splunk
+#
+
+<VirtualHost *:80>
+    ServerName {{ item.sub_domain }}.{{ item.domain }}
+    ServerAdmin {{ server_admin }}
+
+    ErrorLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-error.log
+    CustomLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-access.log combined
+
+    RewriteEngine on
+  	RewriteCond %{HTTPS} !=on
+    RewriteRule .* https://%{SERVER_NAME}%{REQUEST_URI} [NE,R,L]
+</VirtualHost>
+
+<VirtualHost *:443>
+	ServerName {{ item.sub_domain }}.{{ item.domain }}
+    ServerAdmin {{ server_admin }}
+	
+    ErrorLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-error.log
+    CustomLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-access.log combined
+
+	SSLEngine On
+	SSLCertificateFile /etc/apache2/ssl/{{ item.sub_domain }}.{{ item.domain }}/fullchain.pem
+	SSLCertificateKeyFile /etc/apache2/ssl/{{ item.sub_domain }}.{{ item.domain }}/privkey.pem
+	
+    ProxyPass /   http://{{ item.target_host }}:8000/ timeout=60  
+    ProxyPassReverse /  http://{{ item.target_host }}:8000/ timeout=60
+</VirtualHost>
+

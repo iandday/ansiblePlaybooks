@@ -1,0 +1,54 @@
+#
+# Managed by Ansible
+# Nextcloud
+#
+
+
+<VirtualHost *:80>
+    ServerName {{ item.sub_domain }}.{{ item.domain }}
+    ServerAdmin {{ server_admin }}
+
+    ErrorLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-error.log
+    CustomLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-access.log combined
+
+    RewriteEngine on
+  	RewriteCond %{HTTPS} !=on
+    RewriteRule .* https://%{SERVER_NAME}%{REQUEST_URI} [NE,R,L]
+</VirtualHost>
+
+<IfModule mod_ssl.c>
+	<VirtualHost *:443>
+		ServerName {{ item.sub_domain }}.{{ item.domain }}
+	    ServerAdmin {{ server_admin }}
+		
+		ErrorLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-error.log
+		CustomLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-access.log combined
+
+		SSLEngine On
+		SSLCertificateFile /etc/apache2/ssl/{{ item.sub_domain }}.{{ item.domain }}/fullchain.pem
+		SSLCertificateKeyFile /etc/apache2/ssl/{{ item.sub_domain }}.{{ item.domain }}/privkey.pem
+		
+		SSLProxyEngine On
+		SSLProxyVerify none
+		SSLProxyCheckPeerCN off
+		SSLProxyCheckPeerName off
+		SSLProxyCheckPeerExpire off
+
+		<proxy *>
+			AddDefaultCharset off
+			Order Allow,Deny
+			Allow from all
+		</proxy>
+
+		ProxyRequests     Off
+		ProxyPreserveHost On
+
+		<location />
+			RequestHeader unset Accept-Encoding
+			ProxyPass http://{{ item.target_host }}:80/
+			ProxyPassReverse http://{{ item.target_host }}:80/  
+			Order allow,deny
+			Allow from All
+		</location>
+	</VirtualHost>
+</IfModule>

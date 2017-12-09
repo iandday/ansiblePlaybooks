@@ -1,0 +1,33 @@
+#
+# Managed by Ansible
+# Default catchall, redirects to 404
+#
+
+<VirtualHost *:80>
+    ServerAdmin {{ server_admin }}
+
+    ErrorLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-error.log
+    CustomLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-access.log combined
+
+    RewriteEngine on
+  	RewriteCond %{HTTPS} !=on
+    RewriteRule .* https://%{SERVER_NAME}%{REQUEST_URI} [NE,R,L]
+</VirtualHost>
+
+
+<VirtualHost *:443>   
+    ServerAdmin {{ server_admin }}
+    
+    ErrorLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-error.log
+    CustomLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-access.log combined
+    
+    SSLEngine On
+	SSLCertificateFile /etc/apache2/ssl/{{ item.sub_domain }}.{{ item.domain }}/fullchain.pem
+	SSLCertificateKeyFile /etc/apache2/ssl/{{ item.sub_domain }}.{{ item.domain }}/privkey.pem
+
+    Redirect 404 /
+    ErrorDocument 404 "Page Not Found"
+</VirtualHost>
+
+# vim: syntax=apache ts=4 sw=4 sts=4 sr noet
+

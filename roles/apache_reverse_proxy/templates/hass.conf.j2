@@ -1,0 +1,46 @@
+#
+# Managed by Ansible
+# Home Assistant
+#
+
+<VirtualHost *:80>
+    ServerName {{ item.sub_domain }}.{{ item.domain }}
+    ServerAdmin {{ server_admin }}
+
+    ErrorLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-error.log
+    CustomLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-access.log combined
+
+    RewriteEngine on
+  	RewriteCond %{HTTPS} !=on
+    RewriteRule .* https://%{SERVER_NAME}%{REQUEST_URI} [NE,R,L]
+</VirtualHost>
+
+<VirtualHost *:443>
+	ServerName {{ item.sub_domain }}.{{ item.domain }}
+    ServerAdmin {{ server_admin }}
+	
+    ErrorLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-error.log
+    CustomLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-access.log combined
+
+	SSLEngine On
+	SSLCertificateFile /etc/apache2/ssl/{{ item.sub_domain }}.{{ item.domain }}/fullchain.pem
+	SSLCertificateKeyFile /etc/apache2/ssl/{{ item.sub_domain }}.{{ item.domain }}/privkey.pem
+	
+	ProxyPreserveHost On
+    ProxyRequests off
+	ProxyPass / http://{{ item.target_host }}:8123/  
+	ProxyPassReverse / http://{{ item.target_host }}:8123/
+	ProxyPass /api/websocket ws://{{ item.target_host }}:8123/api/websocket
+    ProxyPassReverse /api/websocket ws://{{ item.target_host }}:8123/api/websocket
+	
+	# Google Home and Emulated Hue
+	ProxyPass /description.xml http://{{ item.target_host }}:8300/description.xml
+    ProxyPass /api http://{{ item.target_host }}:8300/api
+
+    RewriteEngine on
+    RewriteCond %{HTTP:Upgrade} =websocket [NC]
+    RewriteRule /(.*)  ws://{{ item.target_host }}:8123/$1 [P,L]
+    RewriteCond %{HTTP:Upgrade} !=websocket [NC]
+    RewriteRule /(.*)  http://{{ item.target_host }}:8123/$1 [P,L]
+</VirtualHost>
+

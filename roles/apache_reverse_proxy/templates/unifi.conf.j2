@@ -1,0 +1,48 @@
+#
+# Managed by Ansible
+# Unifi Controller
+#
+
+
+<VirtualHost *:80>
+    ServerName {{ item.sub_domain }}.{{ item.domain }}
+    ServerAdmin {{ server_admin }}
+
+    ErrorLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-error.log
+    CustomLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-access.log combined
+
+    RewriteEngine on
+  	RewriteCond %{HTTPS} !=on
+    RewriteRule .* https://%{SERVER_NAME}%{REQUEST_URI} [NE,R,L]
+</VirtualHost>
+
+
+<VirtualHost *:443>
+	ServerName {{ item.sub_domain }}.{{ item.domain }}
+    ServerAdmin {{ server_admin }}
+	
+    ErrorLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-error.log
+    CustomLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-access.log combined
+
+	SSLEngine On
+	SSLCertificateFile /etc/apache2/ssl/{{ item.sub_domain }}.{{ item.domain }}/fullchain.pem
+	SSLCertificateKeyFile /etc/apache2/ssl/{{ item.sub_domain }}.{{ item.domain }}/privkey.pem
+	
+	SSLProxyEngine On
+	SSLProxyVerify none
+	SSLProxyCheckPeerCN off
+	SSLProxyCheckPeerName off
+	SSLProxyCheckPeerExpire off
+
+	ProxyRequests On
+	RequestHeader unset Referer
+
+	ProxyPass /wss wss://{{ item.target_host }}:8443/wss  
+	ProxyPassReverse /wss wss://{{ item.target_host }}:8443/wss
+
+	ProxyPass / https://{{ item.target_host }}:8443/
+	ProxyPassReverse / https://{{ item.target_host }}:8443/
+
+	ProxyPreserveHost on
+</VirtualHost>
+
