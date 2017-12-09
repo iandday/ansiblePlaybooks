@@ -1,0 +1,18 @@
+# Managed by ansible
+
+[radius_client]
+host={{ radius_client_host }} 
+secret={{ radius_client_secret }} 
+pass_through_all=true
+
+
+[radius_server_auto]
+ikey={{ ikey }} 
+skey={{ skey }} 
+api_host={{ api_host }} 
+radius_ip_1={{ radius_ip }} 
+radius_secret_1={{ radius_secret }} 
+client=radius_client
+port={{ port }}
+failmode={{ failmode }}
+pass_through_attr_names={{ pass_through }}

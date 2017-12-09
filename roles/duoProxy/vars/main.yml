@@ -1,0 +1,25 @@
+---
+# roles/duoProxy/vars/main.yml
+
+# Device providing radius authentication 
+radius_client_host: '{{ vault_radius_client_host }}'
+radius_client_secret: '{{ vault_radius_client_secret }}'
+pass_through: NAS-Identifier,Calling-Station-Id
+# Device requesting radius authentication
+radius_ip: '{{ vault_radius_ip }}'
+radius_secret: '{{ vault_radius_secret }}'
+port: 1812
+# From duo admin portal
+ikey: '{{ vault_ikey }}'
+skey: '{{ vault_skey }}'
+api_host: '{{ vault_api_host }}'
+failmode: safe
+apt_packages: 
+    - build-essential
+    - libssl-dev
+    - python-dev
+    - libffi-dev
+    - cifs-utils
+tar_url: https://dl.duosecurity.com/duoauthproxy-latest-src.tgz
+install_dir: '/opt/duoauthproxy'
+service_user: 'nobody'

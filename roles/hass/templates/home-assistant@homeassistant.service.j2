@@ -1,0 +1,14 @@
+# roles/hass/templates/home-assistant@homeassistant.service
+# Managed by Ansible
+
+[Unit]
+Description=Home Assistant
+After=network.target
+
+[Service]
+Type=simple
+User=%i
+ExecStart=/srv/homeassistant/bin/hass -c "/home/{{ hass_user }}/.homeassistant"
+
+[Install]
+WantedBy=multi-user.target

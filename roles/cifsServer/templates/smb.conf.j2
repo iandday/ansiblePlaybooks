@@ -1,0 +1,27 @@
+# roles/cifsServer/templates/smb.conf.j2
+# Managed by Ansible
+
+
+[global]
+follow symlinks = yes
+wide links = yes
+unix extensions = no
+
+[{{ cifs_comments }}]
+comment = {{ cifs_comments }}
+path = {{ cifs_path }}
+browseable = yes
+valid users = {{ cifs_user }}
+write list = {{ cifs_user }}
+create mask = 0775
+force create mode = 0775
+directory mask = 0775
+force directory mode = 0775
+store dos attributes = Yes
+hide unreadable = yes
+
+
+ 
+
+
+

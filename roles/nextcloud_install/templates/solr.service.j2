@@ -1,0 +1,17 @@
+[Unit]
+Description=Apache Solr for Nextcloud's nextant app fulltext indexing
+After=syslog.target network.target remote-fs.target nss-lookup.target systemd-journald-dev-log.socket
+Before=nginx.service
+
+[Service]
+Type=forking
+User=solr
+Group=solr
+WorkingDirectory={{ solr_path }}/server
+#ExecStart={{ solr_path }}/bin/solr start -m 512m -Dsolr.log.dir={{ solr_data_path }}/log
+ExecStart={{ solr_path }}/bin/solr start -m 512m 
+ExecStop={{ solr_path }}/bin/solr stop
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

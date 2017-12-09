@@ -1,0 +1,43 @@
+---
+#
+# roles/apache_reverse_proxy
+# 
+
+- name: load vault variables
+  include_vars: 
+    file: '{{ item }}'
+  with_items:
+      - vault.yml
+      - main.yml
+
+- name: install apt packages
+  apt: 
+    name: "{{ item }}"
+    state: latest
+  with_items:
+      - '{{ apt_packages }}'
+
+- name: Install Apache Modules
+  apache2_module: 
+    state: present 
+    name: "{{ item }}"
+  with_items: "{{ apache_modules }}"
+
+- name: Start Apache at boot
+  command: systemctl enable apache2
+  
+- name: Restart Apache
+  service: 
+    name: apache2 
+    state: restarted
+
+- name: copy default site config
+  template:
+    src: '{{ item.config_file }}'
+    dest: '/etc/apache2/sites-available/{{ item.file_name }}'
+    owner: www-data
+    group: www-data
+    mode: 0644
+  with_items: 
+    - '{{ websites }}'
+
