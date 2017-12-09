@@ -1,0 +1,57 @@
+---
+#
+# roles/common/deploy_vm_tamplate.yml
+#
+
+- name: import vCenter credentials
+  include_vars:
+    file: '{{ item }}'
+  with_items:
+    - main.yml
+    - vault.yml
+  no_log: true
+
+- name: Create a VM from a template
+  local_action:
+    module: vmware_guest
+    hostname: '{{ vcenter_host }}'
+    username: '{{ vcenter_username }}'  
+    password: '{{ vcenter_password }}'
+    validate_certs: '{{ vcenter_validate }}'
+    folder: '{{ vcenter_folder }}'
+    name: '{{ inventory_hostname }}'
+    state: poweredon
+    template: '{{ vcenter_vmtemplate }}'
+    datacenter: '{{ vcenter_datacenter }}'
+    networks:
+    - name: '{{ vcenter_lan_network }}'
+  register: deploy
+
+- name: Change hostname and reboot
+  local_action:
+    module: vmware_vm_shell
+    hostname: '{{ vcenter_host }}'
+    username: '{{ vcenter_username }}' 
+    password: '{{ vcenter_password }}'
+    validate_certs: '{{ vcenter_validate }}'
+    folder: '{{ vcenter_folder }}'
+    datacenter: '{{ vcenter_datacenter }}'
+    vm_id: '{{ deploy.instance.hw_product_uuid }}'
+    vm_id_type: uuid
+    vm_username: '{{ vm_user }}'
+    vm_password: '{{ vm_pass }}'
+    vm_shell: '/usr/bin/sudo'
+    vm_shell_args: '{{ item }}'
+    vm_shell_cwd: '/tmp'
+  with_items: 
+    - "sed -i 's/ubuntuTemplate/{{ inventory_hostname }}/g' /etc/hosts"
+    - "sed -i 's/ubuntuTemplate/{{ inventory_hostname }}/g' /etc/hostname"
+    - "/sbin/reboot"
+
+- name: wait for reboot
+  local_action:
+    module: wait_for
+    host: '{{ inventory_hostname }}'
+    port: 22
+    delay: 1
+    timeout: 300

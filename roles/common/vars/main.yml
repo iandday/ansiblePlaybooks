@@ -1,7 +1,22 @@
 ---
+#
+# roles/common/vars/main.yml
+#
+
+common_packages: python2.7 python-simplejson python3-apt python-apt aptitude
 vcenter_host: vcenter.home.ianday.me
 vcenter_username: vsphere.local\administrator
-vcenter_password: "{{ vault_vcenter_password }}"
+vcenter_password: '{{ vault_vcenter_password }}'
 vcenter_validate: false
 vcenter_vmtemplate: ubuntuTemplate 
 vcenter_datacenter: Daynet
+vcenter_folder: vm
+vcenter_lan_network: DPortGroupLAN
+backup_root_path: "{{ vault_backup_root_path }}" 
+backup_mount_domain:  "{{ vault_backup_mount_domain }}" 
+backup_mount_user: "{{ vault_backup_mount_user }}" 
+backup_mount_pass: "{{ vault_backup_mount_pass }}" 
+backup_uid: mythtv
+backup_gid: mythtv
+vm_user: '{{ vault_vm_user }}'
+vm_pass: '{{ vault_vm_pass }}'
