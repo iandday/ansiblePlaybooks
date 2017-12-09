@@ -1,0 +1,104 @@
+---
+# roles/hass/tasks/main.yml
+
+- include_vars: vault.yml
+  no_log: true   
+- name: update apt cache and install required packages
+  become: yes
+  become_user: root
+  apt: 
+    name: '{{ item }}'
+    state: present
+    update_cache: yes
+  with_items: '{{ apt_packages }}'
+ 
+- name: install venv
+  become: yes
+  become_user: root
+  pip: 
+    name: virtualenv
+    state: latest
+    
+- name: create homeassistant group
+  become: yes
+  become_user: root
+  group:
+    name: '{{ hass_user }}'
+    state: present  
+    
+- name: create hass user
+  become: yes
+  become_user: root
+  user:
+    name: '{{ hass_user}}'
+    shell: /bin/bash
+    groups: 
+      - dialout
+      - '{{ hass_user }}'
+    append: yes
+    system: yes    
+ 
+- name: create install directory
+  become: yes
+  become_user: root
+  file:
+    path: '{{ install_dir }}' 
+    state: directory
+    owner: '{{ hass_user}}'
+    group: '{{ hass_user}}'   
+
+- name: Install hass
+  become: yes
+  become_user: '{{ hass_user }}'
+  pip: 
+    name: '{{ item }}'
+    virtualenv: '{{ install_dir }}'  
+  with_items:
+    - homeassistant
+    - websocket-client
+
+- name: create config directory
+  become: yes
+  become_user: root
+  file: 
+    path: '{{ config_dir }}' 
+    state: directory
+    owner: '{{ hass_user}}'
+    group: '{{ hass_user}}'  
+    
+- name: mount back directory
+  include_role:
+    name: common
+    tasks_from: mount_backup
+  vars:
+    backup_path: "{{ backup_root_path}}/hass/"
+    backup_uid: '{{ hass_user}}'
+    backup_gid: '{{ hass_user}}'
+     
+- name: copy autostart template
+  become: true
+  become_user: root
+  template:
+    src: home-assistant@homeassistant.service.j2
+    dest: /etc/systemd/system/home-assistant@homeassistant.service
+    owner: root
+    group: root
+    mode: 0777
+ 
+- name: restore config from backup
+  become: true
+  become_user: '{{ hass_user}}'
+  synchronize:
+    src: '{{ backup_dir }}'
+    dest: '{{ config_dir }}'
+  delegate_to: "{{ inventory_hostname }}" 
+
+- name: enable start at boot and launch
+  become: true
+  become_user: root
+  service:
+    name: home-assistant@homeassistant
+    enabled: yes
+    state: started
+    
+ 
