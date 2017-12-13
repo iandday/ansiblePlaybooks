@@ -12,8 +12,7 @@
   no_log: true
 
 - name: Create a VM from a template
-  local_action:
-    module: vmware_guest
+  vmware_guest:
     hostname: '{{ vcenter_host }}'
     username: '{{ vcenter_username }}'  
     password: '{{ vcenter_password }}'
@@ -25,11 +24,11 @@
     datacenter: '{{ vcenter_datacenter }}'
     networks:
     - name: '{{ vcenter_lan_network }}'
+  delegate_to: localhost
   register: deploy
 
 - name: Change hostname and reboot
-  local_action:
-    module: vmware_vm_shell
+  vmware_vm_shell:
     hostname: '{{ vcenter_host }}'
     username: '{{ vcenter_username }}' 
     password: '{{ vcenter_password }}'
@@ -46,12 +45,23 @@
   with_items: 
     - "sed -i 's/ubuntuTemplate/{{ inventory_hostname }}/g' /etc/hosts"
     - "sed -i 's/ubuntuTemplate/{{ inventory_hostname }}/g' /etc/hostname"
+    - "apt-get update"
+    - "apt-get install -y {{ common_packages }}"
     - "/sbin/reboot"
+  delegate_to: localhost
 
 - name: wait for reboot
-  local_action:
-    module: wait_for
+  wait_for:
     host: '{{ inventory_hostname }}'
     port: 22
     delay: 1
     timeout: 300
+  delegate_to: localhost
+
+- name: initial package upgrade
+  apt:
+    upgrade: yes
+    update_cache: yes
+    cache_valid_time: 3600
+  become_user: root
+  become: true

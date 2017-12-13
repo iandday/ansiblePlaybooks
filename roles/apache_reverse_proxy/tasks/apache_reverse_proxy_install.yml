@@ -1,0 +1,60 @@
+---
+#
+# Apache Reverse Proxy role 
+# roles/apache_reverse_proxy/tasks/apache_reverse_proxy_install.yml
+#
+
+- name: load vault variables
+  include_vars: 
+    file: '{{ item }}'
+  with_items:
+      - vault.yml
+      - main.yml
+  no_log: true
+
+- name: install apt packages
+  apt: 
+    name: '{{ item }}'
+    state: latest
+  with_items:
+      - '{{ apt_packages }}'
+  become: true
+  become_user: root
+
+- name: install Apache modules
+  apache2_module: 
+    state: present 
+    name: '{{ item }}'
+  with_items: '{{ apache_modules }}'
+  become: true
+  become_user: root
+
+- name: start Apache at boot
+  command: systemctl enable apache2
+  become: true
+  become_user: root
+
+- name: copy site configs
+  template:
+    src: '{{ item.config_file }}'
+    dest: '/etc/apache2/sites-available/{{ item.file_name }}'
+    owner: www-data
+    group: www-data
+    mode: 0644
+  with_items: 
+    - '{{ websites }}'
+  become: true
+  become_user: root
+
+- name: enable sites
+  file:  
+    src: '/etc/apache2/sites-available/{{ item.file_name }}'
+    dest: '/etc/apache2/sites-enabled/{{ item.file_name }}'
+    owner: www-data
+    group: www-data
+    state: link
+  with_items: 
+    - '{{ websites }}'
+  become: true
+  become_user: root
+

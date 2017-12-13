@@ -1,0 +1,22 @@
+---
+#
+# Apache Reverse Proxy role 
+# roles/apache_reverse_proxy/tasks/check_vars.yml
+#
+
+- name: Checking for required variables 
+  fail: msg='{{ item }} is not defined'
+  when: not  item 
+  with_items:
+    - apt_packages
+    - apache_modules
+    - server_admin
+    - domain
+    - ldap_url
+    - vault_ldap_url
+    - ldap_dn
+    - vault_ldap_dn
+    - ldap_password
+    - vault_ldap_password
+    - websites
+    - vault_websites

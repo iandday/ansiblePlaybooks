@@ -8,15 +8,21 @@
     name: python3-pip
     state: present
     update_cache: yes
+  become: true
+  become_user: root
  
 - name: clone dehydrated repo
   git:
     repo: '{{ dehydrated_repo }}'
     dest: '{{ dehydrated_dest }}'
- 
+  become: true
+  become_user: root
+
 - name: install godaddypy python module
   pip:
     name: godaddypy  
+  become: true
+  become_user: root
  
 - name: create godaddy api key file
   ini_file:
@@ -30,6 +36,8 @@
   with_items:
     - {o: 'key', v: '{{ godaddy_key }}'}
     - {o: 'secret', v: '{{ godaddy_secret }}'} 
+  become: true
+  become_user: root
 
 - name: create domain list
   lineinfile:
@@ -38,6 +46,8 @@
     path: '{{ dehydrated_dest }}/dehydrated/domains'
     line: '{{ item }}'
   with_items: '{{ domains }}'
+  become: true
+  become_user: root
 
 - name: copy godaddy dns hook script
   copy:
@@ -46,6 +56,8 @@
     owner: '{{ web_user }}'
     group: '{{ web_user }}'
     mode: 0755
+  become: true
+  become_user: root
 
 - name: copy dehydrated config files
   template:
@@ -57,15 +69,21 @@
   with_items:
     - 'config.prod'
     - 'config.staging'
+  become: true
+  become_user: root
 
 - name: enable production Let's Encrypt CA
   file:
     state: link
     src: '{{ dehydrated_dest }}/dehydrated/config.prod'
     dest: '{{ dehydrated_dest }}/dehydrated/config'
+  become: true
+  become_user: root
 
 - name: setup cron job
   cron:
     name: Let's Encrypt daily certificate check
     special_time: daily
     job: '{{ dehydrated_dest }}/dehydrated/dehyrdrated -cron --accept-terms --config {{ dehydrated_dest }}/dehydrated/config --hook {{ dehydrated_dest }}/dehydrated/godaddy.py'
+  become: true
+  become_user: root

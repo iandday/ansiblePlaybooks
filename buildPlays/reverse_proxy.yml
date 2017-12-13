@@ -1,43 +1,45 @@
+---
+#
+# Apache reverse proxy with SSL termination and LDAP authentication
+#
+
 - hosts: testHost
-  vars:
-    snapshot_details: "base snapshot after ansible play"
-    snapshot_name: "Post Build"
   gather_facts: false
-  become: true
-  become_user: root
+  #become: true
+  #become_user: root
   pre_tasks:
-  - name: deploy new VM from template
-    include_role: 
-      name: common
-      tasks_from: deploy_vm_template
-  - name: gather facts
-    setup:
-  - name: install python and perform base update
-    include_role: 
-      name: common
-      tasks_from: initial_update
-  - name: take clean snapshot
-    include_role:
-      name: common
-      tasks_from: snapshot
+    - name: deploy new VM from template
+      include_role: 
+        name: common
+        tasks_from: deploy_vm_template
+    - name: gather facts
+      setup:
+    - name: set snapshot details
+      set_fact:
+        snapshot_details: "base snapshot after vm deployment from template"
+        snapshot_name: "Pre Build" 
+    - name: take clean snapshot
+      include_role:
+        name: common
+        tasks_from: snapshot
   roles:
     - apache_reverse_proxy
     - lets_encrypt
   post_tasks:
-  - name: Restart Apache
-    service: 
-      name: apache2 
-      state: restarted
-  - name: take clean snapshot
-    include_role:
-      name: common
-      tasks_from: snapshot
-  - name: reboot the server
-    shell: sleep 2 && /sbin/shutdown -r now "system restart after Ansible play"
-    async: 1
-    poll: 0
-  - name: wait for reboot
-    local_action:
-      module: wait_for_connection
-      delay: 1
-      timeout: 300
+    - name: reboot the server
+      shell: sleep 2 && /sbin/shutdown -r now "system restart after Ansible play"
+      async: 1
+      poll: 0
+    - name: wait for reboot
+      local_action:
+        module: wait_for_connection
+        delay: 1
+        timeout: 300
+    - name: set snapshot details
+      set_fact:
+        snapshot_details: "base snapshot after completion of ansible play"
+        snapshot_name: "Post Build" 
+    - name: take post play snapshot
+      include_role:
+        name: common
+        tasks_from: snapshot

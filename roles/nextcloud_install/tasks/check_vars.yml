@@ -1,7 +1,7 @@
 #
 # Checking that required variables are set
 #
-- name: Checking that required variables are set
+- name: checking for required variables
   fail: msg='{{ item }} is not defined'
   when: not  item 
   with_items:

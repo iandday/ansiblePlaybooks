@@ -1,2 +1,7 @@
 ---
+#
+# roles/common/defaults/main.yml
+#
+
 snapshot_details: 
+common_packages: python2.7 python-simplejson python3-apt python-apt aptitude

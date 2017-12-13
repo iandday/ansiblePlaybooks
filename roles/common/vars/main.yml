@@ -3,7 +3,6 @@
 # roles/common/vars/main.yml
 #
 
-common_packages: python2.7 python-simplejson python3-apt python-apt aptitude
 vcenter_host: vcenter.home.ianday.me
 vcenter_username: vsphere.local\administrator
 vcenter_password: '{{ vault_vcenter_password }}'
