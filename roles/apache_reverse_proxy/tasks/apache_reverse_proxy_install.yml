@@ -10,7 +10,7 @@
   with_items:
       - vault.yml
       - main.yml
-  no_log: true
+  #no_log: true
 
 - name: install apt packages
   apt: 

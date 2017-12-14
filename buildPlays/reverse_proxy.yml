@@ -8,20 +8,20 @@
   #become: true
   #become_user: root
   pre_tasks:
-    - name: deploy new VM from template
-      include_role: 
-        name: common
-        tasks_from: deploy_vm_template
+    # - name: deploy new VM from template
+    #   include_role: 
+    #     name: common
+    #     tasks_from: deploy_vm_template
     - name: gather facts
       setup:
-    - name: set snapshot details
-      set_fact:
-        snapshot_details: "base snapshot after vm deployment from template"
-        snapshot_name: "Pre Build" 
-    - name: take clean snapshot
-      include_role:
-        name: common
-        tasks_from: snapshot
+    # - name: set snapshot details
+    #   set_fact:
+    #     snapshot_details: "base snapshot after vm deployment from template"
+    #     snapshot_name: "Pre Build" 
+    # - name: take clean snapshot
+    #   include_role:
+    #     name: common
+    #     tasks_from: snapshot
   roles:
     - apache_reverse_proxy
     - lets_encrypt
