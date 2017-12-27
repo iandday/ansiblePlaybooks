@@ -1,0 +1,10 @@
+---
+#
+# roles/splunk_forwarder/defaults/main.yml
+#
+
+splunk_user: splunk
+splunk_group: splunk
+splunk_path: /opt/splunkforwarder
+log_group: adm
+

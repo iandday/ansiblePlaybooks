@@ -38,3 +38,10 @@
   
 - name: start splunk at boot
   command: /opt/splunk/bin/splunk enable boot-start -user splunk 
+# - name: change admin password
+
+# - name: add licesnse file (transfer first)
+#./splunk add licenses /opt/splunk/etc/licenses/enterprise/enterprise.lic 
+
+#- name: enable universal forwarder listener
+#v/splunk enable listen 9997 -auth admin:PW

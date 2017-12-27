@@ -1,0 +1,6 @@
+---
+#
+# roles/splunk_forwarder/vars/vault.yml
+#
+
+vault_forwarder_password: 
