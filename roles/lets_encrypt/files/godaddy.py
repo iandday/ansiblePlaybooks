@@ -52,7 +52,7 @@ def _update_dns(domain, token):
     result = client.update_record(zone, record)
     if result is not True:
         logger.warn("Error updating record for domain {0}.".format(domain))
-    time.sleep(30)
+    time.sleep(60)
 
 def create_txt_record(args):
     domain, token = args[0], args[2]

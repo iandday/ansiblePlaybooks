@@ -87,3 +87,10 @@
     job: '{{ dehydrated_dest }}/dehydrated/dehyrdrated -cron --accept-terms --config {{ dehydrated_dest }}/dehydrated/config --hook {{ dehydrated_dest }}/dehydrated/godaddy.py'
   become: true
   become_user: root
+
+- name: restart apache
+  service:
+    name: apache2
+    state: restarted
+  become: true
+  become_user: root
