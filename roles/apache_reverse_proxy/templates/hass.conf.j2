@@ -1,7 +1,7 @@
-#
-# Managed by Ansible
 # Home Assistant
-#
+#   {{ ansible_managed }}  
+#   Path: {{ template_fullpath }} 
+#   Creation Date: {{ template_run_date }}
 
 <VirtualHost *:80>
     ServerName {{ item.sub_domain }}.{{ item.domain }}

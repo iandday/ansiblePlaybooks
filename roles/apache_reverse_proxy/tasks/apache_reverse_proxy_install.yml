@@ -58,3 +58,9 @@
   become: true
   become_user: root
 
+- name: copy apache logrotate.d config
+  template:
+    src: apache2.j2
+    dest: /etc/logrotate.d/apache2 
+  become: true
+  become_user: root

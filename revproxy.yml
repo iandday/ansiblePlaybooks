@@ -1,1 +1,47 @@
-buildPlays/reverse_proxy.yml
+---
+#
+# Apache reverse proxy with SSL termination, LDAP authentication, and splunk universal forwarder
+#
+
+- hosts: testHost
+  gather_facts: false
+  vars:
+    splunked_directories: 
+      - { directory: "/var/log/apache2", sourcetype: "apache_reverse_proxy" }
+  pre_tasks:
+    - name: deploy new VM from template
+      include_role: 
+         name: common
+         tasks_from: deploy_vm_template
+    - name: gather facts
+      setup:
+    - name: set snapshot details
+      set_fact:
+         snapshot_details: "base snapshot after vm deployment from template"
+         snapshot_name: "Pre Build" 
+    - name: take clean snapshot
+      include_role:
+         name: common
+         tasks_from: snapshot
+  roles:
+    - apache_reverse_proxy 
+    - lets_encrypt
+    - splunk_forwarder
+  post_tasks:
+    - name: reboot the server
+      shell: sleep 2 && /sbin/shutdown -r now "system restart after Ansible play"
+      async: 1
+      poll: 0
+    - name: wait for reboot
+      local_action:
+        module: wait_for_connection
+        delay: 1
+        timeout: 300
+    - name: set snapshot details
+      set_fact:
+        snapshot_details: "base snapshot after completion of ansible play"
+        snapshot_name: "Post Build" 
+    - name: take post play snapshot
+      include_role:
+        name: common
+        tasks_from: snapshot

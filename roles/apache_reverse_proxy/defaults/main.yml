@@ -1,0 +1,7 @@
+---
+#
+# roles/apache_reverse_proxy/defaults/main.yml
+#
+
+log_rotate_frequency: weekly
+log_rotate_number: 52
