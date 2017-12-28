@@ -10,5 +10,6 @@
 - name: check splunk variables
   include_tasks: check_vars.yml
 
+
 - name: start splunk install
-  include_tasks: install_splunk_forwarder.yml
+  include_tasks: install_.yml
