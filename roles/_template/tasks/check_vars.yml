@@ -1,0 +1,10 @@
+---
+#
+# roles/_/tasks/check_vars.yml
+#
+
+- name: Checking that required variables are set
+  fail: msg='{{ item }} is not defined'
+  when: not  item 
+  with_items:
+    #- forwarder_password

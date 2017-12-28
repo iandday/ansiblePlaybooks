@@ -1,0 +1,14 @@
+---
+#
+# roles/_/tasks/main.yml
+#
+
+- name: load vault variables
+  include_vars: vault.yml
+  no_log: true
+
+- name: check splunk variables
+  include_tasks: check_vars.yml
+
+- name: start splunk install
+  include_tasks: install_splunk_forwarder.yml

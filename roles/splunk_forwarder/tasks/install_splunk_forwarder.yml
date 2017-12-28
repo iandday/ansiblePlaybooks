@@ -1,13 +1,16 @@
 ---
+#
+# roles/splunk_forwarder/tasks/install_splunk_forwarder.yml
+#
 
-- name: copy deb file
+- name: copy UF installer
   copy:
     src: '{{ role_path }}/files/{{ deb_file }}'
     dest: '/tmp/{{ deb_file }}'
   become: true
   become_user: root
 
-- name: installdeb
+- name: install UF
   apt:
     deb: '/tmp/{{ deb_file }}'
   become: true
@@ -58,7 +61,6 @@
   become_user: '{{ splunk_user }}'
 
 - name: configure forward-server
-#  shell: /opt/splunkforwarder/bin/splunk add forward-server '{{ server_host }}':'{{ server_port }}' -auth admin:'{{ forwarder_password }}'
   blockinfile:
     path: /opt/splunkforwarder/etc/system/local/outputs.conf
     create: yes
@@ -81,10 +83,10 @@
     block: |
       [monitor://{{ item.directory }}] 
       sourcetype={{ item.sourcetype }}
-    marker: "# {mark} ANSIBLE MANAGED BLOCK Monitoring directory: {{item.directory}}"
+    marker: '# {mark} ANSIBLE MANAGED BLOCK Monitoring directory: {{ item.directory }}'
   become: true
   become_user: '{{ splunk_user }}'
-  with_items: "{{ splunked_directories }}"
+  with_items: '{{ splunked_directories }}'
 
 - name: restart splunkd
   shell: '{{ splunk_path }}/bin/splunk restart'
