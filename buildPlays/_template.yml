@@ -1,6 +1,6 @@
 ---
 #
-# Apache reverse proxy with SSL termination, LDAP authentication, and splunk universal forwarder
+# 
 #
 
 - hosts: 

@@ -1,0 +1,6 @@
+---
+#
+# roles/_/vars/vault.yml
+#
+
+vault_splunk_admin_password: 

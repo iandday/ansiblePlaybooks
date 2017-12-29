@@ -1,4 +1,4 @@
-install_type: staging
+install_type: production
 web_user: www-data
 dehydrated_dest: /etc/dehydrated
 dehydrated_repo: https://github.com/lukas2511/dehydrated.git

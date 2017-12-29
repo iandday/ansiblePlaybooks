@@ -1,34 +1,42 @@
 ---
-#configure base VM to host a splunk instance
+#
+# Splunk Enterprise
+#
+
 - hosts: splunk
-  vars:
-    snapshot_details: "snapshot after install and initial start"
-    hostname: "splunk"
-    vm_name: "splunk"
-    snapshot_name: "Clean Splunk"
-  become: true
-      
-  pre_tasks: 
-  - name: apt update/upgrade
-    include_role:
-      name: common
-      tasks_from: initial_update
-  - name: change hostname
-    include_role:
-      name: common
-      tasks_from: hostname
-        
+  gather_facts: false
+  pre_tasks:
+    - name: deploy new VM from template
+      include_role: 
+         name: common
+         tasks_from: deploy_vm_template
+    - name: gather facts
+      setup:
+    - name: set snapshot details
+      set_fact:
+         snapshot_details: "base snapshot after vm deployment from template"
+         snapshot_name: "Pre Build" 
+    - name: take clean snapshot
+      include_role:
+         name: common
+         tasks_from: snapshot
   roles:
     - splunk
-  
   post_tasks:
-  - name: take clean snapshot
-    include_role:
-      name: common
-      tasks_from: snapshot
-  
-  - name: reboot the server
-    command: /sbin/reboot
-      
-
-       
+    - name: reboot the server
+      shell: sleep 2 && /sbin/shutdown -r now "system restart after Ansible play"
+      async: 1
+      poll: 0
+    - name: wait for reboot
+      wait_for_connection:
+        delay: 1
+        timeout: 300
+      delegate_to: localhost
+    - name: set snapshot details
+      set_fact:
+        snapshot_details: "base snapshot after completion of ansible play"
+        snapshot_name: "Post Build" 
+    - name: take post play snapshot
+      include_role:
+        name: common
+        tasks_from: snapshot

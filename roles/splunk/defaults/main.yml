@@ -1,0 +1,10 @@
+---
+#
+# roles/splunk/defaults/main.yml
+#
+
+splunk_user: splunk
+splunk_group: splunk
+splunk_dir: /opt/splunk
+
+

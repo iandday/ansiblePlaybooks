@@ -1,47 +1,14 @@
 ---
-#Splunk build
-    
-- name: update apt cache and install NFS client packages
-  apt: 
-    name: nfs-common
-    state: present
-    update_cache: yes
-      
-- name: download and install splunk package
-  apt:
-    deb: "{{ splunk_url }}"
-    install_recommends: yes
- 
-- name: create splunk user
-  user:
-    name: splunk
-    group: splunk
+#
+# roles/splunk/tasks/main.yml
+#
 
-- name: mount network share
-  mount: 
-    path: /opt/splunk/var/lib/splunk 
-    src: "{{ network_path }}"
-    fstype: nfs 
-    state: mounted    
-    
-- name: modify splunk directory permissions
-  file:
-    path: /opt/splunk
-    owner: splunk
-    group: splunk
-    recurse: yes
-    
-- name: initial splunk start
-  command: /opt/splunk/bin/splunk start --accept-license
-  become: true
-  become_user: splunk
-  
-- name: start splunk at boot
-  command: /opt/splunk/bin/splunk enable boot-start -user splunk 
-# - name: change admin password
+- name: load vault variables
+  include_vars: vault.yml
+  no_log: true
 
-# - name: add licesnse file (transfer first)
-#./splunk add licenses /opt/splunk/etc/licenses/enterprise/enterprise.lic 
+- name: check splunk variables
+  include_tasks: check_vars.yml
 
-#- name: enable universal forwarder listener
-#v/splunk enable listen 9997 -auth admin:PW
+- name: start splunk install
+  include_tasks: install_splunk.yml

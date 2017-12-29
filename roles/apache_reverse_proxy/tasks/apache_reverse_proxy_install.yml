@@ -4,13 +4,13 @@
 # roles/apache_reverse_proxy/tasks/apache_reverse_proxy_install.yml
 #
 
-- name: load vault variables
-  include_vars: 
-    file: '{{ item }}'
-  with_items:
-      - vault.yml
-      - main.yml
-  #no_log: true
+#- name: load vault variables
+#  include_vars: 
+#    file: '{{ item }}'
+#  with_items:
+#      - vault.yml
+#      - main.yml
+#  no_log: true
 
 - name: install apt packages
   apt: 

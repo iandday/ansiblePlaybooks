@@ -1,0 +1,89 @@
+---
+#
+# roles/splunk/tasks/install_splunk.yml
+#
+    
+- name: update apt cache and install NFS client packages
+  apt: 
+    name: nfs-common
+    state: present
+    update_cache: yes
+      
+- name: download and install splunk package
+  apt:
+    deb: "{{ splunk_url }}"
+    install_recommends: yes
+ 
+- name: create splunk user
+  user:
+    name: '{{ splunk_user }}'
+    group: '{{ splunk_group }}'
+
+- name: mount network share
+  mount: 
+    path: '{{ splunk_dir }}/var/lib/splunk' 
+    src: '{{ network_path }}'
+    fstype: nfs 
+    state: mounted    
+    
+- name: modify splunk directory permissions
+  file:
+    path: '{{ splunk_dir }}'
+    owner: '{{ splunk_user }}'
+    group: '{{ splunk_group }}'
+    recurse: yes
+    
+- name: initial splunk start
+  command: '{{ splunk_dir }}/bin/splunk start --accept-license'
+  become: true
+  become_user: '{{ splunk_user }}'
+  
+- name: start splunk at boot
+  command: '{{ splunk_path }}/bin/splunk enable boot-start -user {{ splunk_user }}' 
+
+- name: change splunk admin credentials
+  shell: '{{ splunk_path }}/bin/splunk edit user admin -password {{ fsplunk_admin_password }} -auth admin:changeme'
+  become: true
+  become_user: '{{ splunk_user }}'
+
+- name: transfer license file
+  copy:
+    src: '{{ license_filename }}' 
+    dest: '{{ splunk_path }}/{{ license_filename }}'
+    owner: '{{ splunk_user }}'
+    group: '{{ splunk_group }}'
+
+- name: register license 
+  shell: '{{ splunk_path }}/bin/splunk add licenses {{ splunk_path }}/{{ license_filename }} -auth admin:{{ fsplunk_admin_password }}'
+  become: true
+  become_user: '{{ splunk_user }}'
+
+- name: enable universal forwarder listener on tcp 9997
+  shell: '{{ splunk_path }}/bin/splunk enable listen 9997 -auth admin:{{ fsplunk_admin_password }}'
+  become: true
+  become_user: '{{ splunk_user }}'
+
+- name: mount splunk app share
+  mount:
+    src: //10.168.1.3/Repository/Software/LabIso/splunkApps
+    dest: /tmp/splunkapps
+    state: mounted
+    fstype: cifs
+
+- name: identify apps to install
+  find: 
+    paths: /tmp/splunkapps
+  register: splunk_apps
+
+- name: install apps
+  unarchive:
+    src: '{{ item.path }}'
+    dest: '{{ splunk_path }}/etc/apps/'
+    remote_src: yes
+with_items:
+  - '{{ splunk_apps.files }}'
+
+- name: restart splunk
+  shell: '{{ splunk_path }}/bin/splunk restart'
+  become: true
+  become_user: '{{ splunk_user }}'

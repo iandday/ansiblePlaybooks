@@ -1,0 +1,13 @@
+---
+#
+# roles/splunk/tasks/check_vars.yml
+#
+
+- name: Checking that required variables are set
+  fail: msg='{{ item }} is not defined'
+  when: not  item 
+  with_items:
+    - splunk_url
+    - snetwork_path
+    - ssplunk_admin_password
+    - license_filename
