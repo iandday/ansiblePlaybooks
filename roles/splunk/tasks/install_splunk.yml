@@ -5,19 +5,27 @@
     
 - name: update apt cache and install NFS client packages
   apt: 
-    name: nfs-common
+    name: '{{ item }}'
     state: present
     update_cache: yes
+  with_items:
+    - '{{ required_packages }}'
+  become: true
+  become_user: root
       
 - name: download and install splunk package
   apt:
     deb: "{{ splunk_url }}"
     install_recommends: yes
+  become: true
+  become_user: root
  
 - name: create splunk user
   user:
     name: '{{ splunk_user }}'
     group: '{{ splunk_group }}'
+  become: true
+  become_user: root
 
 - name: mount network share
   mount: 
@@ -25,6 +33,8 @@
     src: '{{ network_path }}'
     fstype: nfs 
     state: mounted    
+  become: true
+  become_user: root
     
 - name: modify splunk directory permissions
   file:
@@ -32,43 +42,52 @@
     owner: '{{ splunk_user }}'
     group: '{{ splunk_group }}'
     recurse: yes
-    
+  become: true
+  become_user: root
+
 - name: initial splunk start
   command: '{{ splunk_dir }}/bin/splunk start --accept-license'
   become: true
   become_user: '{{ splunk_user }}'
   
 - name: start splunk at boot
-  command: '{{ splunk_path }}/bin/splunk enable boot-start -user {{ splunk_user }}' 
+  command: '{{ splunk_dir }}/bin/splunk enable boot-start -user {{ splunk_user }}' 
+  become: true
+  become_user: root
 
 - name: change splunk admin credentials
-  shell: '{{ splunk_path }}/bin/splunk edit user admin -password {{ fsplunk_admin_password }} -auth admin:changeme'
+  shell: '{{ splunk_dir }}/bin/splunk edit user admin -password {{ splunk_admin_password }} -auth admin:changeme'
   become: true
   become_user: '{{ splunk_user }}'
 
 - name: transfer license file
   copy:
     src: '{{ license_filename }}' 
-    dest: '{{ splunk_path }}/{{ license_filename }}'
+    dest: '{{ splunk_dir }}/{{ license_filename }}'
     owner: '{{ splunk_user }}'
     group: '{{ splunk_group }}'
+  become: true
+  become_user: root
 
 - name: register license 
-  shell: '{{ splunk_path }}/bin/splunk add licenses {{ splunk_path }}/{{ license_filename }} -auth admin:{{ fsplunk_admin_password }}'
+  shell: '{{ splunk_dir }}/bin/splunk add licenses {{ splunk_dir }}/{{ license_filename }} -auth admin:{{ splunk_admin_password }}'
   become: true
   become_user: '{{ splunk_user }}'
 
 - name: enable universal forwarder listener on tcp 9997
-  shell: '{{ splunk_path }}/bin/splunk enable listen 9997 -auth admin:{{ fsplunk_admin_password }}'
+  shell: '{{ splunk_dir }}/bin/splunk enable listen 9997 -auth admin:{{ splunk_admin_password }}'
   become: true
   become_user: '{{ splunk_user }}'
 
 - name: mount splunk app share
   mount:
     src: //10.168.1.3/Repository/Software/LabIso/splunkApps
-    dest: /tmp/splunkapps
+    name: /tmp/splunkapps
     state: mounted
     fstype: cifs
+    opts: guest
+  become: true
+  become_user: root
 
 - name: identify apps to install
   find: 
@@ -78,12 +97,14 @@
 - name: install apps
   unarchive:
     src: '{{ item.path }}'
-    dest: '{{ splunk_path }}/etc/apps/'
+    dest: '{{ splunk_dir }}/etc/apps/'
     remote_src: yes
-with_items:
-  - '{{ splunk_apps.files }}'
+  with_items:
+    - '{{ splunk_apps.files }}'
+  become: true
+  become_user: '{{ splunk_user }}'
 
 - name: restart splunk
-  shell: '{{ splunk_path }}/bin/splunk restart'
+  shell: '{{ splunk_dir }}/bin/splunk restart'
   become: true
   become_user: '{{ splunk_user }}'
