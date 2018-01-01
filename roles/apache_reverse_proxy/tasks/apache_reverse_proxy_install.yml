@@ -1,16 +1,7 @@
 ---
 #
-# Apache Reverse Proxy role 
 # roles/apache_reverse_proxy/tasks/apache_reverse_proxy_install.yml
 #
-
-#- name: load vault variables
-#  include_vars: 
-#    file: '{{ item }}'
-#  with_items:
-#      - vault.yml
-#      - main.yml
-#  no_log: true
 
 - name: install apt packages
   apt: 
@@ -64,3 +55,28 @@
     dest: /etc/logrotate.d/apache2 
   become: true
   become_user: root
+
+- name: replace log directory
+  file:
+    path: '{{ log_dir }}'
+    state: absent
+  become: true
+  become_user: root
+
+- name: replace log directory
+  file:
+    path: '{{ log_dir }}'
+    state: directory
+    owner: www-data
+    group: www-data
+  become: true
+  become_user: root
+
+- name: mount log directory
+  mount: 
+    path: '{{ log_dir }}'
+    src: '{{ nfs_server }}:{{ nfs_path }}'
+    fstype: nfs 
+    state: mounted
+  become: true
+  become_user: root    

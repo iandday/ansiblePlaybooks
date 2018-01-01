@@ -1,6 +1,5 @@
 ---
 #
-# Apache Reverse Proxy role 
 # roles/apache_reverse_proxy/tasks/check_vars.yml
 #
 
@@ -20,3 +19,6 @@
     - vault_ldap_password
     - websites
     - vault_websites
+    - log_dir
+    - nfs_server
+    - nfs_path

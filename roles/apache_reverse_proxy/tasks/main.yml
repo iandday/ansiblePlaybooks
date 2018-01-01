@@ -1,6 +1,5 @@
 ---
 #
-# Apache Reverse Proxy role 
 # roles/apache_reverse_proxy/tasks/main.yml
 #
 
