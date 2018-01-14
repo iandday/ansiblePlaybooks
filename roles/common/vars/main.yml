@@ -19,3 +19,4 @@ backup_uid: mythtv
 backup_gid: mythtv
 vm_user: '{{ vault_vm_user }}'
 vm_pass: '{{ vault_vm_pass }}'
+ntp_server: 'boss.home.ianday.me'

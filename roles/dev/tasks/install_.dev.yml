@@ -1,0 +1,38 @@
+---
+#
+# roles/dev/tasks/install_dev.yml
+#
+
+- name: add package repo key(s)
+  apt_key:
+    url: '{{ item }}'
+    state: present
+  with_items:
+    - '{{ package_key }}'
+  become: true
+  become_user: root
+
+- name: add package repo source(s)
+  apt_repository:
+    repo: '{{ item }}'
+    state: present
+  with_items: 
+    - '{{ pacakge_repo }}'
+  become: true
+  become_user: root
+
+- name: install required packages
+  apt:
+    name: '{{ item }}'
+    update_cache: yes
+  with_items:
+    - '{{ required_packages }}'
+  become: true
+  become_user: root
+  
+#- name: create profile
+#- name: set .profile
+#- name: copy ssh key
+#- name: copy ansible key
+#- name: set git options
+#- name: create gir directory

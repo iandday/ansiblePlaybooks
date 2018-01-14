@@ -1,0 +1,55 @@
+---
+#
+#  development vm: Gnome 3, MS VS Code, 
+#
+
+- hosts: dev
+  gather_facts: false
+  #vars:
+  pre_tasks:
+  - name: deploy new VM from template
+    include_role: 
+      tasks_from: deploy_vm_template
+      name: common
+  - name: deploy new VM from template
+    include_role: 
+      tasks_from: add_ntp
+      name: common
+  - name: deploy new VM from template
+    include_role: 
+      tasks_from: join_domain
+      name: common
+#   - name: df
+#     include_role:
+#       name: common
+#       tasks_from:  '{{ item }}'
+#     with_items:
+#       - deploy_vm_template
+#       - add_ntp
+#       - join_domain
+
+  - name: gather facts
+    setup:
+#     - name: set snapshot details
+#       set_fact:
+#          snapshot_details: "base snapshot after vm deployment from template"
+#          snapshot_name: "Pre Build" 
+#     - name: take clean snapshot
+#       include_role:
+#          name: common
+#          tasks_from: snapshot
+#   roles:
+#     - dev
+#   post_tasks:
+#     - name: reboot
+#       include_role:
+#         name: common
+#         tasks_from: reboot
+#     - name: set snapshot details
+#       set_fact:
+#         snapshot_details: "base snapshot after completion of ansible play"
+#         snapshot_name: "Post Build" 
+#     - name: take post play snapshot
+#       include_role:
+#         name: common
+#         tasks_from: snapshot

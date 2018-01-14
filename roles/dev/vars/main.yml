@@ -1,0 +1,20 @@
+---
+#
+# roles/_/vars/main.yml
+#
+
+required_packages: 
+  - gnome-shell
+  - git
+  - nfs-common
+  - cifs-utils
+  - code
+  - sublime-text-installer
+
+
+package_key:
+  - 'https://packages.microsoft.com/keys/microsoft.asc'
+
+package_repo:
+  - 'ppa:webupd8team/sublime-text-2'
+  - 'deb https://packages.microsoft.com/repos/vscode stable main'

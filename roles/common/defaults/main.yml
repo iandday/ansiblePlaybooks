@@ -5,3 +5,13 @@
 
 snapshot_details: 
 common_packages: python2.7 python-simplejson python3-apt python-apt aptitude
+domain_packages:
+  - realmd
+  - sssd 
+  - adcli
+  - krb5-user
+  - sssd-tools
+  - samba-common
+  - packagekit
+  - samba-common-bin
+  - samba-libs
