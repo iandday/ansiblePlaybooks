@@ -4,14 +4,14 @@
 #
 
 - name: reboot the vm
-    shell: sleep 2 && /sbin/shutdown -r now "system restart after Ansible play"
-    async: 1
-    poll: 0
+  shell: sleep 2 && /sbin/shutdown -r now "system restart after Ansible play"
+  async: 1
+  poll: 0
   become: true
   become_user: root
   
 - name: wait for reboot
-    wait_for_connection:
+  wait_for_connection:
     delay: 1
     timeout: 300
-    delegate_to: localhost
+  delegate_to: localhost

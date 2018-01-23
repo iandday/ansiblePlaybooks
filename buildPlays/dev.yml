@@ -3,43 +3,37 @@
 #  development vm: Gnome 3, MS VS Code, 
 #
 
-- hosts: dev
+- hosts: development
   gather_facts: false
-  #vars:
+  vars:
+    account: ian
   pre_tasks:
-  - name: deploy new VM from template
-    include_role: 
-      tasks_from: deploy_vm_template
-      name: common
-  - name: deploy new VM from template
-    include_role: 
-      tasks_from: add_ntp
-      name: common
-  - name: deploy new VM from template
-    include_role: 
-      tasks_from: join_domain
-      name: common
-#   - name: df
-#     include_role:
-#       name: common
-#       tasks_from:  '{{ item }}'
-#     with_items:
-#       - deploy_vm_template
-#       - add_ntp
-#       - join_domain
-
-  - name: gather facts
-    setup:
-#     - name: set snapshot details
-#       set_fact:
-#          snapshot_details: "base snapshot after vm deployment from template"
-#          snapshot_name: "Pre Build" 
-#     - name: take clean snapshot
-#       include_role:
-#          name: common
-#          tasks_from: snapshot
-#   roles:
-#     - dev
+  # - name: deploy new VM from template
+  #   include_role: 
+  #     name: common
+  #     tasks_from: deploy_vm_template
+   - name: gather facts
+     setup:
+  # - name: sdeploy new VM from template
+  #   include_role: 
+  #     tasks_from: add_ntp
+  #     name: common
+  # - name: sdeploy new VM from template
+  #   include_role: 
+  #     tasks_from: join_domain
+  #     name: common
+  # - name: set snapshot details
+  #   set_fact:
+  #      snapshot_details: "base snapshot after vm deployment from template"
+  #      snapshot_name: "Pre Build" 
+  # - name: take clean snapshot
+  #   include_role:
+  #      name: common
+  #      tasks_from: snapshot
+     
+  roles:
+    #- dev
+    - vnc
 #   post_tasks:
 #     - name: reboot
 #       include_role:

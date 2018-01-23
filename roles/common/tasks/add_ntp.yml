@@ -12,7 +12,7 @@
 
 - name: Configure ntp service
   template:
-    src: ntp.conf.t1
+    src: ntp.conf.j2
     dest: /etc/ntp.conf
     backup: yes
   become: true

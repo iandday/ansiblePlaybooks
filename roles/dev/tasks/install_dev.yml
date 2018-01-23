@@ -1,0 +1,160 @@
+---
+#
+# roles/dev/tasks/install_dev.yml
+#
+
+- name: add package repo key(s)
+  apt_key:
+    url: '{{ item }}'
+    state: present
+  with_items:
+    - '{{ package_key }}'
+  become: true
+  become_user: root
+
+- name: add package repo source(s)
+  apt_repository:
+    repo: '{{ item }}'
+    state: present
+  with_items: 
+    - '{{ package_repo }}'
+  become: true
+  become_user: root
+
+- name: hack to resolve Problem with MergeList Issue
+  sudo: true
+  shell: 'apt-get update'
+  warn: no
+  become: true
+
+- name: install required packages
+  apt:
+    name: '{{ item }}'
+    update_cache: no
+  with_items:
+    - '{{ required_packages }}'
+  become: true
+
+
+- name: get user details
+  getent:
+    database: passwd
+    key: '{{ cifs_user }}'
+
+- name: create home directory
+  file:
+    path: '{{ getent_passwd[cifs_user][4] }}'
+    state: directory
+    owner: '{{ getent_passwd[cifs_user][1] }}'
+    group: '{{ getent_passwd[cifs_user][2] }}'
+    mode: 0700
+  become: true    
+
+- name: copy skeleton files
+  copy:
+    src: '/etc/skel/{{ item }}'
+    dest: '{{ getent_passwd[cifs_user][4] }}/{{ item }}'
+    remote_src: yes
+    owner: '{{ getent_passwd[cifs_user][1] }}'
+    group: '{{ getent_passwd[cifs_user][2] }}'
+    mode: 0600
+  with_items:
+    - '.bash_logout'
+    - '.bashrc'
+    - '.profile'
+  become: true
+
+- name: allow domain login through GUI
+  lineinfile:
+    path: /etc/lightdm/lightdm.conf.d/50-unity-greeter.conf
+    create: yes
+    state: present
+    line: '{{ item }}'
+  with_items:
+    - 'greeter-show-manual-login=true'
+    - 'greeter-hide-users=true'
+  become: true
+
+- name: create ansible credential file
+  template:
+    src: .ansibleCredential.j2
+    dest: '{{ getent_passwd[cifs_user][4] }}/.ansibleCredential'
+    mode: 0600
+    owner: '{{ getent_passwd[cifs_user][1] }}'
+    group: '{{ getent_passwd[cifs_user][2] }}'
+  become: true
+
+- name: set bash aliases
+  lineinfile:
+    path: '{{ getent_passwd[cifs_user][4] }}/.bashrc'
+    line: "alias {{ item.name }}='{{ item.command }}'"
+    mode: 0600
+    state: present
+    create: yes
+    owner: '{{ getent_passwd[cifs_user][1] }}'
+    group: '{{ getent_passwd[cifs_user][2] }}'
+  with_items:
+    - '{{ aliases }}'
+  become: true  
+
+- name: create git options file
+  template:
+    src: .gitconfig.j2
+    dest: '{{ getent_passwd[cifs_user][4] }}/.gitconfig'
+    mode: 0600
+    owner: '{{ getent_passwd[cifs_user][1] }}'
+    group: '{{ getent_passwd[cifs_user][2] }}'
+  become: true
+
+- name: create git ignore file
+  lineinfile:
+    path: '{{ getent_passwd[cifs_user][4] }}/.gitignore'
+    line: '{{ item }}'
+    mode: 0600
+    state: present
+    create: yes
+    owner: '{{ getent_passwd[cifs_user][1] }}'
+    group: '{{ getent_passwd[cifs_user][2] }}'
+  with_items:
+    - '{{ git_ignore }}'
+  become: true
+
+- name: create git repo directory
+  file:
+    path: '{{ getent_passwd[cifs_user][4] }}/git'
+    state: directory
+    owner: '{{ getent_passwd[cifs_user][1] }}'
+    group: '{{ getent_passwd[cifs_user][2] }}'
+  become: true 
+
+- name: create ssh key directory
+  file:
+    path: '{{ getent_passwd[cifs_user][4] }}/.ssh'
+    mode: 0700
+    state: directory
+    owner: '{{ getent_passwd[cifs_user][1] }}'
+    group: '{{ getent_passwd[cifs_user][2] }}'
+  become: true  
+
+- name: copy ansible ssh key
+  copy:
+    src: id_rsa-Ansible
+    dest: '{{ getent_passwd[cifs_user][4] }}/.ssh/id_rsa-Ansible'
+    mode: 0600
+    owner: '{{ getent_passwd[cifs_user][1] }}'
+    group: '{{ getent_passwd[cifs_user][2] }}'
+  become: true
+
+
+- name: copy github ssh key
+  copy:
+    src: id_rsa-Github
+    dest: '{{ getent_passwd[cifs_user][4] }}/.ssh/id_rsa-Github'
+    mode: 0600
+    owner: '{{ getent_passwd[cifs_user][1] }}'
+    group: '{{ getent_passwd[cifs_user][2] }}'
+  become: true
+
+
+  #owner???
+#- name: create gir directory

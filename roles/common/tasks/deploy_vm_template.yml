@@ -27,6 +27,10 @@
   delegate_to: localhost
   register: deploy
 
+- name: wait for vmtools to initialize
+  pause:
+    seconds: 30
+
 - name: Change hostname and reboot
   vmware_vm_shell:
     hostname: '{{ vcenter_host }}'

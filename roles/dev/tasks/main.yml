@@ -1,15 +1,21 @@
 ---
 #
-# roles/_/tasks/main.yml
+# roles/development/tasks/main.yml
 #
 
+- name: load common role variables
+  include_vars: '{{ playbook_dir }}/roles/common/vars/main.yml'
+  
 - name: load vault variables
   include_vars: vault.yml
   no_log: true
 
-- name: check splunk variables
-  include_tasks: check_vars.yml
+# - name: check for required variables
+#   include_tasks: check_vars.yml
 
 
-- name: start splunk install
-  include_tasks: install_.yml
+
+- name: start dev install
+  include_role: 
+    name: dev
+    tasks_from: install_dev

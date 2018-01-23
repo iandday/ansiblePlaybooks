@@ -20,3 +20,13 @@ backup_gid: mythtv
 vm_user: '{{ vault_vm_user }}'
 vm_pass: '{{ vault_vm_pass }}'
 ntp_server: 'boss.home.ianday.me'
+domain_join_user: '{{ vault_domain_join_user }}'
+domain_join_password: '{{ vault_domain_join_password }}'
+domain: home.ianday.me
+workgroup: home
+domain_sudo_group: domainsudo
+domain_controller: boss.home.ianday.me
+ian_user: ian
+ian_user_dn: '{{ vault_ian_user_dn }}'
+ian_domain_password: '{{ vault_ian_domain_password }}'
+

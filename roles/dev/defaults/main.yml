@@ -1,7 +1,40 @@
 ---
 #
-# roles/_/defaults/main.yml
+# roles/dev/defaults/main.yml
 #
 
 
 
+
+
+git_ignore:
+  - '.DS_Store'
+  - '._*'
+  - '.svn'
+  - '.hg'
+  - '.*.swp'
+  - '*.com'
+  - '*.class'
+  - '*.dll'
+  - '*.exe'
+  - '*.o'
+  - '*.so'
+  - '*.swp'
+  - '*.swo'
+  - '*~'
+  - '*.7z'
+  - '*.dmg'
+  - '*.gz'
+  - '*.iso'
+  - '*.jar'
+  - '*.rar'
+  - '*.tar'
+  - '*.zip'
+  - '*.log'
+  - '*.sql'
+  - '*.sqlite'
+  - 'ehthumbs.db'
+  - 'Icon?'
+  - 'Thumbs.db'
+  - '*.lock'
+  - 'package-lock.json'

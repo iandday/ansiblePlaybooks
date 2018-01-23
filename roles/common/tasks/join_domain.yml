@@ -9,11 +9,13 @@
     - vault.yml
     - main.yml
 
-- name: Install pip
+- name: Install required packages
   apt: 
-    name: python-pip
+    name: '{{ item }}'
     state: present
     update_cache: yes
+  with_items:
+    - '{{ ad_packages }}'
   become: true
   become_user: root
 
@@ -24,97 +26,52 @@
   become: true
   become_user: root
 
-- name: Install AD Domain packages
-  apt: 
-    name: {{ item }}
-    state: present 
-    update_cache: yes
-  with_items:  domain_packages
+- name: discover realm
+  command: /bin/bash -c '/usr/sbin/realm discover {{ domain }}'
   become: true
   become_user: root
 
+- name: join domain
+  expect:
+    command: 'realm join -v -U {{ domain_join_user }} {{ domain }} --install=/'
+    responses:
+      (?i)Password: '{{ domain_join_password }}'
+  ignore_errors: yes
+  become: true
+  become_user: root
 
-# - name: Copy realmd.conf
-#   template: 
-#     src: realmd.conf.j2
-#     dest: /etc/realmd.conf
-#     owner: root
-#     group: root
-#     mode: 0644
-#   tags: ad
+- name: add domain admins group to sudoers
+  lineinfile: 
+    dest: /etc/sudoers
+    backup: yes
+    state: present 
+    line: '%{{ domain_sudo_group }} ALL=(ALL:ALL) ALL' 
+    regexp: '^%domain'
+    validate: /usr/sbin/visudo -cf %s
+  become: true
+  become_user: root
 
-# - name: Copy krb5.conf
-#   template: 
-#     src: krb5.conf.j2
-#     dest: /etc/krb5.conf
-#     backup: yes
-#     owner: root
-#     group: root
-#     mode: 0644
-#   tags: ad
+- name: modify SSSD settings
+  lineinfile:
+    path: /etc/sssd/sssd.conf
+    regexp: '{{ item.r }}'
+    line: '{{ item.l }}'
+  with_items:
+    - {r: 'use_fully_qualifed_names = True', l: 'use_fully_qualified_names = False' }
+    - {r: 'fallback_homedir = /home/%u@%d', l: 'fallback_homedir = /home/%u'}   
+  become: true
+  become_user: root
 
-# - name: Discover realm
-#   command: /bin/bash -c "/usr/sbin/realm discover {{ realm_domain }}"
-#   register: realm_discover_results
-#   tags: ad
+- name: enable creation of home directory for AD users 
+  lineinfile:
+    path: /etc/pam.d/common-session
+    line: 'session    required    pam_mkhomedir.so skel=/etc/skel/ umask=0022'
+    state: present
+  become: true
+  become_user: root  
 
-# - name: Discover realm debug
-#   debug: 
-#     msg: {{ realm_discover_results.stdout }}
+- name: reboot
+  include_role:
+    name: common
+    tasks_from: reboot
 
-# - name: Create kerberos ticket
-#   expect:
-#     command: /bin/bash -c "/usr/bin/kinit -V {{ kerberos_user }}"
-#     responses:
-#       (?i)Password: "{{ kerberos_user_password }}"
-#   tags: ad
-
-# # Check for existing AD
-# - name: Checking to see if system is already joined to AD
-#   command: /bin/bash -c "/usr/sbin/realm list"
-#   register: realm_list_results
-#   tags: ad
-
-# - name: Debug realm_list_results
-#   debug:
-#     msg: {{ realm_list_results.stdout }}
-
-# - name: Join system to AD
-#   expect:
-#     command: /bin/bash -c "/usr/sbin/realm join {{ realm_domain }} --computer-ou='{{ realm_ad_ou }}' --user={{ kerberos_user }}"
-#     responses:
-#       (?i)Password: "{{ kerberos_user_password }}"  
-#   ignore_errors: yes
-#   when: realm_list_results.stdout == ""
-#   become: true
-#   tags: ad
-
-# - name: Copy suders file for safety
-#   command: cp -f /etc/sudoers /etc/sudoers.tmp
-
-# - name: Create sudoers file backup
-#   command: cp -f /etc/sudoers /etc/sudoers.bak
-
-# - name: Add domain admins group to sudoers
-#   lineinfile: dest=/etc/sudoers.tmp state=present line='%domain\ admins ALL=(ALL:ALL) ALL' regexp='^%domain'
-
-# - name: Final sudoers file check
-#   shell: visudo -q -c -f /etc/sudoers.tmp && cp -f /etc/sudoers.tmp /etc/sudoers
-
-# - name: Copy sssd.conf
-#   template:
-#     src: sssd.conf.j2
-#     dest: /etc/sssd/sssd.conf
-#     owner: root
-#     group: root
-#     mode: 0644
-#   tags: ad
-
-# - name: Copy pam common-session
-#   template: 
-#     src: common-session.j2
-#     dest: /etc/pam.d/common-session
-#     owner: root
-#     group: root
-#     mode: 0644
-#   tags: ad
