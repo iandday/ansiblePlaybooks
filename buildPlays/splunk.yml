@@ -1,6 +1,6 @@
 ---
 #
-# Splunk Enterprise
+# buildPlays/splunk.yml
 #
 
 - hosts: splunk
