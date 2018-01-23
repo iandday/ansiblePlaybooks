@@ -3,7 +3,7 @@
 #  development vm
 #
 
-- hosts: localhost
+- hosts: development
   gather_facts: false
   pre_tasks:
   - name: deploy new VM from template

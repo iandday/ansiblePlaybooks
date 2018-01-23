@@ -3,38 +3,32 @@
 # roles/splunk/tasks/install_splunk.yml
 #
     
-- name: update apt cache and install NFS client packages
-  apt: 
-    name: '{{ item }}'
-    state: present
-    update_cache: yes
-  with_items:
-    - '{{ required_packages }}'
-  become: true
-  become_user: root
+- name: install packages
+  include_role:
+    name: common
+  tasks_from: install_packages
+  vars:
+    packages: '{{ apt_packages }}'
       
 - name: download and install splunk package
   apt:
     deb: "{{ splunk_url }}"
     install_recommends: yes
   become: true
-  become_user: root
  
 - name: create splunk user
   user:
     name: '{{ splunk_user }}'
     group: '{{ splunk_group }}'
   become: true
-  become_user: root
 
-- name: mount network share
+- name: mount data network share
   mount: 
     path: '{{ splunk_dir }}/var/lib/splunk' 
     src: '{{ network_path }}'
     fstype: nfs 
     state: mounted    
   become: true
-  become_user: root
     
 - name: modify splunk directory permissions
   file:
@@ -43,7 +37,6 @@
     group: '{{ splunk_group }}'
     recurse: yes
   become: true
-  become_user: root
 
 - name: initial splunk start
   command: '{{ splunk_dir }}/bin/splunk start --accept-license'
@@ -53,7 +46,6 @@
 - name: start splunk at boot
   command: '{{ splunk_dir }}/bin/splunk enable boot-start -user {{ splunk_user }}' 
   become: true
-  become_user: root
 
 - name: change splunk admin credentials
   shell: '{{ splunk_dir }}/bin/splunk edit user admin -password {{ splunk_admin_password }} -auth admin:changeme'
@@ -67,7 +59,6 @@
     owner: '{{ splunk_user }}'
     group: '{{ splunk_group }}'
   become: true
-  become_user: root
 
 - name: register license 
   shell: '{{ splunk_dir }}/bin/splunk add licenses {{ splunk_dir }}/{{ license_filename }} -auth admin:{{ splunk_admin_password }}'
@@ -81,13 +72,12 @@
 
 - name: mount splunk app share
   mount:
-    src: //10.168.1.3/Repository/Software/LabIso/splunkApps
+    src: '{{ splunk_app_share }}'
     name: /tmp/splunkapps
     state: mounted
     fstype: cifs
     opts: guest
   become: true
-  become_user: root
 
 - name: identify apps to install
   find: 

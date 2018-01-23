@@ -6,36 +6,34 @@
 - hosts: splunk
   gather_facts: false
   pre_tasks:
-    - name: deploy new VM from template
-      include_role: 
-         name: common
-         tasks_from: deploy_vm_template
-    - name: gather facts
-      setup:
-    - name: set snapshot details
-      set_fact:
-         snapshot_details: "base snapshot after vm deployment from template"
-         snapshot_name: "Pre Build" 
-    - name: take clean snapshot
-      include_role:
-         name: common
-         tasks_from: snapshot
+  - name: deploy new VM from template
+    include_role: 
+      name: common
+      tasks_from: deploy_vm_template
+  - name: gather facts
+    setup:
+  - name: join domain
+    include_role: 
+      tasks_from: join_domain
+      name: common
+  - name: take clean snapshot
+    include_role:
+       name: common
+       tasks_from: snapshot
+      vars:
+        snapshot_details: "base snapshot after vm deployment from template"
+        snapshot_name: "Pre Build" 
   roles:
     - splunk
   post_tasks:
-    - name: reboot the server
-      shell: sleep 2 && /sbin/shutdown -r now "system restart after Ansible play"
-      async: 1
-      poll: 0
-    - name: wait for reboot
-      wait_for_connection:
-        delay: 1
-        timeout: 300
-    - name: set snapshot details
-      set_fact:
-        snapshot_details: "base snapshot after completion of ansible play"
-        snapshot_name: "Post Build" 
+    - name: reboot
+      include_role:
+        name: common
+        tasks_from: reboot
     - name: take post play snapshot
       include_role:
         name: common
         tasks_from: snapshot
+      vars:
+        snapshot_details: "base snapshot after completion of ansible play"
+        snapshot_name: "Post Build" 
