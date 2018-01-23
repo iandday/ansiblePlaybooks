@@ -1,0 +1,6 @@
+---
+#
+# roles/vnc/vars/main.yml
+#
+
+apt_packages: 'tightvncserver'

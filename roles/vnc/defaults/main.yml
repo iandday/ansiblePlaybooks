@@ -1,0 +1,9 @@
+---
+#
+# roles/vnc/defaults/main.yml
+#
+
+required_variables: 
+ - '{{ apt_packages }}'
+ - '{{ vnc_user }}'
+ - '{{ vnc_password }}'

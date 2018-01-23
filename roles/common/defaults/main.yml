@@ -4,9 +4,10 @@
 #
 
 snapshot_details: 
-common_packages: python2.7 python-simplejson python3-apt python-apt aptitude
+common_packages: python2.7 python-simplejson python3-apt python-apt aptitude ntp
 ad_packages:
   - python3-pip
   - sssd
   - adcli
   - realmd
+
