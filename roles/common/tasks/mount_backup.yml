@@ -1,7 +1,15 @@
 ---
-#roles/common/tasks/mount_backup.yml
+#
+# roles/common/tasks/mount_backup.yml
+#
 
-- include_vars: vault.yml 
+- name: load variables
+  include_vars: '{{ item }}'
+  with_items:
+    - vault.yml
+    - main.yml
+  no_log: true
+  
 - name: mount backup share
   mount: 
     state: mounted 
@@ -9,5 +17,4 @@
     src: '{{ backup_path }}'
     path: /mnt/backup
     opts: "domain={{backup_mount_domain}},username={{backup_mount_user}},password={{backup_mount_pass}},uid={{backup_uid}},gid={{backup_gid}}"
-  become_user: root
   become: true

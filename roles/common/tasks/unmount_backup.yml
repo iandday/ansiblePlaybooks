@@ -1,8 +1,10 @@
 ---
-#roles/common/tasks/unmount_backup.yml
+#
+# roles/common/tasks/unmount_backup.yml
+#
+
 - name: unmount backup share
   mount: 
     state: unmounted 
     path: /mnt/backup
-  become_user: root
   become: true

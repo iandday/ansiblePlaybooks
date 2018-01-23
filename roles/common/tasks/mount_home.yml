@@ -3,8 +3,11 @@
 # roles/common/tasks/mount_home.yml
 #
 
-- name: load vault variables
-  include_vars: vault.yml
+- name: load variables
+  include_vars: '{{ item }}'
+  with_items:
+    - vault.yml
+    - main.yml
   no_log: true
 
 - name: get user details
@@ -24,6 +27,4 @@
     state: 'mounted' 
     fstype: 'cifs' 
     opts: 'domain={{ workgroup|upper }},username={{ cifs_user }},password={{ cifs_password }},uid={{ getent_passwd[cifs_user][1] }},gid={{ getent_passwd[cifs_user][2] }},file_mode=0777,dir_mode=0777'
-  #no_log: true
   become: true
-  become_user: root

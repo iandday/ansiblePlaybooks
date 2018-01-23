@@ -4,11 +4,10 @@
 #
 
 - name: import vCenter credentials
-  include_vars:
-    file: '{{ item }}'
+  include_vars: '{{ item }}'
   with_items:
-    - main.yml
     - vault.yml
+    - main.yml
   no_log: true
 
 - name: Create a VM from a template
@@ -59,10 +58,20 @@
     delay: 1
     timeout: 300
 
-- name: initial package upgrade
-  apt:
-    upgrade: yes
-    update_cache: yes
-    cache_valid_time: 3600
-  become_user: root
+- name: Configure ntp service
+  template:
+    src: ntp.conf.j2
+    dest: /etc/ntp.conf
+    backup: yes
   become: true
+
+- name: start ntp service
+  service:
+    name: ntp
+    state: started
+    enabled: yes
+  become: true
+
+- include_role:
+    name: common
+    tasks_from: reboot
