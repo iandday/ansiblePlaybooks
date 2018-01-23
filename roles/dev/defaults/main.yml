@@ -3,10 +3,6 @@
 # roles/dev/defaults/main.yml
 #
 
-
-
-
-
 git_ignore:
   - '.DS_Store'
   - '._*'
@@ -38,3 +34,14 @@ git_ignore:
   - 'Thumbs.db'
   - '*.lock'
   - 'package-lock.json'
+required_variables:
+  - package_key
+  - package_repo
+  - apt_packages
+  - ad_user
+  - aliases
+  - ansible_credential
+  - git_name
+  - git_email
+  - git_username
+  - git_repos

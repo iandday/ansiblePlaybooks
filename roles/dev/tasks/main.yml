@@ -4,18 +4,24 @@
 #
 
 - name: load common role variables
-  include_vars: '{{ playbook_dir }}/roles/common/vars/main.yml'
+  include_vars: '{{ playbook_dir }}/roles/common/vars/{{ item }}.yml'
+  with_items:
+    - main
+    - vault
+  no_log: true
   
 - name: load vault variables
   include_vars: vault.yml
   no_log: true
 
-# - name: check for required variables
-#   include_tasks: check_vars.yml
+- name: check for required variables
+  include_role: 
+    name: common
+    tasks_from: check_vars
+  vars:
+    req_vars: '{{ required_variables }}'
 
-
-
-- name: start dev install
+- name: start development build 
   include_role: 
     name: dev
     tasks_from: install_dev
