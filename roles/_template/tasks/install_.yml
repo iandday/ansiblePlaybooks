@@ -2,3 +2,10 @@
 #
 # roles/_/tasks/_.yml
 #
+
+- name: install packages
+  include_role:
+    name: common
+  tasks_from: install_packages
+  vars:
+    packages: '{{ apt_packages }}'
