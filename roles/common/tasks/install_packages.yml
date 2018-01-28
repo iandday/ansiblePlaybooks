@@ -1,12 +1,12 @@
 ---
 #
-# roles/common/tasks/install_dev.yml
+# roles/common/tasks/install_packages.yml
 #
 
 - name: upgrade apt packages manually 
-  sudo: true
   shell: 'apt-get update'
-  warn: no
+  args:
+    warn: no
   become: true
 
 - name: install packages
@@ -14,5 +14,6 @@
     name: '{{ item }}' 
     state: present
     update_cache: no
-  with_items: '{{ packages }}'
+  with_items: 
+    - '{{ packages }}'
   become: true

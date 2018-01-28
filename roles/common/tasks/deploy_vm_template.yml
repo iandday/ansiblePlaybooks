@@ -55,7 +55,7 @@
 
 - name: wait for reboot
   wait_for_connection:
-    delay: 1
+    delay: 15
     timeout: 300
 
 - name: Configure ntp service
@@ -71,7 +71,3 @@
     state: started
     enabled: yes
   become: true
-
-- include_role:
-    name: common
-    tasks_from: reboot

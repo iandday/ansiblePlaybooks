@@ -29,4 +29,6 @@ domain_controller: boss.home.ianday.me
 ian_user: ian
 ian_user_dn: '{{ vault_ian_user_dn }}'
 ian_domain_password: '{{ vault_ian_domain_password }}'
-
+vnc_password: '{{ vault_ian_domain_password }}'
+pypi_user: '{{ vault_pypi_user }}'
+pypi_password: '{{ vault_pypi_password }}'

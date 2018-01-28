@@ -22,7 +22,7 @@
 - name: install packages
   include_role:
     name: common
-  tasks_from: install_packages
+    tasks_from: install_packages
   vars:
     packages: '{{ apt_packages }}'
 
@@ -103,6 +103,15 @@
     group: '{{ gid }}'
   become: true
 
+- name: create pypi configuration
+  template:
+    src: .pypirc.j2
+    dest: '{{ home }}/.pypirc'
+    mode: 0600
+    owner: '{{ uid }}'
+    group: '{{ gid }}'
+  become: true
+
 - name: create git ignore file
   lineinfile:
     path: '{{ home }}/.gitignore'
@@ -133,6 +142,15 @@
     group: '{{ gid }}'
   become: true  
 
+- name: set git ssh options
+  template: 
+    src: .sshconfig.j2
+    dest: '{{ home }}/.ssh/config'
+    mode: 0600
+    owner: '{{ uid }}'
+    group: '{{ gid }}'
+  become: true
+
 - name: copy ansible ssh key
   copy:
     src: id_rsa-Ansible
@@ -154,7 +172,10 @@
 - name: clone git repos
   git:
     repo: '{{ item }}'
-    dest: '{{ home }}/git'
+    dest: "{{ home }}/git/{{ item|basename|splitext|first }}"
     key_file: '{{ home }}/.ssh/id_rsa-Github'
+    ssh_opts: '-o StrictHostKeyChecking=no'
   with_items:
     - '{{ git_repos }}'
+  become: true
+  become_user: ian

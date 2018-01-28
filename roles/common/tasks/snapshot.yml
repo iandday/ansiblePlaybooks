@@ -30,7 +30,7 @@
     validate_certs: '{{ vcenter_validate }}'
     folder: /vm
     name: '{{ inventory_hostname }}'
-    uuid: '{{ vmfacts['virtual_machines'][inventory_hostname]['uuid']  }}'
+    uuid: "{{ vmfacts['virtual_machines'][inventory_hostname]['uuid']  }}"
     state: present
     snapshot_name: '{{ snapshot_name }}'
     description: 'Created by Ansible: {{ snapshot_details }}'

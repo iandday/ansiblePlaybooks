@@ -4,7 +4,7 @@
 #
 
 snapshot_details: 
-common_packages: python2.7 python-simplejson python3-apt python-apt aptitude ntp
+common_packages: python2.7 python-simplejson python3-apt python3-pip python-apt aptitude ntp
 ad_packages:
   - python3-pip
   - sssd

@@ -45,3 +45,5 @@ required_variables:
   - git_email
   - git_username
   - git_repos
+  - pypi_user
+  - pypi_password

@@ -11,10 +11,21 @@ package_repo:
   - 'deb https://packages.microsoft.com/repos/vscode stable main'
   - 'ppa:ansible/ansible'
 apt_packages: 
-  - xfce4
-  - xfce4-goodies
-  - gnome-icon-theme
-  - gnome-terminal
+  - lightdm 
+  - lightdm-gtk-greeter
+  - xfwm4 
+  - xfce4-panel 
+  - xfce4-settings 
+  - xfce4-session 
+  - xfce4-terminal 
+  - xfdesktop4 
+  - xfce4-taskmanager 
+  - tango-icon-theme
+  - thunar
+  - gvfs 
+  - gvfs-backends 
+  - policykit-1 
+  - udisks2
   - firefox
   - xterm
   - git
@@ -23,6 +34,7 @@ apt_packages:
   - code
   - sublime-text
   - ansible
+  - twine
 aliases:
   - {name: 'ansible-vault', command: 'ansible-vault --vault-password-file ~/.ansibleCredential' }
   - {name: 'ansible-playbook', command: 'ansible-playbook  --vault-password-file ~/.ansibleCredential --inventory-file inventory/hosts.yml --private-key ~/.ssh/id_rsa-Ansible' }
@@ -32,5 +44,7 @@ git_name: 'Ian Day'
 git_email: 'ian236day@gmail.com'
 git_username: 'iandday'
 git_repos: 
-  - 
+  - 'ssh://git@github.com/iandday/pyharmony.git'
+  - 'ssh://git@github.com/iandday/ansiblePlaybooks.git'
+  - 'ssh://git@github.com/iandday/hassConfig.git'
 

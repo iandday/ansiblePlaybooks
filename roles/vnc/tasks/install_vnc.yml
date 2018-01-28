@@ -3,71 +3,22 @@
 # roles/vnc/tasks/install_vnc.yml
 #
 
-- name: fix Ubuntu 17.10 bug part 1
-  include_role:
-    name: common
-  tasks_from: install_packages
-  vars:
-    packages: 'network_manager'
-  when: 
-    - ansible_distribution_version | version_compare('17.10', '==') 
-
-- name: fix Ubuntu 17.10 bug, part 2
-  service:
-    name: NetworkManager
-    state: started
-  become: true
-  when: 
-    - ansible_distribution_version | version_compare('17.10', '==') 
-
 - name: install packages
   include_role:
     name: common
-  tasks_from: install_packages
+    tasks_from: install_packages
   vars:
     packages: '{{ apt_packages }}'
 
-- name: get user details
-  getent:
-    database: passwd
-    key: '{{ vnc_user }}'
-
-- name: Create .vnc dirs
-  file:
-    path: '/home/{{ vnc_user }}/.vnc'
-    state: directory
-    mode: 0755
-    owner: '{{ getent_passwd[vnc_user][1] }}'
-    group: '{{ getent_passwd[vnc_user][2] }}'
-  become: true
-    
-- name: Update "xstartup" file
-  template:
-    src: xstartup.j2
-    dest: '/home/{{ vnc_user }}/.vnc/xstartup'
-    mode: 0755
-    owner: '{{ getent_passwd[vnc_user][1] }}'
-    group: '{{ getent_passwd[vnc_user][2] }}'
-  become: true
-
 - name: Set vnc password
-  shell: 'echo {{ vnc_password }} | vncpasswd -f > /home/{{ vnc_user }}/.vnc/passwd'
+  shell: 'x11vnc -storepasswd {{ vnc_password }} /etc/x11vnc.pass'
   no_log: true
-  become: true
-
-- name: secure vnc password
-  file:
-    path: '/home/{{ vnc_user }}/.vnc/passwd'
-    owner: '{{ getent_passwd[vnc_user][1] }}'
-    group: '{{ getent_passwd[vnc_user][2] }}'
-    mode: '0700'
-    state: 'file'
   become: true
 
 - name: install vnc service
   template:
-    src: 'tightvncserver.service.j2'
-    dest: '/etc/systemd/system/tightvncserver.service'
+    src: 'x11vnc.service.j2'
+    dest: '/etc/systemd/system/x11vnc.service'
     owner: 'root'
     group: 'root'
     mode: 'u=rwx,g=rx,o=rx'
@@ -75,7 +26,7 @@
 
 - name: start vnc at boot
   service:
-    name: tightvncserver.service
+    name: x11vnc.service
     enabled: yes
     state: started
   become: true

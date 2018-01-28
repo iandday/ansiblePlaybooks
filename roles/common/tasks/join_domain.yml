@@ -13,7 +13,7 @@
 - name: install packages
   include_role:
     name: common
-  tasks_from: install_packages
+    tasks_from: install_packages
   vars:
     packages: '{{ ad_packages }}'
 

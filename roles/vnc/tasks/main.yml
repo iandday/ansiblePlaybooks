@@ -17,7 +17,11 @@
   vars:
     req_vars: '{{ required_variables }}'
 
-- name: start vnc installation 
-  include_role: 
-    name: vnc
-    tasks_from: install_vnc
+- name: wait for response
+  wait_for_connection:
+    delay: 1
+    timeout: 300
+  delegate_to: localhost
+  
+- name: start main play
+  include_tasks: install_vnc.yml

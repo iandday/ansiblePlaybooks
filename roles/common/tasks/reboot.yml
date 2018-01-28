@@ -11,6 +11,6 @@
   
 - name: wait for reboot
   wait_for_connection:
-    delay: 1
+    delay: 15
     timeout: 300
   delegate_to: localhost

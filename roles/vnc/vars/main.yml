@@ -3,4 +3,5 @@
 # roles/vnc/vars/main.yml
 #
 
-apt_packages: 'tightvncserver'
+apt_packages: 
+ - 'x11vnc'
