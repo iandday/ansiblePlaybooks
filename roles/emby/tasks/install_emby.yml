@@ -1,0 +1,74 @@
+---
+#
+# roles/emby/tasks/main.yml
+#
+
+- name: add package repo key(s)
+  apt_key:
+    url: '{{ item }}'
+    state: present
+  with_items:
+    - '{{ repo_key }}'    
+  become: true
+
+- name: add package repo source(s)
+  apt_repository:
+    repo: '{{ item }}'
+    state: present
+  with_items: 
+    - '{{ package_repo }}'
+  become: true
+
+- name: install packages
+  include_role:
+    name: common
+    tasks_from: install_packages
+  vars:
+    packages: '{{ apt_packages }}'
+
+- name: mount media share
+  mount: 
+    state: mounted 
+    fstype: cifs
+    src: '{{ media_path}}'
+    path: '{{ media_dest }}'
+    opts: "domain=home,username={{ service_username }},password={{ service_password }}"
+  become: true
+  no_log: true
+
+- name: mount backup directory
+  include_role:
+    name: common
+    tasks_from: mount_backup
+  vars:
+    - username: '{{ service_username }}'
+    - password: '{{ service_password }}'
+    - path: '{{ backup_path }}'
+    - uid: '{{ emby_user }}'
+    - gid: '{{ emby_user }}'
+
+- name: copy backup script
+  template:
+    src: backup_emby.sh.j2
+    dest: /usr/local/bin/backup_emby.sh
+    mode: 'a+x'
+  become: true
+
+- name: setup backup cronjob
+  cron:
+    name: 'Backup emby'
+    job: '/usr/local/bin/backup_emby.sh'
+    hour: '3'
+    minute: '5'
+  become: true
+
+- name: configure backup rotation
+  include_role:
+    name: common
+    tasks_from: rotate_backups
+
+- name: restart emby
+  service:
+    name: emby-server
+    state: restarted
+  become: true

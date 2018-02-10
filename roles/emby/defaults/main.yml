@@ -1,0 +1,18 @@
+---
+#
+# roles/emby/defaults/main.yml
+#
+
+emby_user: 'emby'
+backup_path: 'emby'
+required_variables:
+  - service_username
+  - service_password
+  - mount_domain
+  - backup_path
+  - emby_user
+  - package_repo 
+  - repo_key
+  - apt_packages
+  - media_path
+  - media_dest

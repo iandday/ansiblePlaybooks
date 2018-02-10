@@ -1,11 +1,16 @@
 ---
-emby_repo: "deb http://download.opensuse.org/repositories/home:/emby/xUbuntu_16.04/ /"
-emby_repo_key: http://download.opensuse.org/repositories/home:emby/xUbuntu_16.04/Release.key
+#
+# roles/emby/vars/main.yml
+#
+
+package_repo: 
+  - 'deb http://download.opensuse.org/repositories/home:/emby/xUbuntu_16.04/ /'
+repo_key: 
+  - 'http://download.opensuse.org/repositories/home:emby/xUbuntu_16.04/Release.key'
 apt_packages: 
-    - cifs-utils
-    - emby-server
-media_path: "{{ vault_media_path }}"
-media_dest: /mnt/media
-mount_user: "{{ vault_mount_user }}"
-mount_pass: "{{ vault_mount_pass }}"
-mount_domain: "{{ vault_mount_domain }}"
+    - 'cifs-utils'
+    - 'emby-server'
+media_path: '//freenas/Media'
+media_dest: '/mnt/media'
+service_username: 'svcEmby'
+service_password: '{{ vault_service_password }}'
