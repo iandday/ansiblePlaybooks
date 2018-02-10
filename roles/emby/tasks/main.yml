@@ -1,45 +1,31 @@
 ---
+#
 # roles/emby/tasks/main.yml
+#
 
-- include_vars: vault.yml    
-- name: add emby signing key
-  apt_key:
-    url: '{{ emby_repo_key }}'
-    state: present
-    
-- name: add emby repository to sources list
-  apt_repository:
-    repo: '{{ emby_repo }}'
-    state: present
-    filename: 'emby'
-        
-- name: update apt cache and install required packages
-  apt: 
-    name: '{{ item }}'
-    state: present
-    update_cache: yes
-  with_items: '{{ apt_packages }}'
+- name: load common role variables
+  include_vars: '{{ playbook_dir }}/roles/common/vars/{{ item }}.yml'
+  with_items:
+    - main
+    - vault
+  no_log: true
+  
+- name: load vault variables
+  include_vars: vault.yml
+  no_log: true
 
-- name: mount media share
-  mount: 
-    state: mounted 
-    fstype: cifs
-    src: '{{ media_path}}'
-    path: '{{ media_dest }}'
-    opts: "domain={{mount_domain}},username={{mount_user}},password={{mount_pass}}"
-  become_user: root
-  become: true
-
-- name: mount backup path
-  include_role:
+- name: check for required variables
+  include_role: 
     name: common
-    tasks_from: mount_backup
+    tasks_from: check_vars
   vars:
-    backup_path: "{{ backup_root_path}}/emby/"
-    backup_uid: emby
-    backup_gid: emby  
-   
-- name: start emby
-  service:
-    name: emby-server
-    state: restarted
+    req_vars: '{{ required_variables }}'
+
+- name: wait for response
+  wait_for_connection:
+    delay: 1
+    timeout: 300
+  delegate_to: localhost
+
+- name: start main play
+  include_tasks: install_emby.yml
