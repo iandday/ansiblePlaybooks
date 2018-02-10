@@ -1,0 +1,11 @@
+#!/bin/bash
+
+
+days="{{ backup_days }}"
+backup_dir="/mnt/backup_{{ backup_path }}"
+
+# rotate backups
+for i in `find $backup_dir/ -maxdepth 1 -type f -mtime +$days`;
+do
+    rm -rf $i;
+done

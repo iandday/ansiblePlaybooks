@@ -3,18 +3,38 @@
 # roles/common/tasks/mount_backup.yml
 #
 
-- name: load variables
-  include_vars: '{{ item }}'
-  with_items:
-    - vault.yml
-    - main.yml
-  no_log: true
-  
+- name: unmount backup share if mounted
+  mount: 
+    state: unmounted 
+    path: '/mnt/backup_{{ path }}'
+  become: true
+
+- name: mount root backup share
+  mount: 
+    state: mounted 
+    fstype: cifs
+    src: '//freenas/backup/'
+    path: '/mnt/backup_{{ path }}'
+    opts: 'domain={{ domain }},username={{ username }},password={{ password }},uid={{ uid }},gid={{ gid }}'
+  become: true
+
+- name: create backup directory if not found
+  file:
+    path: '/mnt/backup_{{ path }}/{{ path }}'
+    state: directory
+  become: true
+
+- name: unmount root backup share
+  mount: 
+    state: unmounted 
+    path: '/mnt/backup_{{ path }}'
+  become: true
+
 - name: mount backup share
   mount: 
     state: mounted 
     fstype: cifs
-    src: '{{ backup_path }}'
-    path: /mnt/backup
-    opts: "domain={{backup_mount_domain}},username={{backup_mount_user}},password={{backup_mount_pass}},uid={{backup_uid}},gid={{backup_gid}}"
+    src: '//freenas/backup/{{ path}}'
+    path: '/mnt/backup_{{ path }}'
+    opts: 'domain={{ domain }},username={{ username }},password={{ password }},uid={{ uid }},gid={{ gid }}'
   become: true

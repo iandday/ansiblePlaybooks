@@ -6,11 +6,6 @@
 vcenter_host: vcenter.home.ianday.me
 vcenter_username: vsphere.local\administrator
 vcenter_password: '{{ vault_vcenter_password }}'
-vcenter_validate: false
-vcenter_vmtemplate: ubuntuTemplate 
-vcenter_datacenter: Daynet
-vcenter_folder: vm
-vcenter_lan_network: DPortGroupLAN
 backup_root_path: "{{ vault_backup_root_path }}" 
 backup_mount_domain:  "{{ vault_backup_mount_domain }}" 
 backup_mount_user: "{{ vault_backup_mount_user }}" 
@@ -32,3 +27,4 @@ ian_domain_password: '{{ vault_ian_domain_password }}'
 vnc_password: '{{ vault_ian_domain_password }}'
 pypi_user: '{{ vault_pypi_user }}'
 pypi_password: '{{ vault_pypi_password }}'
+mount_domain: 'home'

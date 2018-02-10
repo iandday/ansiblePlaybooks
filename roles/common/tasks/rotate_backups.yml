@@ -1,0 +1,19 @@
+---
+#
+# roles/common/tasks/rotate_backups.yml
+#
+
+- name: copy rotation script
+  template:
+    src: rotate_backups.sh.j2
+    dest: /usr/local/bin/rotate_backups_{{ backup_path|basename }}.sh
+    mode: 'a+x'
+  become: true
+
+- name: set rotation cronjob
+  cron:
+    name: 'Backup rotation - {{ backup_path|basename }}'
+    job: '/usr/local/bin/rotate_backups_{{ backup_path|basename }}.sh'
+    hour: '3'
+    minute: '15'
+  become: true

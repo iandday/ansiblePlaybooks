@@ -5,6 +5,5 @@
 
   - fail: 
       msg='{{ item }} is not defined'
-    when: not  item 
-    with_items:
-        - '{{ req_vars }}'
+    when: item not in vars
+    with_items: '{{ req_vars }}'
