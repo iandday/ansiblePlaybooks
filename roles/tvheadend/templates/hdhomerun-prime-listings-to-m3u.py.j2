@@ -1,0 +1,43 @@
+#
+# this script will convert the hdhomerun listings (channels) to
+# m3u format for use with external media players. before running
+# this script, be sure to modify the <<config>> variable settings
+# below.
+#
+# Suggested Usage: This script should be run on a cron to keep
+# the channel lineup to date. Below is an example of how to execute this script:
+# python /path/to/script/hdhomerun-prime-listings-to-m3u.py > /path/to/playlist.m3u
+#
+# @author Josh Kastang (josh[dot]kastang[at]gmail[dot]com)
+# Updated for Python 3.x
+#
+
+import requests
+import json
+from pprint import pprint
+
+# * hdhr-ip: ip address of your hdhr prime unit
+# * duration: the duration the stream should play for. some
+# players seem to require this while others do not. default
+# is set for 7200 minutes (2 hours)
+config = {
+    'hdhr-ip'   : '{{ homerun_ip }}',
+    'duration'  : '7200',
+}
+
+hdhr_url        = "http://{0}/lineup.json?show=unprotected".format(config['hdhr-ip'])
+response_obj    = requests.get(hdhr_url)
+listings_res    = response_obj.text
+
+print ("#EXTM3U")
+listings = json.loads(listings_res)
+for l in listings:
+    channel = l['GuideNumber']
+    name    = l['GuideName']
+
+    print ("#EXTINF:{0},{1}: {2}".format(channel,channel, name))
+    print ("http://{0}:5004/auto/v{1}?duration={2}".format(
+            config['hdhr-ip'],
+            channel,
+            config['duration'])
+    )

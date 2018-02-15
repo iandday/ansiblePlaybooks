@@ -1,0 +1,210 @@
+---
+#
+# roles/tvheadend/tasks/install_tvheadend.yml
+#
+
+- name: add package repo key(s)
+  apt_key:
+    keyserver: 'hkp://keyserver.ubuntu.com:80'
+    id: 379CE192D401AB61
+  become: true
+
+- name: add package repo source(s)
+  apt_repository:
+    repo: '{{ item }}'
+    state: present
+  with_items: 
+    - '{{ package_repo }}'
+  become: true
+
+- name: set tvheadend admin credentials
+  debconf: 
+    name: tvheadend 
+    question: '{{ item.q }}'
+    vtype: string 
+    value: '{{ item.v }}'
+  with_items:
+    - { q: 'tvheadend/admin_username', v: '{{ tvheadend_username }}' }
+    - { q: 'tvheadend/admin_password', v: '{{ tvheadend_password }}' }
+  become: true
+  no_log: true
+
+- name: install packages
+  include_role:
+    name: common
+    tasks_from: install_packages
+  vars:
+    packages: '{{ apt_packages }}'
+
+- name: install requests module
+  pip:
+    name: requests
+
+- name: clone git repos
+  git:
+    repo: '{{ item }}'
+    dest: '/opt/{{ item|basename|splitext|first }}'
+    force: yes
+  with_items:
+    - '{{ git_repos }}'
+  become: true
+
+- name: build Comskip
+  command: '{{ item }}'
+  args:
+    chdir: '/opt/Comskip'
+  with_items:
+    - './autogen.sh'
+    - './configure'
+    - 'make'
+  become: true
+
+- name: install Comskip
+  command: make install
+  args:
+    chdir: '/opt/Comskip'
+  become: true
+
+- name: set autoedit executable bit
+  file:
+    path: /opt/autoedit/autoedit
+    state: file
+    mode: 'a+x'
+  become: true
+
+- name: build autoedit
+  command: 'update-alternatives --install /usr/bin/autoedit autoedit /opt/autoedit/autoedit 100'
+  become: true
+
+- name: copy comskip ini file
+  copy:
+    src: '/opt/autoedit/comskip.ini'
+    dest: '/home/{{ hts_user }}/.hts/comskip.ini'
+    remote_src: yes
+    owner: '{{ hts_user }}'
+    group: '{{ hts_user }}'
+  become: true
+
+- name: copy autoedit settings
+  template:
+    src: autoedit_settings.txt.j2
+    dest: /opt/autoedit/settings.txt
+  become: true
+
+- name: copy removeEDL script
+  template:
+    src: removeEDL.sh.j2
+    dest: '/home/{{ hts_user }}/.hts/removeEDL.sh'
+    mode: 'a+x'
+    owner: '{{ hts_user }}'
+    group: '{{ hts_user }}'
+  become: true    
+
+- name: copy hdhomerun to m3u script
+  template:
+    src: hdhomerun-prime-listings-to-m3u.py.j2
+    dest: '/home/{{ hts_user }}/.hts/hdhomerun-prime-listings-to-m3u.py'
+    owner: '{{ hts_user }}'
+    group: '{{ hts_user }}'
+  become: true
+
+- name: initial m3u script run
+  shell: 'python3 /home/{{ hts_user }}/.hts/hdhomerun-prime-listings-to-m3u.py > /home/{{ hts_user }}/.hts/prime.m3u'
+  become: true
+    
+- name: set m3u script cron job
+  cron: 
+    name: 'hdhomerun to m3u'
+    job: 'python3 /home/{{ hts_user }}/.hts/hdhomerun-prime-listings-to-m3u.py > /home/{{ hts_user }}/.hts/prime.m3u'
+    user: '{{ hts_user }}'
+    cron_file: 'backup_tvheadend'
+    special_time: daily
+  become: true
+
+- name: create xmltv directory
+  file:
+    path: /home/{{ hts_user }}/.xmltv
+    state: directory
+    owner: '{{ hts_user }}'
+    group: '{{ hts_user }}'
+  become: true
+
+- name: copy zap2xml script
+  copy:
+    src: zap2xml.pl
+    dest: '/home/{{ hts_user }}/.xmltv/zap2xml.pl'    
+    owner: '{{ hts_user }}'
+    group: '{{ hts_user }}'
+    mode: 'a+x'
+  become: true
+
+- name: copy tv_grab_file script
+  template:
+    src: tv_grab_file.j2
+    dest: /usr/bin/tv_grab_file
+    owner: 'root'
+    group: 'root'
+    mode: 'a+x'
+  become: true
+    
+- name: set epg cron jobs
+  cron:
+    name: 'update epg'
+    job: 'perl /home/{{ hts_user }}/.xmltv/zap2xml.pl -u {{ zap2xml_username }} -p {{ zap2xml_password }} -d 14 -L -A "new live" -D -c /home/{{ hts_user }}/.xmltv/cache -o /home/{{ hts_user }}/.xmltv/tv_grab_file.xmltv'
+    user: '{{ hts_user }}'
+    cron_file: 'update_epg'
+    hour: '23'
+    minute: '5'
+  become: true
+
+- name: mount recordings directory
+  mount:
+    name: '/mnt/tvh'
+    src:  '{{ recordings_share }}'
+    opts: 'username={{ service_username }},password={{ service_password }},domain=home,uid={{ hts_user }},gid={{ hts_user }}'
+    fstype: 'cifs'
+    state: 'mounted'
+  become: true
+
+- name: mount backup directory
+  include_role:
+    name: common
+    tasks_from: mount_backup
+  vars:
+    - username: '{{ service_username }}'
+    - password: '{{ service_password }}'
+    - path: '{{ backup_path }}'
+    - uid: '{{ hts_user }}'
+    - gid: '{{ hts_user }}'
+
+- name: copy backup script
+  template:
+    src: backup_tvheadend.sh.j2
+    dest: /usr/local/bin/backup_tvheadend.sh
+    mode: 'a+x'
+  become: true
+
+- name: setup backup cronjob
+  cron:
+    name: 'Backup tvheadend'
+    job: '/usr/local/bin/backup_tvheadend.sh'
+    user: '{{ hts_user }}'
+    cron_file: 'backup_tvheadend'
+    hour: '3'
+    minute: '5'
+  become: true
+
+- name: configure backup rotation
+  include_role:
+    name: common
+    tasks_from: rotate_backups
+  vars:
+    - cron_user: '{{ hts_user }}'
+
+- name: restart tvheadend
+  service:
+    name: 'tvheadend'
+    state: 'restarted'
+  become: true
+
+

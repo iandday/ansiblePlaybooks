@@ -1,0 +1,40 @@
+---
+#
+# roles/tvheadend/vars/main.yml
+#
+
+package_key:
+  - 'https://packages.microsoft.com/keys/microsoft.asc'
+
+package_repo:
+  - 'deb https://dl.bintray.com/tvheadend/deb xenial release-4.2'
+  - 'ppa:alex-tomlins/xmltv'
+  - 'ppa:jonathonf/ffmpeg-3'
+
+apt_packages: 
+  - xmltv-util
+  - python-pip
+  - cifs-utils
+  - python3-pip
+  - tvheadend
+  - ffmpeg 
+  - build-essential 
+  - libargtable2-dev 
+  - libavformat-dev 
+  - libsdl1.2-dev 
+  - autoconf 
+  - automake 
+  - libtool
+
+git_repos: 
+  - 'git://github.com/erikkaashoek/Comskip'
+  - 'git://github.com/IfThenERROR/autoedit'
+  
+homerun_ip: 192.168.2.2
+tvheadend_username: 'svcTvh'
+tvheadend_password: '{{ vault_tvheadend_password }}' 
+recordings_share: '//freenas/tvh'
+service_username:  '{{ tvheadend_username }}'
+service_password: '{{ vault_tvheadend_password }}'
+zap2xml_username: 'ian236day@gmail.com'
+zap2xml_password:  '{{ vault_zap2xml_password }}'
