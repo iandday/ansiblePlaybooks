@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# backup script for {{ backup_path }}
+
+/usr/sbin/service tvheadend stop
+
+src="/home/{{ hts_user }}/.xmltv /home/{{ hts_user }}/.hts"
+dest="/mnt/backup_{{ backup_path }}"
+day=$(date +%Y%m%d)
+
+/bin/mkdir "$dest/$day"
+
+/bin/tar -czf "$dest/$day/{{ backup_path }}-$day.tar.gz" $src
+
+/usr/sbin/service tvheadend start
