@@ -58,6 +58,8 @@
   cron:
     name: 'Backup emby'
     job: '/usr/local/bin/backup_emby.sh'
+    user: '{{ emby_user }}'
+    cron_file: backup_emby
     hour: '3'
     minute: '5'
   become: true
@@ -66,6 +68,8 @@
   include_role:
     name: common
     tasks_from: rotate_backups
+  vars:
+    - cron_user: '{{ emby_user }}'
 
 - name: restart emby
   service:

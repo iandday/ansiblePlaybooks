@@ -4,7 +4,7 @@
 
 /usr/sbin/service emby-server stop
 
-src="/var/lib/emby-server/cache /var/lib/emby-server/config /var/lib/emby-server/data /var/lib/emby-server/ffmpeg /var/lib/emby-server/localization /var/lib/emby-server/logs /var/lib/emby-server/plugins /var/lib/emby-server/root /var/lib/emby-server/ssl"
+src="/var/lib/emby-server/cache /var/lib/emby-server/config /var/lib/emby-server/data /var/lib/emby-server/ffmpeg /var/lib/emby-server/localization /var/lib/emby-server/logs /var/lib/emby-server/plugins /var/lib/emby-server/root"
 dest="/mnt/backup_{{ backup_path }}"
 day=$(date +%Y%m%d)
 
