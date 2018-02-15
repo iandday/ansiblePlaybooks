@@ -15,7 +15,8 @@
     fstype: cifs
     src: '//freenas/backup/'
     path: '/mnt/backup_{{ path }}'
-    opts: 'domain={{ domain }},username={{ username }},password={{ password }},uid={{ uid }},gid={{ gid }}'
+    opts: 'domain={{ domain.split(".")[0] }},username={{ username }},password={{ password }},uid={{ uid }},gid={{ gid }}'
+  no_log: true
   become: true
 
 - name: create backup directory if not found
@@ -36,5 +37,6 @@
     fstype: cifs
     src: '//freenas/backup/{{ path}}'
     path: '/mnt/backup_{{ path }}'
-    opts: 'domain={{ domain }},username={{ username }},password={{ password }},uid={{ uid }},gid={{ gid }}'
+    opts: 'domain={{ domain.split(".")[0] }},username={{ username }},password={{ password }},uid={{ uid }},gid={{ gid }}'
+  no_log: true
   become: true
