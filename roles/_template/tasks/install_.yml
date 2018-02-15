@@ -3,9 +3,25 @@
 # roles/_/tasks/_.yml
 #
 
+- name: add package repo key(s)
+  apt_key:
+    url: '{{ item }}'
+    state: present
+  with_items:
+    - '{{ package_key }}'
+  become: true
+
+- name: add package repo source(s)
+  apt_repository:
+    repo: '{{ item }}'
+    state: present
+  with_items: 
+    - '{{ package_repo }}'
+  become: true
+
 - name: install packages
   include_role:
     name: common
-  tasks_from: install_packages
+    tasks_from: install_packages
   vars:
     packages: '{{ apt_packages }}'
