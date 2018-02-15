@@ -4,5 +4,5 @@
 #
 
 required_variables: 
- - '{{ apt_packages }}'
+ - apt_packages
 
