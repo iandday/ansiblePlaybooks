@@ -21,8 +21,7 @@
     state: poweredon
     template: '{{ vcenter_vmtemplate }}'
     datacenter: '{{ vcenter_datacenter }}'
-    networks:
-    - name: '{{ vcenter_lan_network }}'
+    networks: '{{ vcenter_lan_network }}'
   delegate_to: localhost
   register: deploy
 
