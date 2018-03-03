@@ -1,11 +1,9 @@
 #   {{ ansible_managed }}  
-#   Path: {{ template_fullpath }} 
-#   Creation Date: {{ template_run_date }}
 
 /var/log/apache2/*.log {
-        {{ log_rotate_frequency }}
+        {{ apache_log_rotate_frequency }}
         missingok
-        rotate {{ log_rotate_number }}
+        rotate {{ apache_log_rotate_number }}
         compress
         delaycompress
         notifempty

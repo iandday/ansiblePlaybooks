@@ -1,13 +1,11 @@
 # Default catchall, redirects to 404
 #   {{ ansible_managed }}  
-#   Path: {{ template_fullpath }} 
-#   Creation Date: {{ template_run_date }}
 
 <VirtualHost *:80>
-    ServerAdmin {{ server_admin }}
+    ServerAdmin {{ apache_server_admin }}
 
-    ErrorLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-error.log
-    CustomLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-access.log combined
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
 
     RewriteEngine on
   	RewriteCond %{HTTPS} !=on
@@ -16,10 +14,10 @@
 
 
 <VirtualHost *:443>   
-    ServerAdmin {{ server_admin }}
+    ServerAdmin {{ apache_server_admin }}
     
-    ErrorLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-error.log
-    CustomLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-access.log combined
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
     
     SSLEngine On
 	SSLCertificateFile /etc/apache2/ssl/{{ item.sub_domain }}.{{ item.domain }}/fullchain.pem

@@ -3,80 +3,74 @@
 # roles/apache_reverse_proxy/tasks/apache_reverse_proxy_install.yml
 #
 
-- name: install apt packages
-  apt: 
-    name: '{{ item }}'
-    state: latest
-  with_items:
-      - '{{ apt_packages }}'
-  become: true
-  become_user: root
+- name: install packages
+  include_role:
+    name: common
+    tasks_from: install_packages
+  vars:
+    packages: '{{ apache_apt_packages }}'
 
 - name: install Apache modules
   apache2_module: 
     state: present 
     name: '{{ item }}'
-  with_items: '{{ apache_modules }}'
+  with_items: 
+    - '{{ apache_modules }}'
   become: true
-  become_user: root
-
-- name: start Apache at boot
-  command: systemctl enable apache2
-  become: true
-  become_user: root
 
 - name: copy site configs
   template:
     src: '{{ item.config_file }}'
     dest: '/etc/apache2/sites-available/{{ item.file_name }}'
-    owner: www-data
-    group: www-data
+    owner: '{{ apache_web_user }}'
+    group: '{{ apache_web_user }}'
     mode: 0644
   with_items: 
-    - '{{ websites }}'
+    - '{{ apache_websites }}'
   become: true
-  become_user: root
 
 - name: enable sites
   file:  
     src: '/etc/apache2/sites-available/{{ item.file_name }}'
     dest: '/etc/apache2/sites-enabled/{{ item.file_name }}'
-    owner: www-data
-    group: www-data
+    owner: '{{ apache_web_user }}'
+    group: '{{ apache_web_user }}'
     state: link
   with_items: 
-    - '{{ websites }}'
+    - '{{ apache_websites }}'
   become: true
-  become_user: root
 
 - name: copy apache logrotate.d config
   template:
     src: apache2.j2
     dest: /etc/logrotate.d/apache2 
   become: true
-  become_user: root
 
-- name: replace log directory
-  file:
-    path: '{{ log_dir }}'
-    state: absent
+- name: modify combined and common log formats for splunk apache add-on app
+  lineinfile:
+    path: '{{ apache_config_file }}'
+    regexp: '{{ item.r }}'
+    line: '{{ item.l }}'
+    backrefs: yes
+  with_items:
+    - { r: 'LogFormat \"%h %l %u %t \\\"%r\\\" %>s %O \\\"%{Referer}i\\\" \\\"%{User-Agent}i\\\"\" combined', l: 'LogFormat "%h %v %l %u %{local}p %t \"%r\" \"%q\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\" %I %O %D" combined' }
+    - { r: 'LogFormat \"%h %l %u %t \\\"%r\\\" %>s %O\" common', l: 'LogFormat "%h %l %u %t \"%r\" %>s %b" common' }  
   become: true
-  become_user: root
-
-- name: replace log directory
-  file:
-    path: '{{ log_dir }}'
-    state: directory
-    owner: www-data
-    group: www-data
-  become: true
-  become_user: root
 
 - name: mount log directory
-  mount: 
-    path: '{{ log_dir }}'
-    src: '{{ nfs_server }}:{{ nfs_path }}'
-    fstype: nfs 
-    state: mounted
+  mount:
+    name: '{{ apache_log_dir }}'
+    src:  '{{ apache_log_share }}'
+    opts: 'username={{ apache_service_username }},password={{ apache_service_password }},domain=home,uid={{ apache_web_user }},gid={{ apache_web_user }}'
+    fstype: 'cifs'
+    state: 'mounted'
+  no_log: true
   become: true
-  become_user: root    
+
+- name: start apache
+  service:
+    name: apache2
+    state: started
+    enabled: yes
+  become: true
+  

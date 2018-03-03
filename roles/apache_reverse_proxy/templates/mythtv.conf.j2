@@ -1,14 +1,12 @@
 # MythWeb for MythTV
 #   {{ ansible_managed }}  
-#   Path: {{ template_fullpath }} 
-#   Creation Date: {{ template_run_date }}
 
 <VirtualHost *:80>
     ServerName {{ item.sub_domain }}.{{ item.domain }}
-    ServerAdmin {{ server_admin }}
+    ServerAdmin {{ apache_server_admin }}
     
-    ErrorLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-error.log
-    CustomLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-access.log combined
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
 
     RewriteEngine on
   	RewriteCond %{HTTPS} !=on
@@ -18,11 +16,11 @@
 
 <IfModule mod_ssl.c>
     <VirtualHost *:443>
-        ServerName {{ item.sub_domain }}.{{ domain }}
-        ServerAdmin {{ server_admin }}
+        ServerName {{ item.sub_domain }}.{{ item.domain }}
+        ServerAdmin {{ apache_server_admin }}
 
-        ErrorLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-error.log
-        CustomLog ${APACHE_LOG_DIR}/{{ item.log_prefix }}-access.log combined
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
 
         SSLEngine on
         SSLCertificateFile /etc/apache2/ssl/{{ item.sub_domain }}.{{ item.domain }}/fullchain.pem
@@ -48,9 +46,9 @@
 	        AuthType Basic
 	        AuthBasicProvider ldap
 	        LDAPReferrals Off
-	        AuthLDAPUrl {{ ldap_url }} 
-	        AuthLDAPBindDN {{ ldap_dn }} 
-	        AuthLDAPBindPassword {{ ldap_password }} 
+	        AuthLDAPUrl {{ apache_ldap_url }} 
+	        AuthLDAPBindDN {{ apache_ldap_dn }} 
+	        AuthLDAPBindPassword {{ apache_ldap_password }} 
 	        Require valid-user
         </Location>
 
