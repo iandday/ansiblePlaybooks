@@ -1,3 +1,4 @@
+# {{ ansible_managed }}
 ########################################################
 # This is the main config file for dehydrated          #
 #                                                      #
@@ -40,7 +41,7 @@ CHALLENGETYPE="dns-01"
 DOMAINS_TXT="${BASEDIR}/domains"
 
 # Output directory for generated certificates
-CERTDIR="{{ cert_out_directory }}"
+CERTDIR="{{ le_cert_out_directory }}"
 
 # Directory for account keys and registration information
 #ACCOUNTDIR="${BASEDIR}/accounts"
