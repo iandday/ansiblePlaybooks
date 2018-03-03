@@ -5,12 +5,10 @@
 
 package_key:
   - 'https://packages.microsoft.com/keys/microsoft.asc'
-
 package_repo:
   - 'deb https://dl.bintray.com/tvheadend/deb xenial release-4.2'
   - 'ppa:alex-tomlins/xmltv'
   - 'ppa:jonathonf/ffmpeg-3'
-
 apt_packages: 
   - xmltv-util
   - python-pip
@@ -25,11 +23,9 @@ apt_packages:
   - autoconf 
   - automake 
   - libtool
-
 git_repos: 
   - 'git://github.com/erikkaashoek/Comskip'
   - 'git://github.com/IfThenERROR/autoedit'
-  
 homerun_ip: 192.168.2.2
 tvheadend_username: 'svcTvh'
 tvheadend_password: '{{ vault_tvheadend_password }}' 
