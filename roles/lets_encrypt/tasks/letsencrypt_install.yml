@@ -1,0 +1,94 @@
+---
+# 
+# Let's Encrypt support for production CA
+#
+
+- name: install packages
+  include_role:
+    name: common
+    tasks_from: install_packages
+  vars:
+    packages: '{{ le_apt_packages }}'
+
+- name: clone dehydrated repo
+  git:
+    repo: '{{ le_dehydrated_repo }}'
+    dest: '{{ le_dehydrated_dest }}'
+  become: true
+
+- name: install godaddypy python module
+  pip:
+    name: godaddypy  
+  become: true
+ 
+- name: create godaddy api key file
+  ini_file:
+    path: '{{ le_dehydrated_dest }}/.gdkeys'
+    owner: '{{ le_web_user }}'
+    group: '{{ le_web_user }}'
+    mode: 0600
+    section: API
+    option: '{{ item.o }}'
+    value: '{{ item.v }}'
+  with_items:
+    - {o: 'key', v: '{{ le_godaddy_key }}'}
+    - {o: 'secret', v: '{{ le_godaddy_secret }}'} 
+  become: true
+
+- name: create domain list
+  lineinfile:
+    state: present
+    create: yes
+    path: '{{ le_dehydrated_dest }}/domains'
+    line: '{{ item }}'
+  with_items: '{{ le_domains }}'
+  become: true
+
+- name: copy godaddy dns hook script
+  copy:
+    src: godaddy.py
+    dest: '{{ le_dehydrated_dest }}'
+    owner: '{{ le_web_user }}'
+    group: '{{ le_web_user }}'
+    mode: 0755
+  become: true
+
+- name: copy dehydrated config files
+  template:
+    src: '{{ item }}'
+    dest: '{{ le_dehydrated_dest }}'
+    owner: '{{ le_web_user }}'
+    group: '{{ le_web_user }}'
+    mode: 0644
+  with_items:
+    - 'config.production'
+    - 'config.staging'
+  become: true
+
+- name: enable production Let's Encrypt CA
+  file:
+    state: link
+    src: '{{ le_dehydrated_dest }}/config.{{ le_install_type }}'
+    dest: '{{ le_dehydrated_dest }}/config'
+  become: true
+
+- name: setup cron job
+  cron:
+    name: Let's Encrypt daily certificate check
+    special_time: daily
+    job: '{{ le_dehydrated_dest }}/dehyrdrated -cron --accept-terms --config {{ le_dehydrated_dest }}/config --hook {{ le_dehydrated_dest }}/godaddy.py'
+  become: true
+
+- name: generate initial certificates
+  shell: '{{ le_dehydrated_dest }}/dehydrated --cron --accept-terms --config {{ le_dehydrated_dest }}/config --hook {{ le_dehydrated_dest }}/godaddy.py' 
+  args: 
+    creates: '{{ le_cert_out_directory }}/{{ le_domains[0] }}'
+  become: true
+  register: cert_gen
+  
+- name: restart apache
+  service:
+    name: apache2
+    state: restarted
+  become: true
+  when: cert_gen.changed

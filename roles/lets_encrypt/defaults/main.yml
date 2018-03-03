@@ -1,5 +1,11 @@
-install_type: production
-web_user: www-data
-dehydrated_dest: /etc/dehydrated
-dehydrated_repo: https://github.com/lukas2511/dehydrated.git
-cert_out_directory: /etc/apache2/ssl
+le_install_type: production
+le_web_user: www-data
+le_dehydrated_dest: /etc/dehydrated
+le_dehydrated_repo: https://github.com/lukas2511/dehydrated.git
+le_cert_out_directory: /etc/apache2/ssl
+le_apt_packages:
+  - python3-pip
+le_required_variables:
+  - le_godaddy_key
+  - le_godaddy_secret
+  - le_domains
