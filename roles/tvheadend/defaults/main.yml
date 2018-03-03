@@ -16,3 +16,4 @@ required_variables:
   - backup_path
   - zap2xml_username
   - zap2xml_password
+  

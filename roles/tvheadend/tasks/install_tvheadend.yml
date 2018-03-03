@@ -150,7 +150,7 @@
 - name: set epg cron jobs
   cron:
     name: 'update epg'
-    job: 'perl /home/{{ hts_user }}/.xmltv/zap2xml.pl -u {{ zap2xml_username }} -p {{ zap2xml_password }} -d 14 -L -A "new live" -D -c /home/{{ hts_user }}/.xmltv/cache -o /home/{{ hts_user }}/.xmltv/tv_grab_file.xmltv'
+    job: 'perl /home/{{ hts_user }}/.xmltv/zap2xml.pl -u {{ zap2xml_username }} -p {{ zap2xml_password }} -d 12 -L -A "new live" -D -c /home/{{ hts_user }}/.xmltv/cache -o /home/{{ hts_user }}/.xmltv/tv_grab_file.xmltv'
     user: '{{ hts_user }}'
     cron_file: 'update_epg'
     hour: '23'
