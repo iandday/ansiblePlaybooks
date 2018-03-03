@@ -3,62 +3,54 @@
 # roles/splunk_forwarder/tasks/install_splunk_forwarder.yml
 #
 
+- name: check if forwarder is installed
+  stat: 
+    path: '{{ uf_splunk_path }}'
+  register: splunk_path
+
 - name: copy UF installer
   copy:
-    src: '{{ role_path }}/files/{{ deb_file }}'
-    dest: '/tmp/{{ deb_file }}'
-  become: true
-  become_user: root
+    src: '{{ uf_deb_file }}'
+    dest: '/tmp/{{ uf_deb_file }}'
+  become: true  
 
 - name: install UF
   apt:
-    deb: '/tmp/{{ deb_file }}'
+    deb: '/tmp/{{ uf_deb_file }}'
   become: true
-  become_user: root
 
 - name: create splunk user
   user:
-    name: '{{ splunk_user }}'
+    name: '{{ uf_splunk_user }}'
     system: yes
-    groups: '{{ splunk_group }},{{ log_group }}'
+    groups: '{{ uf_splunk_group }},{{ log_group }}'
   become: true
-  become_user: root
 
 - name: change ownership of splunk directory
   file:
-    path: '{{ splunk_path }}'
-    owner: '{{ splunk_user }}'
-    group: '{{ splunk_group }}'
+    path: '{{ uf_splunk_path }}'
+    owner: '{{ uf_splunk_user }}'
+    group: '{{ uf_splunk_group }}'
     state: directory
     recurse: yes  
   become: true
-  become_user: root
-
-- name: change permissions for directory to be monitored
-  file:
-    path: '{{ item.directory }}'
-    state: directory
-    recurse: yes
-    mode: 0755
-  with_items:
-    - '{{ splunked_directories }}'
-  become: true
-  become_user: root
 
 - name: start splunk
-  shell: '{{ splunk_path }}/bin/splunk start --accept-license'
+  shell: '{{ uf_splunk_path }}/bin/splunk start --accept-license'
   become: true
-  become_user: '{{ splunk_user }}'
+  become_user: '{{ uf_splunk_user }}'
+  when: splunk_path.stat.exists == false
 
 - name: enable boot-start
-  shell: '{{ splunk_path }}/bin/splunk enable boot-start -user {{ splunk_user }}'
+  shell: '{{ uf_splunk_path }}/bin/splunk enable boot-start -user {{ uf_splunk_user }}'
   become: true
-  become_user: root
+  when: splunk_path.stat.exists == false
 
 - name: change forwarder admin credentials
-  shell: '{{ splunk_path }}/bin/splunk edit user admin -password {{ forwarder_password }} -auth admin:changeme'
+  shell: '{{ uf_splunk_path }}/bin/splunk edit user admin -password {{ uf_forwarder_password }} -auth admin:changeme'
   become: true
-  become_user: '{{ splunk_user }}'
+  become_user: '{{ uf_splunk_user }}'
+  when: splunk_path.stat.exists == false
 
 - name: configure forward-server
   blockinfile:
@@ -69,27 +61,32 @@
       defaultGroup = default-autolb-group
 
       [tcpout:default-autolb-group]
-      server = {{ server_host }}:{{ server_port }}
+      server = {{ uf_server_host }}:{{ uf_server_port }}
 
-      [tcpout-server://{{ server_host }}:{{ server_port }}]
+      [tcpout-server://{{ uf_server_host }}:{{ uf_server_port }}]
     marker: "# {mark} ANSIBLE MANAGED BLOCK"
   become: true
-  become_user: '{{ splunk_user }}'
+  become_user: '{{ uf_splunk_user }}'
+  register: splunk_output
 
 - name: add directories to monitor
   blockinfile:
-    path: '{{ splunk_path }}/etc/system/local/inputs.conf'
+    path: '{{ uf_splunk_path }}/etc/system/local/inputs.conf'
     create: yes
     block: |
       [monitor://{{ item.directory }}] 
       sourcetype={{ item.sourcetype }}
+      index={{ item.index }}
+      disabled = 0
     marker: '# {mark} ANSIBLE MANAGED BLOCK Monitoring directory: {{ item.directory }}'
   become: true
-  become_user: '{{ splunk_user }}'
+  become_user: '{{ uf_splunk_user }}'
   with_items: '{{ splunked_directories }}'
+  register: splunk_input
 
 - name: restart splunkd
-  shell: '{{ splunk_path }}/bin/splunk restart'
+  shell: '{{ uf_splunk_path }}/bin/splunk restart'
   become: true
-  become_user: '{{ splunk_user }}'
+  become_user: '{{ uf_splunk_user }}'
+  when: splunk_output.changed or splunk_input.changed
 

@@ -7,8 +7,12 @@
   include_vars: vault.yml
   no_log: true
 
-- name: check splunk variables
-  include_tasks: check_vars.yml
+- name: check for required variables
+  include_role: 
+    name: common
+    tasks_from: check_vars
+  vars:
+    req_vars: '{{ uf_required_variables }}'
 
 - name: start splunk install
   include_tasks: install_splunk_forwarder.yml
