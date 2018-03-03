@@ -9,6 +9,16 @@
     warn: no
   become: true
 
+- name: copy dpkg lock script
+  copy:
+    src: 'check_lock.sh'
+    dest: '/usr/local/bin/check_lock.sh'
+    mode: 'a+x'
+  become: true
+
+- name: wait for dpkg lock to release
+  shell: '/usr/local/bin/check_lock.sh'
+
 - name: install packages
   apt: 
     name: '{{ item }}' 

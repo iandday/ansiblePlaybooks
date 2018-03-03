@@ -3,7 +3,7 @@
 #  TvHeadend/Emby
 #
 
-- hosts: testHost
+- hosts: dvr
   gather_facts: false
   pre_tasks:
     - name: deploy new VM from template
@@ -32,13 +32,13 @@
         name: tvheadend
         tasks_from: restore_tvheadend
       vars:
-        tvh_backup: '20180214/tvheadend-20180214.tar.gz'
+        tvh_backup: '20180215/tvheadend-20180215.tar.gz'
     - name: restore emby backup
       include_role:
         name: emby
         tasks_from: restore_emby
       vars:
-        tvh_backup: '.tar.gz'
+        emby_backup: '20180215/emby-20180215.tar.gz'
     - name: reboot
       include_role:
         name: common
