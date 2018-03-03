@@ -1,5 +1,5 @@
 #vault password file
-.pass
+.cred
 
 # visual studio code
 .vscode/*
