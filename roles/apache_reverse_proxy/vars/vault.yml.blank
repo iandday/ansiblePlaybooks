@@ -3,8 +3,5 @@
 # roles/apache_reverse_proxy/vars/vault.yml
 #
 
-vault_ldap_url:
-vault_ldap_dn: 
-vault_ldap_password:
-vault_websites:
-  - {config_file: '', file_name: '', log_prefix: '', sub_domain: '', domain:  '{{ domain }}', target_host: ''}
+vault_apache_websites:
+  - {config_file: '', file_name: '', sub_domain: '', domain:  '{{ domain }}', target_host: ''}

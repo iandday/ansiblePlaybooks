@@ -7,8 +7,12 @@
   include_vars: vault.yml
   no_log: true
 
-- name: check required variables
-  import_tasks: check_vars.yml
+- name: check for required variables
+  include_role: 
+    name: common
+    tasks_from: check_vars
+  vars:
+    req_vars: '{{ apache_required_variables }}'
 
 - name: load apache reverse proxy install tasks
   import_tasks: apache_reverse_proxy_install.yml
