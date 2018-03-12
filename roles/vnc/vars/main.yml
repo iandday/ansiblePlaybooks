@@ -3,5 +3,9 @@
 # roles/vnc/vars/main.yml
 #
 
-apt_packages: 
- - 'x11vnc'
+vnc_tigervnc_deb: 'https://www.bintray.com/tigervnc/stable/download_file?file_path=ubuntu-16.04LTS%2Famd64%2Ftigervncserver_1.8.0-1ubuntu1_amd64.deb'
+vnc_apt_packages: 
+ - 'libglu1-mesa'  
+ - 'libtasn1-3-bin'
+vnc_vnc_port: 1
+vnc_client_res: '1920x1080'

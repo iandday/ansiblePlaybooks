@@ -3,6 +3,10 @@
 # roles/vnc/defaults/main.yml
 #
 
-required_variables: 
- - '{{ apt_packages }}'
- - '{{ vnc_password }}'
+vnc_required_variables: 
+ - vnc_apt_packages
+ - vnc_vnc_user 
+ - vnc_vnc_password
+ - vnc_tigervnc_deb
+ - vnc_vnc_port
+ - vnc_client_res

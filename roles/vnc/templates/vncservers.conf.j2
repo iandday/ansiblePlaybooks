@@ -1,0 +1,4 @@
+#{{ ansible_managed }}
+
+VNCSERVERS="{{ vnc_vnc_port }}:{{ vnc_vnc_user }}"
+VNCSERVERARGS[{{ vnc_vnc_port }}]="-geometry {{ vnc_client_res }}"
