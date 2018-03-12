@@ -40,14 +40,19 @@
   pip:
     name: requests
 
-- name: clone git repos
+- name: check if comskip is installed
+  stat:
+    path: /usr/local/bin/comskip
+  changed_when: false
+  register: comskip
+
+- name: clone comskip repo
   git:
-    repo: '{{ item }}'
-    dest: '/opt/{{ item|basename|splitext|first }}'
+    repo: '{{ comskip_repo }}'
+    dest: '/opt/{{ comskip_repo|basename|splitext|first }}'
     force: yes
-  with_items:
-    - '{{ git_repos }}'
   become: true
+  when: comskip.stat.exists == false
 
 - name: build Comskip
   command: '{{ item }}'
@@ -58,12 +63,28 @@
     - './configure'
     - 'make'
   become: true
+  when: comskip.stat.exists == false
 
 - name: install Comskip
   command: make install
   args:
     chdir: '/opt/Comskip'
   become: true
+  when: comskip.stat.exists == false
+
+- name: check if autoedit is installed
+  stat:
+    path: /usr/bin/autoedit
+  changed_when: false
+  register: autoedit
+
+- name: clone autoedit repos
+  git:
+    repo: '{{ autoedit_repo }}'
+    dest: '/opt/{{ autoedit_repo|basename|splitext|first }}'
+    force: yes
+  become: true
+  when: autoedit.stat.exists == false
 
 - name: set autoedit executable bit
   file:
@@ -71,10 +92,12 @@
     state: file
     mode: 'a+x'
   become: true
+  when: autoedit.stat.exists == false
 
 - name: build autoedit
   command: 'update-alternatives --install /usr/bin/autoedit autoedit /opt/autoedit/autoedit 100'
   become: true
+  when: autoedit.stat.exists == false
 
 - name: copy comskip ini file
   copy:
@@ -84,12 +107,14 @@
     owner: '{{ hts_user }}'
     group: '{{ hts_user }}'
   become: true
+  when: comskip.stat.exists == false
 
 - name: copy autoedit settings
   template:
     src: autoedit_settings.txt.j2
     dest: /opt/autoedit/settings.txt
   become: true
+  when: autoedit.stat.exists == false
 
 - name: copy removeEDL script
   template:
@@ -103,22 +128,28 @@
 - name: copy hdhomerun to m3u script
   template:
     src: hdhomerun-prime-listings-to-m3u.py.j2
-    dest: '/home/{{ hts_user }}/.hts/hdhomerun-prime-listings-to-m3u.py'
+    dest: "/home/{{ hts_user }}/.hts/hdhomerun-prime-listings-to-m3u-{{ item | regex_replace('\\.', '_') }}.py"
     owner: '{{ hts_user }}'
     group: '{{ hts_user }}'
+  with_items:
+    - '{{ homerun_ip }}'
   become: true
 
 - name: initial m3u script run
-  shell: 'python3 /home/{{ hts_user }}/.hts/hdhomerun-prime-listings-to-m3u.py > /home/{{ hts_user }}/.hts/prime.m3u'
+  shell: "python3 /home/{{ hts_user }}/.hts/hdhomerun-prime-listings-to-m3u-{{ item | regex_replace('\\.', '_') }}.py > /home/{{ hts_user }}/.hts/prime-{{ item | regex_replace('\\.', '_') }}.m3u"
+  with_items:
+    - '{{ homerun_ip }}'
   become: true
     
 - name: set m3u script cron job
   cron: 
     name: 'hdhomerun to m3u'
-    job: 'python3 /home/{{ hts_user }}/.hts/hdhomerun-prime-listings-to-m3u.py > /home/{{ hts_user }}/.hts/prime.m3u'
+    job: "python3 /home/{{ hts_user }}/.hts/hdhomerun-prime-listings-to-m3u-{{ item | regex_replace('\\.', '_') }}.py > /home/{{ hts_user }}/.hts/prime-{{ item | regex_replace('\\.', '_') }}.m3u"
     user: '{{ hts_user }}'
-    cron_file: 'backup_tvheadend'
+    cron_file: "update_channels_{{ item | regex_replace('\\.', '_') }} }}"
     special_time: daily
+  with_items:
+    - '{{ homerun_ip }}'
   become: true
 
 - name: create xmltv directory
@@ -146,15 +177,28 @@
     group: 'root'
     mode: 'a+x'
   become: true
-    
-- name: set epg cron jobs
+
+- name: copy epg update script
+  template:
+    src: update_epg.sh.j2
+    dest: /home/{{ hts_user }}/.hts/update_epg.sh
+    owner: '{{ hts_user }}'
+    group: '{{ hts_user }}'
+    mode: 'a+x'
+  become: true
+
+- name: set epg cron job
   cron:
     name: 'update epg'
-    job: 'perl /home/{{ hts_user }}/.xmltv/zap2xml.pl -u {{ zap2xml_username }} -p {{ zap2xml_password }} -d 12 -L -A "new live" -D -c /home/{{ hts_user }}/.xmltv/cache -o /home/{{ hts_user }}/.xmltv/tv_grab_file.xmltv'
+    job: '/bin/sh /home/{{ hts_user }}/.hts/update_epg.sh'
     user: '{{ hts_user }}'
     cron_file: 'update_epg'
     hour: '23'
     minute: '5'
+  become: true
+
+- name: initial epg grab 
+  command:  '/bin/sh /home/{{ hts_user }}/.hts/update_epg.sh'
   become: true
 
 - name: mount recordings directory
