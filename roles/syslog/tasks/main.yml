@@ -1,40 +1,34 @@
 ---
-#syslog
+#
+# roles/syslog/tasks/main.yml
+#
 
-- name: add syslog-ng signing key
-  apt_key:
-    url: "{{ syslog_key }}"
-    state: present
-    
-- name: add syslog repository to sources list
-  apt_repository:
-    repo: "{{ syslog_repo }}"
-    state: present
-    filename: 'syslog-ng'
-    
-- name: update apt cache and install required packages
-  apt: 
-    name: "{{ item }}"
-    state: present
-    update_cache: yes
-  with_items: "{{ apt_packages }}"
+- name: load common role variables
+  include_vars: '{{ playbook_dir }}/roles/common/vars/{{ item }}.yml'
+  with_items:
+    - main
+    - vault
+  no_log: true
+  
+- name: load vault variables
+  include_vars: vault.yml
+  no_log: true
 
-- name: copy syslog config file
-  template:
-    src: roles/syslog/templates/utm.conf.j2
-    dest: /etc/syslog-ng/conf.d/utm.conf
-    owner: root
-    group: root
-    mode: 0644
- 
-- name: mount log directory
-  mount: 
-    path: "{{ log_dir }}"
-    src: "{{ nfs_server }}:{{ nfs_path }}"
-    fstype: nfs 
-    state: mounted    
+- name: check for required variables
+  include_role: 
+    name: common
+    tasks_from: check_vars
+  vars:
+    req_vars: '{{ required_variables }}'
 
-- name: restart syslog-ng
-  service:
-    name: syslog-ng
-    state: restarted   
+- name: wait for response
+  wait_for_connection:
+    delay: 1
+    timeout: 300
+  delegate_to: localhost
+
+- name: start main play
+  include_tasks: install_syslog.yml
+
+
+
