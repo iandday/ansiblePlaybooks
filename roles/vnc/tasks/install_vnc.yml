@@ -8,26 +8,76 @@
     name: common
     tasks_from: install_packages
   vars:
-    packages: '{{ apt_packages }}'
+    packages: '{{ vnc_apt_packages }}'
 
-- name: Set vnc password
-  shell: 'x11vnc -storepasswd {{ vnc_password }} /etc/x11vnc.pass'
-  no_log: true
+- name: download tigervnc deb
+  apt:
+    deb: '{{ vnc_tigervnc_deb }}'
   become: true
 
-- name: install vnc service
+- name: get user details
+  getent:
+    database: passwd
+    key: '{{ vnc_vnc_user }}'
+
+- name: set user facts
+  set_fact:
+    uid: '{{ getent_passwd[vnc_vnc_user][1] }}'
+    gid:  '{{ getent_passwd[vnc_vnc_user][2] }}'
+    home: '{{ getent_passwd[vnc_vnc_user][4] }}'
+
+- name: create .vnc directory
+  file:
+    path: '/home/{{ vnc_vnc_user }}/.vnc'
+    owner: '{{ uid }}'
+    group: '{{ gid }}'
+    mode: '0755'
+    state: 'directory'
+  become: yes
+
+- name: set vnc password
+  shell: 'echo {{ vnc_vnc_password }} | vncpasswd -f > /home/{{ vnc_vnc_user }}/.vnc/passwd'
+  args:
+    executable: /bin/bash
+  become: true
+
+- name: secure vnc password file
+  file:
+    path: '/home/{{ vnc_vnc_user }}/.vnc/passwd'
+    owner: '{{ uid }}'
+    group: '{{ gid }}'
+    mode: 0600
+  become: true
+
+- name: copy xstartup file
   template:
-    src: 'x11vnc.service.j2'
-    dest: '/etc/systemd/system/x11vnc.service'
-    owner: 'root'
-    group: 'root'
-    mode: 'u=rwx,g=rx,o=rx'
+    src: 'xstartup.j2'
+    dest: '/home/{{ vnc_vnc_user }}/.vnc/xstartup'
+    mode: 0755
   become: true
 
-- name: start vnc at boot
+- name: copy vnc server config
+  template:
+    src: vncservers.conf.j2
+    dest: /etc/vncservers.conf
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+
+- name: copy system.d file
+  template:
+    src: vncserver.j2
+    dest: /etc/init.d/vncserver
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+
+- name: start vncserver at boot
   service:
-    name: x11vnc.service
+    name: vncserver
     enabled: yes
     state: started
   become: true
-
+  

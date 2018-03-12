@@ -178,4 +178,31 @@
   with_items:
     - '{{ git_repos }}'
   become: true
-  become_user: ian
+  become_user: '{{ ad_user }}'
+
+- name: create vscode directory
+  file:
+    path: '{{ home }}/.vscode'
+    owner: '{{ uid }}'
+    group: '{{ gid }}'
+    state: directory
+    mode: 'u=rwx,go=r'
+  become: true
+
+- name: create extensions directory
+  file:
+    path: '{{ home }}/.vscode/extensions'
+    state: directory
+    owner: '{{ uid }}'
+    group: '{{ gid }}'
+    mode: 'u=rwx,go='
+  become: true
+
+- name: install extensions
+  command: "code --install-extension '{{ item }}'"
+  with_items:
+    - '{{ dev_vscode_extensions }}'
+  become: true
+  become_user: '{{ uid }}'
+
+
