@@ -1,0 +1,13 @@
+# {{ ansible_managed }}
+
+{% for item in splunked_directories %}
+# Begin monitoring directory {{ item.directory }}
+
+[monitor://{{ item.directory }}] 
+sourcetype={{ item.sourcetype }}
+index={{ item.index }}
+recursive={{ item.recursive }}
+disabled = 0
+
+# End monitoring directory {{ item.directory }}
+{% endfor %}

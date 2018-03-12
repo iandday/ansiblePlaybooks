@@ -52,36 +52,22 @@
   become_user: '{{ uf_splunk_user }}'
   when: splunk_path.stat.exists == false
 
-- name: configure forward-server
-  blockinfile:
-    path: /opt/splunkforwarder/etc/system/local/outputs.conf
-    create: yes
-    block: |
-      [tcpout]
-      defaultGroup = default-autolb-group
-
-      [tcpout:default-autolb-group]
-      server = {{ uf_server_host }}:{{ uf_server_port }}
-
-      [tcpout-server://{{ uf_server_host }}:{{ uf_server_port }}]
-    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+- name: configure universal forwarder outputs
+  template: 
+    src: outputs.conf.j2
+    dest: '{{ uf_splunk_path }}/etc/system/local/outputs.conf'
+    owner: '{{ uf_splunk_user }}'
+    group: '{{ uf_splunk_group }}'
   become: true
-  become_user: '{{ uf_splunk_user }}'
   register: splunk_output
 
-- name: add directories to monitor
-  blockinfile:
-    path: '{{ uf_splunk_path }}/etc/system/local/inputs.conf'
-    create: yes
-    block: |
-      [monitor://{{ item.directory }}] 
-      sourcetype={{ item.sourcetype }}
-      index={{ item.index }}
-      disabled = 0
-    marker: '# {mark} ANSIBLE MANAGED BLOCK Monitoring directory: {{ item.directory }}'
+- name: configure universal forwarder inputs
+  template: 
+    src: inputs.conf.j2
+    dest: '{{ uf_splunk_path }}/etc/system/local/inputs.conf'
+    owner: '{{ uf_splunk_user }}'
+    group: '{{ uf_splunk_group }}'
   become: true
-  become_user: '{{ uf_splunk_user }}'
-  with_items: '{{ splunked_directories }}'
   register: splunk_input
 
 - name: restart splunkd
