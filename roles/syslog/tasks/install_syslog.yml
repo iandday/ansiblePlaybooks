@@ -1,0 +1,41 @@
+---
+#
+# roles/syslog/tasks/install_syslog.yml
+#
+    
+- name: install packages
+  include_role:
+    name: common
+    tasks_from: install_packages
+  vars:
+    packages: '{{ syslog_apt_packages }}'
+
+- name: copy syslog config file(s)
+  template:
+    src: '{{ item }}.j2'
+    dest: '/etc/syslog-ng/conf.d/{{ item }}'
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+   - '{{ syslog_config }}'
+  become: true
+  register: syslog_config
+
+- name: mount log directory
+  mount:
+    name: '{{ syslog_log_dir }}'
+    src:  '{{ syslog_share }}'
+    opts: 'username={{ syslog_service_username }},password={{ syslog_service_password }},domain=home,uid=root,gid=root'
+    fstype: 'cifs'
+    state: 'mounted'
+  no_log: true
+  become: true
+
+- name: restart syslog-ng
+  service:
+    name: syslog-ng
+    enabled: yes
+    state: restarted  
+  become: true
+  when: syslog_config.changed
