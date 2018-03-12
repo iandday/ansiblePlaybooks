@@ -14,6 +14,10 @@ required_variables:
   - tvheadend_password
   - recordings_share
   - backup_path
-  - zap2xml_username
-  - zap2xml_password
+  - zap2xml_username_cable
+  - zap2xml_password_cable
+  - zap2xml_username_ota
+  - zap2xml_password_ota
+  - comskip_repo
+  - autoedit_repo
   
