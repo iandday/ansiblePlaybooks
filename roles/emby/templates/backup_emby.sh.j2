@@ -11,5 +11,6 @@ day=$(date +%Y%m%d)
 /bin/mkdir "$dest/$day"
 
 /bin/tar -czf "$dest/$day/{{ backup_path }}-$day.tar.gz" $src
+ls -1tr | head -n -15 | xargs -d '\n' rm -rf --
 
 /usr/sbin/service emby-server start

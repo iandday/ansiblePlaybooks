@@ -3,7 +3,7 @@
 #  TvHeadend/Emby
 #
 
-- hosts: dvr
+- hosts: media
   gather_facts: false
   pre_tasks:
     - name: deploy new VM from template
@@ -24,7 +24,7 @@
         snapshot_details: "base snapshot after vm deployment from template"
         snapshot_name: "Pre Build" 
   roles:
-    - tvheadend
+   - tvheadend
     - emby 
   post_tasks:
     - name: restore tvheadend backup
