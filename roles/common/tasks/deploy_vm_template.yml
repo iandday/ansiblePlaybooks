@@ -10,6 +10,16 @@
     - main.yml
   no_log: true
 
+- name: check if vm exists
+  vmware_vm_facts:
+    hostname: '{{ vcenter_host }}'
+    username: '{{ vcenter_username }}'  
+    password: '{{ vcenter_password }}'
+    validate_certs: '{{ vcenter_validate }}'
+  delegate_to: localhost
+  register: vm_check
+  changed_when: false
+
 - name: Create a VM from a template
   vmware_guest:
     hostname: '{{ vcenter_host }}'
@@ -24,10 +34,12 @@
     networks: '{{ vcenter_lan_network }}'
   delegate_to: localhost
   register: deploy
+  when: inventory_hostname not in vm_check.virtual_machines
 
 - name: wait for vmtools to initialize
   pause:
     seconds: 30
+  when: inventory_hostname not in vm_check.virtual_machines
 
 - name: Change hostname and reboot
   vmware_vm_shell:
@@ -51,11 +63,13 @@
     - "apt-get install -y {{ common_packages }}"
     - "/sbin/reboot"
   delegate_to: localhost
+  when: inventory_hostname not in vm_check.virtual_machines
 
 - name: wait for reboot
   wait_for_connection:
     delay: 15
     timeout: 300
+  when: inventory_hostname not in vm_check.virtual_machines
 
 - name: Configure ntp service
   template:
@@ -63,6 +77,7 @@
     dest: /etc/ntp.conf
     backup: yes
   become: true
+  when: inventory_hostname not in vm_check.virtual_machines
 
 - name: start ntp service
   service:
@@ -70,3 +85,4 @@
     state: started
     enabled: yes
   become: true
+  when: inventory_hostname not in vm_check.virtual_machines

@@ -3,12 +3,18 @@
 # roles/common/takas/join_domain.yml
 #
 
+- name: check if already joined
+  shell: 'realm list | grep active-directory'
+  changed_when: False
+  register: domain_status
+
 - name: load variables
   include_vars: '{{ item }}'
   with_items:
     - vault.yml
     - main.yml
   no_log: true
+  when: 'domain_status.rc != 0'
 
 - name: install packages
   include_role:
@@ -16,16 +22,19 @@
     tasks_from: install_packages
   vars:
     packages: '{{ ad_packages }}'
+  when: 'domain_status.rc != 0'
 
 - name: Install pexpect
   pip: 
     name: pexpect
     state: present  
   become: true
+  when: 'domain_status.rc != 0'
 
 - name: discover realm
   command: /bin/bash -c '/usr/sbin/realm discover {{ domain }}'
   become: true
+  when: 'domain_status.rc != 0'
 
 - name: join domain
   expect:
@@ -34,6 +43,7 @@
       (?i)Password: '{{ domain_join_password }}'
   ignore_errors: yes
   become: true
+  when: 'domain_status.rc != 0'
 
 - name: add domain admins group to sudoers
   lineinfile: 
@@ -44,6 +54,7 @@
     regexp: '^%domain'
     validate: /usr/sbin/visudo -cf %s
   become: true
+  when: 'domain_status.rc != 0'
 
 - name: modify SSSD settings
   lineinfile:
@@ -54,6 +65,7 @@
     - {r: 'use_fully_qualifed_names = True', l: 'use_fully_qualified_names = False' }
     - {r: 'fallback_homedir = /home/%u@%d', l: 'fallback_homedir = /home/%u'}   
   become: true
+  when: 'domain_status.rc != 0'
 
 - name: enable creation of home directory for AD users 
   lineinfile:
@@ -61,15 +73,17 @@
     line: 'session    required    pam_mkhomedir.so skel=/etc/skel/ umask=0022'
     state: present
   become: true
+  when: 'domain_status.rc != 0'
 
 - name: reboot
   include_role:
     name: common
     tasks_from: reboot
+  when: 'domain_status.rc != 0'
 
 - name: wait for reboot
   wait_for_connection:
     delay: 15
     timeout: 300
   delegate_to: localhost
-
+  when: 'domain_status.rc != 0'
