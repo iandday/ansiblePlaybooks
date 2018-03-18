@@ -23,26 +23,27 @@
       vars:
         snapshot_details: "base snapshot after vm deployment from template"
         snapshot_name: "Pre Build" 
+      when: inventory_hostname not in vm_check.virtual_machines
   roles:
    - tvheadend
-    - emby 
+   - emby 
   post_tasks:
-    - name: restore tvheadend backup
-      include_role:
-        name: tvheadend
-        tasks_from: restore_tvheadend
-      vars:
-        tvh_backup: '20180215/tvheadend-20180215.tar.gz'
-    - name: restore emby backup
-      include_role:
-        name: emby
-        tasks_from: restore_emby
-      vars:
-        emby_backup: '20180215/emby-20180215.tar.gz'
-    - name: reboot
-      include_role:
-        name: common
-        tasks_from: reboot
+  #   - name: restore tvheadend backup
+  #     include_role:
+  #       name: tvheadend
+  #       tasks_from: restore_tvheadend
+  #     vars:
+  #       tvh_backup: '20180215/tvheadend-20180215.tar.gz'
+  #   - name: restore emby backup
+  #     include_role:
+  #       name: emby
+  #       tasks_from: restore_emby
+  #     vars:
+  #       emby_backup: '20180215/emby-20180215.tar.gz'
+  #   - name: reboot
+  #     include_role:
+  #       name: common
+  #       tasks_from: reboot
     - name: take post play snapshot
       include_role:
         name: common
@@ -50,3 +51,4 @@
       vars:  
         snapshot_details: "base snapshot after completion of ansible play"
         snapshot_name: "Post Build" 
+      when: inventory_hostname not in vm_check.virtual_machines
