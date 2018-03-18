@@ -17,6 +17,12 @@
     - '{{ package_repo }}'
   become: true
 
+- name: check if tvheadend is installed
+  command: "/usr/bin/dpkg-query --show --showformat='${db:Status-Status}\n' 'tvheadend'"
+  register: tvh_status
+  changed_when: false
+  become: true
+
 - name: set tvheadend admin credentials
   debconf: 
     name: tvheadend 
@@ -26,8 +32,11 @@
   with_items:
     - { q: 'tvheadend/admin_username', v: '{{ tvheadend_username }}' }
     - { q: 'tvheadend/admin_password', v: '{{ tvheadend_password }}' }
-  become: true
   no_log: true
+  become: true
+  when: tvh_status.stdout != 'installed'
+  notify:
+    - restart tvheadend
 
 - name: install packages
   include_role:
@@ -36,9 +45,21 @@
   vars:
     packages: '{{ apt_packages }}'
 
+- name: remove acl
+  ini_file:
+    path: '{{ tvh_initd_path }}'
+    section: null
+    option: TVH_ARGS 
+    value: '"--noacl"'
+    backup: yes
+  become: true
+  when: tvheadend_disable_acl|default(false)|bool
+
 - name: install requests module
   pip:
     name: requests
+    state: latest
+  become: true
 
 - name: check if comskip is installed
   stat:
@@ -137,6 +158,8 @@
 
 - name: initial m3u script run
   shell: "python3 /home/{{ hts_user }}/.hts/hdhomerun-prime-listings-to-m3u-{{ item | regex_replace('\\.', '_') }}.py > /home/{{ hts_user }}/.hts/prime-{{ item | regex_replace('\\.', '_') }}.m3u"
+  args:
+    creates: "/home/{{ hts_user }}/.hts/prime-{{ item | regex_replace('\\.', '_') }}.m3u"
   with_items:
     - '{{ homerun_ip }}'
   become: true
@@ -146,7 +169,7 @@
     name: 'hdhomerun to m3u'
     job: "python3 /home/{{ hts_user }}/.hts/hdhomerun-prime-listings-to-m3u-{{ item | regex_replace('\\.', '_') }}.py > /home/{{ hts_user }}/.hts/prime-{{ item | regex_replace('\\.', '_') }}.m3u"
     user: '{{ hts_user }}'
-    cron_file: "update_channels_{{ item | regex_replace('\\.', '_') }} }}"
+    cron_file: "update_channels_{{ item | regex_replace('\\.', '_') }}"
     special_time: daily
   with_items:
     - '{{ homerun_ip }}'
@@ -199,6 +222,8 @@
 
 - name: initial epg grab 
   command:  '/bin/sh /home/{{ hts_user }}/.hts/update_epg.sh'
+  args:
+    creates: '/home/{{ hts_user }}/.xmltv/tv_grab_file.xmltv'
   become: true
 
 - name: mount recordings directory
@@ -208,6 +233,12 @@
     opts: 'username={{ service_username }},password={{ service_password }},domain=home,uid={{ hts_user }},gid={{ hts_user }}'
     fstype: 'cifs'
     state: 'mounted'
+  become: true
+
+- name: check if backup directory is mounted
+  command: '/bin/mountpoint /mnt/backup_{{ backup_path }}'
+  register: tvh_backup_checked
+  changed_when: 'tvh_backup_checked.rc != 0'
   become: true
 
 - name: mount backup directory
@@ -220,6 +251,7 @@
     - path: '{{ backup_path }}'
     - uid: '{{ hts_user }}'
     - gid: '{{ hts_user }}'
+  when: tvh_backup_checked.stdout.find('is a mountpoint') == -1
 
 - name: copy backup script
   template:
@@ -244,11 +276,3 @@
     tasks_from: rotate_backups
   vars:
     - cron_user: '{{ hts_user }}'
-
-- name: restart tvheadend
-  service:
-    name: 'tvheadend'
-    state: 'restarted'
-  become: true
-
-

@@ -1,0 +1,10 @@
+---
+#
+# roles/tvheadend/handlers/main.yml
+#
+
+  - name: restart tvheadend
+    service:
+      name: tvheadend
+      state: restarted
+    become: true

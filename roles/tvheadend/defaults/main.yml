@@ -20,4 +20,4 @@ required_variables:
   - zap2xml_password_ota
   - comskip_repo
   - autoedit_repo
-  
+tvh_initd_path: '/etc/default/tvheadend'
