@@ -25,6 +25,8 @@
     tasks_from: install_packages
   vars:
     packages: '{{ apt_packages }}'
+  notify:
+    - restart tvheadend
 
 - name: mount media share
   mount: 
@@ -36,6 +38,12 @@
   become: true
   no_log: true
 
+- name: check if backup directory is mounted
+  command: '/bin/mountpoint /mnt/backup_{{ backup_path }}'
+  register: emby_backup_checked
+  changed_when: 'emby_backup_checked.rc != 0'
+  become: true
+
 - name: mount backup directory
   include_role:
     name: common
@@ -46,6 +54,7 @@
     - path: '{{ backup_path }}'
     - uid: '{{ emby_user }}'
     - gid: '{{ emby_user }}'
+  when: emby_backup_checked.stdout.find('is a mountpoint') == -1
 
 - name: copy backup script
   template:
@@ -70,9 +79,3 @@
     tasks_from: rotate_backups
   vars:
     - cron_user: '{{ emby_user }}'
-
-- name: restart emby
-  service:
-    name: emby-server
-    state: restarted
-  become: true

@@ -1,6 +1,6 @@
 ---
 #
-# roles/tvheadend/tasks/restore_emby.yml
+# roles/emby/tasks/restore_emby.yml
 #
 
 - name: stop emby
