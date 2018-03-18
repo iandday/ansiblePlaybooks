@@ -15,7 +15,7 @@
     name: 'Backup rotation - {{ backup_path|basename }}'
     job: '/usr/local/bin/rotate_backups_{{ backup_path|basename }}.sh'
     user: '{{ cron_user }}'
-    cron_file: 'roate_backups_{{ cron_user }}'
+    cron_file: 'rotate_backups_{{ cron_user }}'
     hour: '3'
     minute: '15'
   become: true
