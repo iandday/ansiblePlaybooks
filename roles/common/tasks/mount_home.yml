@@ -13,18 +13,18 @@
 - name: get user details
   getent:
     database: passwd
-    key: '{{ cifs_user }}'
+    key: '{{ ad_user }}'
 
 - name: get network home path
-  shell: "ldapsearch -x -h {{ domain_controller }} -D {{ domain_join_user }}@{{ workgroup }} -w {{ domain_join_password }} -b '{{ cifs_dn }}' homeDirectory | grep homeDirectory: | awk -F ' ' '{print $2}'"
+  shell: "ldapsearch -x -h {{ domain_controller }} -D {{ domain_join_user }}@{{ workgroup }} -w {{ domain_join_password }} -b '{{ ad_user_dn }}' homeDirectory | grep homeDirectory: | awk -F ' ' '{print $2}'"
   no_log: true
   register: network_home_path
 
 - name: mount home directory
   mount: 
     src: '{{ network_home_path.stdout }}' 
-    path: '{{ getent_passwd[cifs_user][4]}}'
+    path: '{{ network_home_mount }}'
     state: 'mounted' 
     fstype: 'cifs' 
-    opts: 'domain={{ workgroup|upper }},username={{ cifs_user }},password={{ cifs_password }},uid={{ getent_passwd[cifs_user][1] }},gid={{ getent_passwd[cifs_user][2] }},file_mode=0777,dir_mode=0777'
+    opts: 'domain={{ workgroup|upper }},username={{ ad_user }},password={{ ad_user_password }},uid={{ getent_passwd[ad_user][1] }},gid={{ getent_passwd[ad_user][2] }},file_mode=0777,dir_mode=0777'
   become: true

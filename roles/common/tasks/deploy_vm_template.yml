@@ -31,6 +31,7 @@
     state: poweredon
     template: '{{ vcenter_vmtemplate }}'
     datacenter: '{{ vcenter_datacenter }}'
+    esxi_hostname: 10.168.1.117
     networks: '{{ vcenter_lan_network }}'
   delegate_to: localhost
   register: deploy
