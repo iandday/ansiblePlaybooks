@@ -82,16 +82,11 @@
   become: true
 
 - name: set bash aliases
-  lineinfile:
-    path: '{{ home }}/.bashrc'
-    line: "alias {{ item.name }}='{{ item.command }}'"
-    mode: 0600
-    state: present
-    create: yes
+  template:
+    src: .bash_aliases.j2
+    dest: '{{ home }}/.bash_aliases'
     owner: '{{ uid }}'
     group: '{{ gid }}'
-  with_items:
-    - '{{ aliases }}'
   become: true  
 
 - name: create git options file
@@ -125,22 +120,24 @@
     - '{{ git_ignore }}'
   become: true
 
-- name: create git repo directory
+- name: create directories
   file:
-    path: '{{ home }}/git'
+    path: '{{ item }}'
     state: directory
     owner: '{{ uid }}'
     group: '{{ gid }}'
+  with_items:
+    - '{{ home }}/.ssh'
+    - '{{ home }}/homeDrive'
+    - /mnt/home
   become: true 
 
-- name: create ssh key directory
-  file:
-    path: '{{ home }}/.ssh'
-    mode: 0700
-    state: directory
-    owner: '{{ uid }}'
-    group: '{{ gid }}'
-  become: true  
+- name: mount homedrive
+  include_role:
+    name: common
+    tasks_from: mount_home
+  vars:
+    network_home_mount: '{{home }}/homeDrive'
 
 - name: set git ssh options
   template: 
@@ -169,16 +166,16 @@
     group: '{{ gid }}'
   become: true
 
-- name: clone git repos
-  git:
-    repo: '{{ item }}'
-    dest: "{{ home }}/git/{{ item|basename|splitext|first }}"
-    key_file: '{{ home }}/.ssh/id_rsa-Github'
-    ssh_opts: '-o StrictHostKeyChecking=no'
+- name: set symlinks
+  file:
+    src: '{{ item.s }}'
+    dest: '{{ item.d }}'
+    state: link
+    owner: '{{ uid }}'
+    group: '{{ gid }}'
   with_items:
-    - '{{ git_repos }}'
+    - '{{ dev_symlinks }}'
   become: true
-  become_user: '{{ ad_user }}'
 
 - name: create vscode directory
   file:
@@ -202,7 +199,7 @@
   command: "code --install-extension '{{ item }}'"
   with_items:
     - '{{ dev_vscode_extensions }}'
+  register: code_install_status
+  changed_when: "not code_install_status.stdout|search('is already installed')"
   become: true
-  become_user: '{{ uid }}'
-
-
+  become_user: '{{ ad_user }}'

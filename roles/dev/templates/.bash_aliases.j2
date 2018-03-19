@@ -1,0 +1,4 @@
+# {{ ansible_managed }}
+alias ansible-vault='ansible-vault --vault-password-file ~/.ansibleCredential'
+alias ansible-playbook='ansible-playbook  --vault-password-file ~/.ansibleCredential --inventory-file inventory/hosts.yml --private-key ~/.ssh/id_rsa-Ansible'
+alias check-vault='for filename in $(find . -name "vault.yml"); do echo $filename $(head -n 1 $filename); done'

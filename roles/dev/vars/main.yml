@@ -42,10 +42,6 @@ apt_packages:
 pip_packages:
   - pyvmomi
   - twine
-aliases:
-  - {name: 'ansible-vault', command: 'ansible-vault --vault-password-file ~/.ansibleCredential' }
-  - {name: 'ansible-playbook', command: 'ansible-playbook  --vault-password-file ~/.ansibleCredential --inventory-file inventory/hosts.yml --private-key ~/.ssh/id_rsa-Ansible' }
-  - {name: 'check-vault', command: 'for filename in $(find . -name "vault.yml"); do echo $filename $(head -n 1 $filename); done'}
 ansible_credential: '{{ vault_ansible_credential }}'
 git_name: 'Ian Day'
 git_email: 'ian236day@gmail.com'
@@ -56,11 +52,11 @@ git_repos:
   - 'ssh://git@github.com/iandday/hassConfig.git'
 dev_vscode_extensions:
   - ms-python.python
-  - njpwerner.autodocstring
   - vscoss.vscode-ansible
   - dhoeric.ansible-vault
   - eamodio.gitlens
   - ms-vscode.PowerShell
   - yzhang.markdown-all-in-one
   - ionutvmi.path-autocomplete
-
+dev_symlinks:
+  - { s: '{{home }}/homeDrive/git' , d: '{{home }}/git' }

@@ -34,12 +34,11 @@ git_ignore:
   - 'Thumbs.db'
   - '*.lock'
   - 'package-lock.json'
-required_variables:
+dev_required_variables:
   - package_key
   - package_repo
   - apt_packages
   - ad_user
-  - aliases
   - ansible_credential
   - git_name
   - git_email
