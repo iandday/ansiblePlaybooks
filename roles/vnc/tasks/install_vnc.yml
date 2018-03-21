@@ -39,6 +39,8 @@
   shell: 'echo {{ vnc_vnc_password }} | vncpasswd -f > /home/{{ vnc_vnc_user }}/.vnc/passwd'
   args:
     executable: /bin/bash
+    creates: '/home/{{ vnc_vnc_user }}/.vnc/passwd'
+  notify: restart vnc
   become: true
 
 - name: secure vnc password file
@@ -54,6 +56,7 @@
     src: 'xstartup.j2'
     dest: '/home/{{ vnc_vnc_user }}/.vnc/xstartup'
     mode: 0755
+  notify: restart vnc
   become: true
 
 - name: copy vnc server config
@@ -63,6 +66,7 @@
     owner: root
     group: root
     mode: '0755'
+  notify: restart vnc
   become: true
 
 - name: copy system.d file
@@ -72,12 +76,13 @@
     owner: root
     group: root
     mode: '0755'
+  notify: restart vnc
   become: true
 
 - name: start vncserver at boot
   service:
     name: vncserver
     enabled: yes
-    state: started
+  notify: restart vnc
   become: true
   

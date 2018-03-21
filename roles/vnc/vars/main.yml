@@ -8,4 +8,4 @@ vnc_apt_packages:
  - 'libglu1-mesa'  
  - 'libtasn1-3-bin'
 vnc_vnc_port: 1
-vnc_client_res: '1920x1080'
+vnc_client_res: '3440x1440'

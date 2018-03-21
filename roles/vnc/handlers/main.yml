@@ -1,0 +1,10 @@
+---
+#
+# roles/vnc/handlers/main.yml
+#
+
+  - name: restart vnc
+    service:
+      name: vncserver
+      state: restarted
+    become: true
