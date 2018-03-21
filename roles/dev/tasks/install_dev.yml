@@ -137,7 +137,7 @@
     name: common
     tasks_from: mount_home
   vars:
-    network_home_mount: '{{home }}/homeDrive'
+    network_home_mount: '{{ home }}/homeDrive'
 
 - name: set git ssh options
   template: 

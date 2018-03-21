@@ -25,17 +25,17 @@
         snapshot_name: "Pre Build" 
       when: inventory_hostname not in vm_check.virtual_machines
   roles:
-    - dev
-    #- vnc
-  # post_tasks:
-  #   - name: reboot
-  #     include_role:
-  #       name: common
-  #       tasks_from: reboot
-    # - name: take post play snapshot
-    #   include_role:
-    #     name: common
-    #     tasks_from: snapshot
-    #   vars:  
-    #     snapshot_details: "base snapshot after completion of ansible play"
-    #     snapshot_name: "Post Build" 
+  - dev
+  - vnc
+  post_tasks:
+    - name: reboot
+      include_role:
+        name: common
+        tasks_from: reboot
+    - name: take post play snapshot
+      include_role:
+        name: common
+        tasks_from: snapshot
+      vars:  
+        snapshot_details: "base snapshot after completion of ansible play"
+        snapshot_name: "Post Build" 

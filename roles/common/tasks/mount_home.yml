@@ -15,6 +15,15 @@
     database: passwd
     key: '{{ ad_user }}'
 
+- name: create credential file
+  template:
+    src: '.smbcredential.j2'
+    dest: '/home/{{ ad_user }}/.smbcredential'
+    mode: 0600
+    owner: '{{ getent_passwd[ad_user][1] }}'
+    group: '{{ getent_passwd[ad_user][2] }}'
+  become: true
+
 - name: get network home path
   shell: "ldapsearch -x -h {{ domain_controller }} -D {{ domain_join_user }}@{{ workgroup }} -w {{ domain_join_password }} -b '{{ ad_user_dn }}' homeDirectory | grep homeDirectory: | awk -F ' ' '{print $2}'"
   no_log: true
@@ -26,5 +35,5 @@
     path: '{{ network_home_mount }}'
     state: 'mounted' 
     fstype: 'cifs' 
-    opts: 'domain={{ workgroup|upper }},username={{ ad_user }},password={{ ad_user_password }},uid={{ getent_passwd[ad_user][1] }},gid={{ getent_passwd[ad_user][2] }},file_mode=0777,dir_mode=0777'
+    opts: 'credentials=/home/{{ ad_user }}/.smbcredential,uid={{ getent_passwd[ad_user][1] }},gid={{ getent_passwd[ad_user][2] }},iocharset=utf8,file_mode=0770,dir_mode=0770'
   become: true
