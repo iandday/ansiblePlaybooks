@@ -40,10 +40,6 @@
   #       tasks_from: restore_emby
   #     vars:
   #       emby_backup: '20180215/emby-20180215.tar.gz'
-  #   - name: reboot
-  #     include_role:
-  #       name: common
-  #       tasks_from: reboot
     - name: take post play snapshot
       include_role:
         name: common
