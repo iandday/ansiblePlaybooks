@@ -1,0 +1,10 @@
+---
+#
+# roles/syslog/handlers/main.yml
+#
+
+  - name: restart syslog
+    service:
+      name: syslog-ng
+      state: restarted
+    become: true

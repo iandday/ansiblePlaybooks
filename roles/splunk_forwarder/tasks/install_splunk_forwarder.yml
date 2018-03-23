@@ -12,11 +12,13 @@
   copy:
     src: '{{ uf_deb_file }}'
     dest: '/tmp/{{ uf_deb_file }}'
+  when: splunk_path.stat.exists == false
   become: true  
 
 - name: install UF
   apt:
     deb: '/tmp/{{ uf_deb_file }}'
+  when: splunk_path.stat.exists == false
   become: true
 
 - name: create splunk user
@@ -58,8 +60,8 @@
     dest: '{{ uf_splunk_path }}/etc/system/local/outputs.conf'
     owner: '{{ uf_splunk_user }}'
     group: '{{ uf_splunk_group }}'
+  notify: restart splunk
   become: true
-  register: splunk_output
 
 - name: configure universal forwarder inputs
   template: 
@@ -67,12 +69,5 @@
     dest: '{{ uf_splunk_path }}/etc/system/local/inputs.conf'
     owner: '{{ uf_splunk_user }}'
     group: '{{ uf_splunk_group }}'
+  notify: restart splunk
   become: true
-  register: splunk_input
-
-- name: restart splunkd
-  shell: '{{ uf_splunk_path }}/bin/splunk restart'
-  become: true
-  become_user: '{{ uf_splunk_user }}'
-  when: splunk_output.changed or splunk_input.changed
-

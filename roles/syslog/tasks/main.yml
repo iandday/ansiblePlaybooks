@@ -19,7 +19,7 @@
     name: common
     tasks_from: check_vars
   vars:
-    req_vars: '{{ required_variables }}'
+    req_vars: '{{ syslog_required_variables }}'
 
 - name: wait for response
   wait_for_connection:

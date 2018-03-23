@@ -19,23 +19,18 @@
     mode: 0644
   with_items:
    - '{{ syslog_config }}'
+  notify: restart syslog
   become: true
-  register: syslog_config
 
 - name: mount log directory
-  mount:
-    name: '{{ syslog_log_dir }}'
-    src:  '{{ syslog_share }}'
-    opts: 'username={{ syslog_service_username }},password={{ syslog_service_password }},domain=home,uid=root,gid=root'
-    fstype: 'cifs'
-    state: 'mounted'
-  no_log: true
-  become: true
-
-- name: restart syslog-ng
-  service:
-    name: syslog-ng
-    enabled: yes
-    state: restarted  
-  become: true
-  when: syslog_config.changed
+  include_role:
+    name: common
+    tasks_from: mount_share
+  vars:
+    mount_src:  '{{ syslog_share }}'
+    mount_dest: '{{ syslog_log_dir }}'
+    mount_username: '{{ syslog_service_username }}'
+    mount_password: '{{ syslog_service_password }}'
+    mount_domain: '{{ domain }}'
+    mount_uid: root
+    mount_gid: root
