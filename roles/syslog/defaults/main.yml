@@ -3,7 +3,8 @@
 # roles/syslog/defaults/main.yml
 #
 
-required_variables:
+log_group: syslog
+syslog_required_variables:
   - syslog_apt_packages
   - syslog_config
   - syslog_pfsense_receive_port

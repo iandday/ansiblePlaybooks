@@ -6,10 +6,4 @@
 syslog_apt_packages: 
   - syslog-ng-core
   - cifs-utils
-syslog_config:
-  - pfsense.conf
-syslog_pfsense_receive_port: 5514
 syslog_log_dir: /var/log/syslog-ng/
-syslog_share: //FREENAS/syslog
-syslog_service_password: '{{ vault_syslog_service_password }}'  
-syslog_service_username: 'svcSyslog'
