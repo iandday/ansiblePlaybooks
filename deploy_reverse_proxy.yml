@@ -23,6 +23,7 @@
       vars:
         snapshot_details: "base snapshot after vm deployment from template"
         snapshot_name: "Pre Build" 
+      when: inventory_hostname not in vm_check.virtual_machines
   roles:
     - apache_reverse_proxy 
     - lets_encrypt
