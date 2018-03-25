@@ -1,0 +1,17 @@
+---
+#
+# roles/hass/handlers/main.yml
+#
+
+  - name: restart hass
+    service:
+      name: home-assistant@homeassistant.service
+      state: restarted
+    notify: restart appdaemon
+    become: true
+
+  - name: restart appdaemon
+    service:
+      name: appdaemon@appdaemon.service
+      state: restarted
+    become: true

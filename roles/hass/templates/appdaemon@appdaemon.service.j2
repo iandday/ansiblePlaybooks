@@ -1,0 +1,13 @@
+# {{ ansible_managed }}
+
+[Unit]
+Description=AppDaemon
+After=home-assistant@homeassistant.service
+
+[Service]
+Type=simple
+User=%1
+ExecStart=/usr/local/bin/appdaemon -c {{ hass_config_dir }}
+
+[Install]
+WantedBy=multi-user.target

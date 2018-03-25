@@ -1,29 +1,36 @@
 ---
 # Home Assistant
+
 - hosts: testHost
-  vars:
-    snapshot_details: "snapshot after install and initial start"
-    hostname: test1
-    vm_name: test1
-    snapshot_name: "Clean Home Assistant"
-  become: true
+  gather_facts: false
   pre_tasks: 
-  - name: apt update/upgrade
-    include_role:
-      name: common
-      tasks_from: initial_update
-  - name: change hostname
-    include_role:
-      name: common
-      tasks_from: hostname
+    - name: deploy new VM from template
+      include_role: 
+        name: common
+        tasks_from: deploy_vm_template
+    - name: gather facts
+      setup:
+    - name: join domain
+      include_role: 
+        name: common
+        tasks_from: join_domain
+    - name: take clean snapshot
+      include_role:
+        name: common
+        tasks_from: snapshot
+      vars:
+        snapshot_details: "base snapshot after vm deployment from template"
+        snapshot_name: "Pre Build" 
+      when: inventory_hostname not in vm_check.virtual_machines
   roles:
     - hass
-    - cifsServer
+    - cifs_server
   post_tasks:
-  - name: take clean snapshot
-    include_role:
-      name: common
-      tasks_from: snapshot
-  
-  - name: reboot the server
-    command: /sbin/reboot
+    - name: take post build snapshot
+      include_role:
+        name: common
+        tasks_from: snapshot
+      vars:
+        snapshot_details: 'base snapshot after completion of ansible play'
+        snapshot_name: 'Post Build' 
+      when: inventory_hostname not in vm_check.virtual_machines

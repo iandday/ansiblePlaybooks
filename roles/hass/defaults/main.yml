@@ -1,0 +1,14 @@
+hass_required_variables:
+  -  hass_service_username 
+  - hass_service_password
+hass_user: 'homeassistant'
+hass_apt_packages: 
+  - cifs-utils
+  - libudev-dev
+  - python3.6
+  - python3.6-dev
+  - python3.6-venv
+hass_package_repo:
+  - ppa:jonathonf/python-3.6
+hass_config_dir: '/home/{{ hass_user }}/.homeassistant'
+hass_install_dir: '/srv/homeassistant/'

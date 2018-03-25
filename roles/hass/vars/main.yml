@@ -1,16 +1,12 @@
 ---
 # roles/hass/vars/main.yml
 
-hass_user: 'homeassistant'
-config_dir: '/home/{{ hass_user }}/.homeassistant'
-install_dir: '/srv/homeassistant/'
-backup_dir: '/mnt/backup'
-apt_packages: 
-    - python3-pip
-    - python3-dev
-    - cifs-utils
-    - libudev-dev
+hass_backup_path: 'hass'
+hass_service_username: 'svcHASS'
+hass_service_password: '{{ vault_hass_service_password }}'
+
 cifs_user: '{{ hass_user }}'
-cifs_password: '{{ vault_cifs_password }}'
-cifs_path: '{{ config_dir }}'
-cifs_comments: HASS Config    
+cifs_password: '{{ vault_hass_cifs_password }}'
+cifs_path: '{{ hass_config_dir }}'
+cifs_comments: HASS Config
+
