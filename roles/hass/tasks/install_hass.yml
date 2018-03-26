@@ -18,17 +18,8 @@
   vars:
     packages: '{{ hass_apt_packages }}'
 
-- name: link python3.6 to python3
-  file:
-    src: /usr/bin/python3.6
-    dest: /usr/local/bin/python3
-    state: link
-  become: true
-
-- name: install venv
-  pip: 
-    name: virtualenv
-    state: latest
+- name: install venv in python 3.6
+  shell: 'python3.6 -m pip install virtualenv'
   become: true
 
 - name: create homeassistant group
@@ -60,6 +51,7 @@
   pip: 
     name: '{{ item }}'
     virtualenv: '{{ hass_install_dir }}'
+    virtualenv_python: '/usr/bin/python3.6'
     state: latest
   with_items:
     - 'homeassistant'
@@ -95,8 +87,25 @@
     - 'git remote add origin https://github.com/iandday/hassConfig.git'
     - 'git fetch'
     - 'git checkout -f -t origin/master'
+  notify: restart hass
   become: yes
   become_user: '{{ hass_user }}'
+
+- name: decrypt encrypted config files
+  copy:
+    src: '{{ hass_config_dir }}/{{ item }}.vault'
+    dest: '{{ hass_config_dir }}/{{ item }}'
+    owner: '{{ hass_user}}'
+    group: '{{ hass_user}}'
+    remote_src: yes
+    force: no
+    decrypt: yes
+  with_items:
+    - secrets.yaml
+    - phue.conf
+    - ecobee.conf
+  notify: restart hass
+  become: true
 
 - name: create backup directory mount path
   file:
@@ -107,7 +116,7 @@
 - name: check if backup directory is mounted
   command: '/bin/mountpoint /mnt/backup_{{ hass_backup_path }}'
   register: hass_backup_checked
-  ignore_errors: yes
+  ignore_errors: true
   changed_when: 'hass_backup_checked.rc != 0'
   become: true
 
@@ -137,7 +146,7 @@
  
 - name: enable autostart
   service:
-    name: home-assistant@homeassistant
+    name: '{{ item }}'
     enabled: yes
     state: started
   with_items:

@@ -10,10 +10,6 @@
         tasks_from: deploy_vm_template
     - name: gather facts
       setup:
-    - name: join domain
-      include_role: 
-        name: common
-        tasks_from: join_domain
     - name: take clean snapshot
       include_role:
         name: common

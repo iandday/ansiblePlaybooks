@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# {{ ansible_managed }}
+# backup script for {{ hass_backup_path }}
+
+/usr/sbin/service home-assistant@homeassistant.service stop
+
+src="{{ hass_config_dir }}"
+dest="/mnt/backup_{{ hass_backup_path }}"
+day=$(date +%Y%m%d)
+
+/bin/mkdir "$dest/$day"
+
+/bin/tar -czf "$dest/$day/{{ hass_backup_path }}-$day.tar.gz" $src
+
+/usr/sbin/service home-assistant@homeassistant.service start
