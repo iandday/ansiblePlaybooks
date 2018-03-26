@@ -1,9 +1,0 @@
----
-# roles/cifsServer/vars/main.yml
-
-cifs_server_workgroup: home.ianday.me
-required_cifs_pkgs:
-  - samba
-  - samba-common
-  - system-config-samba
-  - libpam-winbind

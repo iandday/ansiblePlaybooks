@@ -1,0 +1,15 @@
+---
+#
+# roles/cifs_server/defaults/main.yml
+#
+
+cifs_server_required_variables:
+  - cifs_user
+  - cifs_password
+  - cifs_path
+  - cifs_comments
+cifs_server_apt_pkgs:
+  - samba
+  - samba-common
+  - system-config-samba
+  - libpam-winbind

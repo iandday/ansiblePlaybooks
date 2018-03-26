@@ -1,0 +1,31 @@
+---
+#
+# roles/cifsServer/tasks/main.yml
+#
+
+- name: install packages
+  include_role:
+    name: common
+    tasks_from: install_packages
+  vars:
+    packages: '{{ cifs_server_apt_pkgs }}'
+
+- name: copy config file
+  template: 
+    src: smb.conf.j2 
+    dest: /etc/samba/smb.conf
+  notify: restart cifs
+  become: yes
+
+- name: Create password for samba users
+  shell: '(echo  {{ cifs_password }}; echo {{ cifs_password }}) | smbpasswd -s -a {{ cifs_user }}'
+  register: create_user_output
+  changed_when: "'Added user' in create_user_output.stdout"
+  become: yes
+
+- name: start samba at boot.
+  service:
+    name: smbd
+    enabled: yes
+    state: started
+  become: yes
