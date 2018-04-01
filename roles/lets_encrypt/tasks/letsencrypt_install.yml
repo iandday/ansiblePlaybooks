@@ -76,7 +76,7 @@
   cron:
     name: Let's Encrypt daily certificate check
     special_time: daily
-    job: '{{ le_dehydrated_dest }}/dehyrdrated -cron --accept-terms --config {{ le_dehydrated_dest }}/config --hook {{ le_dehydrated_dest }}/godaddy.py'
+    job: '{{ le_dehydrated_dest }}/dehydrated --cron --accept-terms --config {{ le_dehydrated_dest }}/config --hook {{ le_dehydrated_dest }}/godaddy.py'
   become: true
 
 - name: generate initial certificates

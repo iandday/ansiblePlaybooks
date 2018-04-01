@@ -1,6 +1,3 @@
-#vault password file
-.cred
-
 # visual studio code
 .vscode/*
 !.vscode/settings.json

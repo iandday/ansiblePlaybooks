@@ -109,9 +109,13 @@ def main(argv):
         'exit_hook'       : exit_hook,
         'startup_hook'    : startup_hook,
     }
-    logger.info(" + Godaddy hook executing: {0}".format(argv[0]))
-    ops[argv[0]](argv[1:])
-
+    
+    opname = argv[0]
+    if opname not in ops:
+        return
+    else:
+        logger.info(" + Godaddy hook executing: {0}".format(opname))
+        ops[opname](argv[1:])
 
 if __name__ == '__main__':
     main(sys.argv[1:])
