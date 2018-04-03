@@ -10,6 +10,7 @@
       include_role: 
         name: common
         tasks_from: deploy_vm_template
+      when: inventory_hostname not in vm_check.virtual_machines
     - name: gather facts
       setup:
     - name: join domain
