@@ -5,7 +5,10 @@ le_dehydrated_repo: https://github.com/lukas2511/dehydrated.git
 le_cert_out_directory: /etc/apache2/ssl
 le_apt_packages:
   - python3-pip
+  - incron
 le_required_variables:
   - le_godaddy_key
   - le_godaddy_secret
   - le_domains
+le_incron_daemon: incron
+le_incron_config_dir: '/etc/incron.d/'

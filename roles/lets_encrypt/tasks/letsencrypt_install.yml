@@ -84,11 +84,36 @@
   args: 
     creates: '{{ le_cert_out_directory }}/{{ le_domains[0] }}'
   become: true
-  register: cert_gen
-  
-- name: restart apache
+  notify: restart apache
+
+- name: enable autostart and start incron
   service:
-    name: apache2
-    state: restarted
+    name: '{{ le_incron_daemon }}'
+    state: started
+    enabled: yes
   become: true
-  when: cert_gen.changed
+
+- name: create ssl watch directory
+  file:
+    path: '{{ le_cert_out_directory }}/watch'
+    state: directory
+  become: true
+
+- name: link all certs to watch directory
+  file:
+    src: '{{ le_cert_out_directory }}/{{ item }}/fullchain.pem'
+    dest: '{{ le_cert_out_directory }}/watch/{{ item }}.pem'
+    state: link
+  with_items:
+    - '{{ le_domains }}'  
+  become: true
+  notify: restart incron
+
+- name: configure cert watcher
+  template:
+    src: incrontab.j2
+    dest: '{{ le_incron_config_dir }}/{{ item.name }}'
+  with_items:
+    - { name: apacheCert, path: '{{ le_cert_out_directory }}/watch', mask: 'IN_MODIFY', command: '/usr/sbin/service apache2 restart' }
+  become: true
+  notify: restart incron
