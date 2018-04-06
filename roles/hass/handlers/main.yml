@@ -5,13 +5,13 @@
 
   - name: restart hass
     service:
-      name: home-assistant@homeassistant.service
+      name: '{{ hass_service }}'
       state: restarted
     notify: restart appdaemon
     become: true
 
   - name: restart appdaemon
     service:
-      name: appdaemon@appdaemon.service
+      name: '{{ hass_appdameon_service }}'
       state: restarted
     become: true

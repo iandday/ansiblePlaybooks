@@ -8,3 +8,8 @@ cifs_user: '{{ hass_user }}'
 cifs_password: '{{ vault_hass_cifs_password }}'
 cifs_path: '{{ hass_config_dir }}'
 cifs_comments: HASS Config
+hass_vault_files:
+  - secrets.yaml
+  - phue.conf
+  - ecobee.conf
+hass_vault_credential: '{{ vault_hass_vault_credential }}'

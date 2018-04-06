@@ -91,20 +91,36 @@
   become: yes
   become_user: '{{ hass_user }}'
 
-- name: decrypt encrypted config files
-  copy:
-    src: '{{ hass_config_dir }}/{{ item }}.vault'
-    dest: '{{ hass_config_dir }}/{{ item }}'
+- name: create vault credential
+  template:
+    src: vaultCredential.j2
+    dest: '{{ hass_config_dir }}/.vaultCredential'
     owner: '{{ hass_user}}'
     group: '{{ hass_user}}'
-    remote_src: yes
-    force: no
-    decrypt: yes
-  with_items:
-    - secrets.yaml
-    - phue.conf
-    - ecobee.conf
+    mode: '0600'
   notify: restart hass
+  become: true
+  
+- name: decrypt encrypted config files
+  shell: 'cp {{ item }}.vault {{ item }} && ansible-vault --vault-password-file .vaultCredential decrypt {{ item }}'
+  args:
+    chdir: '{{ hass_config_dir }}'
+    creates: '{{ hass_config_dir }}/{{ item }}'
+  ignore_errors: true
+  changed_when: false
+  with_items:
+    - '{{ hass_vault_files }}'
+  become_user: '{{ hass_user }}'
+  become: true
+
+- name: set protected file permissions
+  file:
+    path: '{{ hass_config_dir }}/{{ item }}'
+    owner: '{{ hass_user}}'
+    group: '{{ hass_user}}'
+    mode: '0700'    
+  with_items:
+    - '{{ hass_vault_files }}'  
   become: true
 
 - name: create backup directory mount path
@@ -140,8 +156,8 @@
     group: root
     mode: 0777
   with_items:
-    - home-assistant@homeassistant.service
-    - appdaemon@appdaemon.service
+    - '{{ hass_service }}'
+    - '{{ hass_appdameon_service }}'
   become: true
  
 - name: enable autostart
@@ -150,8 +166,8 @@
     enabled: yes
     state: started
   with_items:
-    - home-assistant@homeassistant.service
-    - appdaemon@appdaemon.service
+    - '{{ hass_service }}'
+    - '{{ hass_appdameon_service }}'
   become: true
  
 - name: copy backup script

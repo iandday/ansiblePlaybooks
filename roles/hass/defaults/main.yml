@@ -15,3 +15,5 @@ hass_package_repo:
   - ppa:jonathonf/python-3.6
 hass_config_dir: '/home/{{ hass_user }}/.homeassistant'
 hass_install_dir: '/srv/homeassistant/'
+hass_service: home-assistant@homeassistant.service
+hass_appdameon_service: appdaemon@appdaemon.service
