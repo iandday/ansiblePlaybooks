@@ -1,9 +1,11 @@
 #!/bin/bash
+# { ansible_managed }
 
 # script to run as post processing command in tvHeadend, will delete corresponding edl file
 
 
-edl_ext="{{recording_extension}}"
+rec_ext="{{recording_extension}}"
 path=${1::-{{ recording_extension|length }}}
+edl_ext="edl"
 edl="$path$edl_ext"
 rm "$edl"
