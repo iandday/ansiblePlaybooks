@@ -113,6 +113,14 @@
   become_user: '{{ hass_user }}'
   become: true
 
+- name: link pre-commit hook
+  command: ln -s ../../pre-commit.sh .git/hooks/pre-commit
+  args:
+    chdir: '{{ hass_config_dir }}'
+    creates: '{{ hass_config_dir }}/.git/hooks/pre-commit'
+  become_user: '{{ hass_user }}'
+  become: true
+   
 - name: set protected file permissions
   file:
     path: '{{ hass_config_dir }}/{{ item }}'

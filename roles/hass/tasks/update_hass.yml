@@ -1,0 +1,75 @@
+---
+#  
+# roles/hass/tasks/update_hass.yml
+#
+
+- include_vars: vault.yml
+  no_log: true 
+
+- name: determine installed HASS version
+  command: bin/hass --version
+  args:
+    chdir: '{{ hass_install_dir}}/bin'
+  register: hass_installed_ver
+
+- name: determine current HASS version
+  wget:
+    path:
+  register: hass_current_ver
+
+- name: stop HASS and appdameon
+  service:
+    name: '{{ item}}'
+    state: stopped
+  with_items:
+    - '{{ hass_service }}'
+    - '{{ hass_appdameon_service }}'
+  become: true
+  when: 
+    
+- name: take preUpdate snapshot
+  include_role:
+    name: common
+    tasks_from: snapshot
+  vars:
+    snapshot_details: 'Update to version ##from version ##'
+    snapshot_name: "Version: installed" 
+  when: 
+    
+- name: apt update/upgrade
+  include_role:
+    name: common
+    tasks_from: update_packages
+  
+- name: update pip packages
+  pip: 
+    name: '{{ item }}'
+    virtualenv: '{{ hass_install_dir }}'
+    virtualenv_python: '/usr/bin/python3.6'
+    state: latest
+  with_items:
+    - 'homeassistant'
+    - 'websocket-client'
+  become: yes
+  become_user: '{{ hass_user }}'
+  when: 
+
+- name: update appdaemon
+  pip: 
+    name: 'appdaemon'
+    virtualenv: '{{ hass_install_dir }}'
+    extra_args: '--pre'
+    state: latest
+  become: yes
+  become_user: '{{ hass_user }}'
+  when: 
+
+- name: start HASS and appdameon
+  service:
+    name: '{{ item}}'
+    state: started
+  with_items:
+    - '{{ hass_service }}'
+    - '{{ hass_appdameon_service }}'
+  become: true
+  when: 

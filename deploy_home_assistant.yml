@@ -1,20 +1,20 @@
 ---
 # Home Assistant
 
-- hosts: testHost
+- hosts: automation
   gather_facts: false
   pre_tasks: 
     - name: deploy new VM from template
       include_role: 
         name: common
         tasks_from: deploy_vm_template
-        when: inventory_hostname not in vm_check.virtual_machines
+      when: inventory_hostname not in vm_check.virtual_machines
     - name: gather facts
       setup:
-    # - name: join domain
-    #   include_role: 
-    #     name: common
-    #     tasks_from: join_domain
+    - name: join domain
+      include_role: 
+        name: common
+        tasks_from: join_domain
     - name: take clean snapshot
       include_role:
         name: common
