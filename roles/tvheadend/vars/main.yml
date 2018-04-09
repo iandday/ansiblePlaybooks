@@ -16,7 +16,7 @@ apt_packages:
   - python3-pip
   - tvheadend
   - ffmpeg 
-  - build-essential 
+  - build-essential
   - libargtable2-dev 
   - libavformat-dev 
   - libsdl1.2-dev 
@@ -30,7 +30,7 @@ homerun_ip:
   - 192.168.2.4
 tvheadend_username: 'svcTvh'
 tvheadend_password: '{{ vault_tvheadend_password }}' 
-recordings_share: '//freenas/tvh'
+recordings_share: '//freenas/dvr'
 service_username:  '{{ tvheadend_username }}'
 service_password: '{{ vault_tvheadend_password }}'
 zap2xml_username_cable: 'ian236day@gmail.com'
