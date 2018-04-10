@@ -7,7 +7,7 @@ After=network.target
 [Service]
 Type=simple
 User=%i
-ExecStart=/srv/homeassistant/bin/hass -c "/home/{{ hass_user }}/.homeassistant"
+ExecStart={{ hass_install_dir }}/bin/hass -c "/home/{{ hass_user }}/.homeassistant"
 
 [Install]
 WantedBy=multi-user.target

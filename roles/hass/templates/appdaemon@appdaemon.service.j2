@@ -7,7 +7,7 @@ After=home-assistant@homeassistant.service
 [Service]
 Type=simple
 User=%1
-ExecStart=source {{ hass_install_dir }}/bin/activate && {{ hass_install_dir }}/bin/appdaemon -c {{ hass_config_dir }}
+ExecStart={{ hass_install_dir }}/bin/appdaemon -c {{ hass_config_dir }}
 
 [Install]
 WantedBy=multi-user.target
