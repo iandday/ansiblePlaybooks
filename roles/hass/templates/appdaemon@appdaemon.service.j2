@@ -6,7 +6,7 @@ After=home-assistant@homeassistant.service
 
 [Service]
 Type=simple
-User=%1
+User={{ hass_user }}
 ExecStart={{ hass_install_dir }}/bin/appdaemon -c {{ hass_config_dir }}
 
 [Install]
