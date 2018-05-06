@@ -269,6 +269,23 @@
     minute: '5'
   become: true
 
+- name: copy emtpy directory purge script
+  template:
+    src: remove_empty.sh.j2
+    dest: /usr/local/bin/remove_empty.sh
+    mode: 'a+x'
+  become: true
+
+- name: setup purge cronjob
+  cron:
+    name: 'Purge empty directories'
+    job: '/usr/local/bin/remove_empty.sh'
+    user: '{{ hts_user }}'
+    cron_file: 'purge_directories'
+    hour: '3'
+    minute: '5'
+  become: true
+
 - name: configure backup rotation
   include_role:
     name: common

@@ -1,0 +1,13 @@
+#! /bin/sh
+
+# {{ ansible_managed }}
+
+find /mnt/tvh/ -type d -empty | while read line; do
+if [ "$line" == "/mnt/tvh/timeshift/buffer" ]
+then
+     continue
+else
+        echo "deleting $line "
+        rm -rf "\"$line\""
+ fi
+done

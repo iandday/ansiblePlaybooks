@@ -28,6 +28,13 @@
   notify:
     - restart tvheadend
 
+- name: add emby user to dvr group to read files
+  user: 
+    name: '{{ emby_user }}'
+    groups: 'tvh'
+    append: yes
+  become: true
+
 - name: mount media share
   mount: 
     state: mounted 
