@@ -6,9 +6,11 @@
 vcenter_validate: false
 vcenter_vmtemplate: ubuntuTemplate 
 vcenter_datacenter: Daynet
-vcenter_folder: vm
+vcenter_folder: '{{ vcenter_datacenter }}/vm'
 vcenter_lan_network: 
-  - {"name": "DPortGroupLAN"}
+  - {"name": "DPortGroupLAN", "start_connected": true, "allow_guest_control": true}
+vcenter_datastore: NAS-VM
+vcenter_template_disk_size: 30
 snapshot_details: 
 common_packages: python2.7 python-simplejson python3-apt python3-pip python-apt aptitude ntp
 backup_days: 14
