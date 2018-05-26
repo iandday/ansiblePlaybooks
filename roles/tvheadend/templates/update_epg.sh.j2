@@ -1,5 +1,5 @@
-perl /home/{{ hts_user }}/.xmltv/zap2xml.pl -u {{ zap2xml_username_cable }} -p {{ zap2xml_password_cable }} -d 12 -L -A "new live" -D -c /home/{{ hts_user }}/.xmltv/cache -o /home/{{ hts_user }}/.xmltv/tv_grab_file_cable.xmltv
-perl /home/{{ hts_user }}/.xmltv/zap2xml.pl -u {{ zap2xml_username_ota }} -p {{ zap2xml_password_ota }} -d 12 -L -A "new live" -D -c /home/{{ hts_user }}/.xmltv/cache -o /home/{{ hts_user }}/.xmltv/tv_grab_file_ota.xmltv
+perl /home/{{ hts_user }}/.xmltv/zap2xml.pl -u {{ zap2xml_username_cable }} -p {{ zap2xml_password_cable }} -d 12 -L  -D -c /home/{{ hts_user }}/.xmltv/cache -o /home/{{ hts_user }}/.xmltv/tv_grab_file_cable.xmltv
+perl /home/{{ hts_user }}/.xmltv/zap2xml.pl -u {{ zap2xml_username_ota }} -p {{ zap2xml_password_ota }} -d 12 -L  -D -c /home/{{ hts_user }}/.xmltv/cache -o /home/{{ hts_user }}/.xmltv/tv_grab_file_ota.xmltv
 
 tv_merge -i /home/{{ hts_user }}/.xmltv/tv_grab_file_cable.xmltv -m /home/{{ hts_user }}/.xmltv/tv_grab_file_ota.xmltv -o  /home/{{ hts_user }}/.xmltv/tv_grab_file.xmltv
 chown {{ hts_user }}:{{ hts_user }}  /home/{{ hts_user }}/.xmltv/tv_grab_file.xmltv
