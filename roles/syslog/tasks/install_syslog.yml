@@ -31,6 +31,6 @@
     mount_dest: '{{ syslog_log_dir }}'
     mount_username: '{{ syslog_service_username }}'
     mount_password: '{{ syslog_service_password }}'
-    mount_domain: '{{ domain }}'
+    mount_domain: '{{ workgroup }}'
     mount_uid: root
     mount_gid: root
