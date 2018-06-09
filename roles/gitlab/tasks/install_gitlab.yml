@@ -1,0 +1,106 @@
+---
+#
+# roles/gitlab/tasks/install_gitlab.yml
+#
+
+- name: install packages
+  include_role:
+    name: common
+    tasks_from: install_packages
+  vars:
+    packages: '{{ gitlab_apt_packages }}'
+
+- name: check if gitlab is already installed
+  stat:
+    path: /etc/gitlab
+  register: gitlab
+
+- name: download gitlab install script
+  get_url:
+    url: '{{ gitlab_script_url }}'
+    dest: /tmp/gitlab-ee.deb.sh
+  when: not gitlab.stat.exists
+
+- name: launch script
+  command: /bin/bash /tmp/gitlab-ee.deb.sh
+  become: true
+  when: not gitlab.stat.exists
+  
+- name: install GitLab
+  package:
+    name: gitlab-ee
+    state: latest
+  become: true
+  register: gitlabupdate
+
+- name: copy gitlab config
+  template:
+    src: gitlab.rb.j2
+    dest: /etc/gitlab/gitlab.rb
+  become: true
+  register: gitlabconfigupdate
+
+- name: reconfigure gitlab
+  command: 'gitlab-ctl reconfigure'
+  become: true
+  when: gitlabupdate is changed or gitlabconfigupdate is changed
+
+- name: wait for startup after reconfigure
+  pause:
+    seconds: 30
+  when: gitlabupdate is changed or gitlabconfigupdate is changed  
+
+- name: reconfigure gitlab
+  command: 'gitlab-ctl renew-le-certs'
+  become: true
+  when: gitlabupdate is changed or gitlabconfigupdate is changed
+
+- name: create backup directory if not present
+  file:
+    path: '/mnt/backup_{{ gitlab_backup_path }}'
+    state: directory
+  become: true
+
+- name: check if backup directory is mounted
+  command: '/bin/mountpoint /mnt/backup_{{ gitlab_backup_path }}'
+  register: gitlab_backup_checked
+  changed_when: 'gitlab_backup_checked.rc != 0'
+  ignore_errors: yes
+  become: true
+
+- name: mount backup directory
+  include_role:
+    name: common
+    tasks_from: mount_backup
+  vars:
+    - username: '{{ gitlab_service_username }}'
+    - password: '{{ gitlab_service_password }}'
+    - path: '{{ gitlab_backup_path }}'
+    - uid: '{{ gitlab_git_user }}'
+    - gid: '{{ gitlab_git_user }}'
+  when: gitlab_backup_checked.stdout.find('is a mountpoint') == -1
+
+- name: copy backup script
+  template:
+    src: backup_gitlab.sh.j2
+    dest: /usr/local/bin/backup_gitlab.sh
+    mode: 'a+x'
+  become: true
+
+- name: setup backup cronjob
+  cron:
+    name: 'Backup gitlab'
+    job: '/usr/local/bin/backup_gitlab.sh'
+    user: 'root'
+    cron_file: backup_gitlab
+    hour: '4'
+    minute: '5'
+  become: true
+
+- name: configure backup rotation
+  include_role:
+    name: common
+    tasks_from: rotate_backups
+  vars:
+    - cron_user: 'root'
+    - backup_path: '{{ gitlab_backup_path }}'

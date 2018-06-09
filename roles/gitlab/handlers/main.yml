@@ -1,0 +1,10 @@
+---
+#
+# roles/____/handlers/main.yml
+#
+
+  - name: restart 
+    service:
+      name: 
+      state: restarted
+    become: true
