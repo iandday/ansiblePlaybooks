@@ -3,8 +3,7 @@
 # roles/splunk/tasks/main.yml
 #
 
-#?
-  - name: load common role variables
+- name: load common role variables
   include_vars: '{{ playbook_dir }}/roles/common/vars/{{ item }}.yml'
   with_items:
     - main

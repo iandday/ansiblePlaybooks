@@ -9,13 +9,19 @@
   tasks_from: install_packages
   vars:
     packages: '{{ apt_packages }}'
-      
+
+- name: checking if splunk is installed
+  stat: 
+    path: /opt/splunk
+  register: splunk_path
+
 - name: download and install splunk package
   apt:
-    deb: "{{ splunk_url }}"
+    deb: '{{ splunk_url }}'
     install_recommends: yes
   become: true
- 
+  when: splunk_path.stat.exists == false
+
 - name: create splunk user
   user:
     name: '{{ splunk_user }}'
@@ -42,15 +48,18 @@
   command: '{{ splunk_dir }}/bin/splunk start --accept-license'
   become: true
   become_user: '{{ splunk_user }}'
+  when: splunk_path.stat.exists == false
   
 - name: start splunk at boot
   command: '{{ splunk_dir }}/bin/splunk enable boot-start -user {{ splunk_user }}' 
   become: true
+  when: splunk_path.stat.exists == false
 
 - name: change splunk admin credentials
   shell: '{{ splunk_dir }}/bin/splunk edit user admin -password {{ splunk_admin_password }} -auth admin:changeme'
   become: true
   become_user: '{{ splunk_user }}'
+  when: splunk_path.stat.exists == false
 
 - name: transfer license file
   copy:
@@ -59,16 +68,19 @@
     owner: '{{ splunk_user }}'
     group: '{{ splunk_group }}'
   become: true
+  register: license_status
 
 - name: register license 
   shell: '{{ splunk_dir }}/bin/splunk add licenses {{ splunk_dir }}/{{ license_filename }} -auth admin:{{ splunk_admin_password }}'
   become: true
   become_user: '{{ splunk_user }}'
+  when: license_status is changed
 
 - name: enable universal forwarder listener on tcp 9997
   shell: '{{ splunk_dir }}/bin/splunk enable listen 9997 -auth admin:{{ splunk_admin_password }}'
   become: true
   become_user: '{{ splunk_user }}'
+  when: splunk_path.stat.exists == false
 
 - name: mount splunk app share
   mount:
@@ -84,15 +96,28 @@
     paths: /tmp/splunkapps
   register: splunk_apps
 
+- name: debug
+  debug:
+    var: splunk_apps
+
 - name: install apps
   unarchive:
     src: '{{ item.path }}'
     dest: '{{ splunk_dir }}/etc/apps/'
     remote_src: yes
-  with_items:
-    - '{{ splunk_apps.files }}'
   become: true
   become_user: '{{ splunk_user }}'
+  with_items:
+    - '{{ splunk_apps.files }}'
+  
+- name: clone apps from github
+  git:
+    repo: '{{ item }}'
+    dest: '{{ splunk_dir }}/etc/apps/'
+  become: true
+  become_user: '{{ splunk_user }}'
+  with_items:
+    - '{{ splunk_app_repos }}'
 
 - name: restart splunk
   shell: '{{ splunk_dir }}/bin/splunk restart'

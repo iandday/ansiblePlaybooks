@@ -3,11 +3,13 @@
 # roles/splunk/vars/main.yml
 #
 
-splunk_url: "https://www.splunk.com/bin/splunk/DownloadActivityServlet?architecture=x86_64&platform=linux&version=6.6.0&product=splunk&filename=splunk-6.6.0-1c4f3bbe1aea-linux-2.6-amd64.deb&wget=true"
-network_path: "10.168.1.3:/mnt/Main/splunk"
+splunk_url: 'https://www.splunk.com/bin/splunk/DownloadActivityServlet?architecture=x86_64&platform=linux&version=7.1.1&product=splunk&filename=splunk-7.1.1-8f0ead9ec3db-linux-2.6-amd64.deb&wget=true'
+network_path: '10.168.1.3:/mnt/Main/splunk'
 splunk_admin_password: '{{ vault_splunk_admin_password }}'
-license_filename: Splunk20180428.License
+license_filename: Splunk20180605.License
 apt_packages:
   - nfs-common
   - cifs-utils
 splunk_app_share: '//10.168.1.3/Repository/Software/LabIso/splunkApps'
+splunk_app_repos:
+  - 'https://github.com/iandday/splunk_pfSense_app.git'
