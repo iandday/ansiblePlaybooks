@@ -29,6 +29,7 @@ apt_packages:
     - unzip
     - nfs-common
     - python3-mysqldb
+    - libmysqlclient-dev
     - python-software-properties
     - openjdk-8-jdk
     - tesseract-ocr
@@ -44,8 +45,8 @@ apache_modules:
     - setenvif 
     - ssl
     - proxy_fcgi
-tar_url: https://download.nextcloud.com/server/releases/nextcloud-12.0.3.tar.bz2
-tar_hash_url: https://download.nextcloud.com/server/releases/nextcloud-12.0.3.tar.bz2.md5
+tar_url: https://download.nextcloud.com/server/releases/nextcloud-13.0.4.tar.bz2
+tar_hash_url: https://download.nextcloud.com/server/releases/nextcloud-13.0.4.tar.bz2.md5
 mysql_database: nextcloud
 mysql_user: nextclouduser
 mysql_password: "{{ vault_mysql_password }}"
@@ -57,14 +58,14 @@ nextcloud_admin_username: admin
 nextcloud_data_dir: /mnt/nextcloud
 network_path: "10.168.1.3:/mnt/Main/nextcloud"
 
-solr_version: 7.1.0
-solr_tar_hash: 421e9f79b7bfb26f380c5bdf7c7aca3205ff9daf
+#solr_version: 7.3.1
+#solr_tar_hash: ef41e76b5256ba6abac61fedd68490182843f3c5
 nextant_version: 1.0.8
-bookmarks_version: 0.10.1
+bookmarks_version: '0.12.0-rc1'
 contacts_version: 2.0.1
 calendar_version: 1.5.5
-spreed_version: 2.0.1
-totp_version: 1.3.1
+#spreed_version: 2.0.1
+totp_version: 1.4.1
 
 external_share_config: /tmp/externalShares
 
@@ -74,14 +75,14 @@ ldap_bind_password: "{{vault_ldap_bind_password }}"
 ldap_base_dn: "{{ vault_ldap_base_users }}"
 ldap_base_groups: "{{ vault_ldap_base_users }}"
 ldap_base_users: "{{ vault_ldap_base_users }}"
-ldap_group_filter: "(|(cn=nextclouduser))"
-ldap_group_filter_groups: nextclouduser
+ldap_group_filter: '(|(cn=sgNextcloudUser)(cn=sgNextcloudAdmin))'
+#ldap_group_filter_groups: 'sgNextcloudUser'
 ldap_host: "{{ vault_ldap_host }}"
 ldap_login_filter: "{{ vault_ldap_login_filter }}"
 ldap_filter_email: 1
 ldap_port: 389
-ldap_display_name: "displayName"
+ldap_display_name: "displayname"
 ldap_display_name2: "mail"
 ldap_user_filter: "{{ vault_ldap_user_filter }}"
-ldap_user_filter_groups: "{{ ldap_group_filter_groups }}"
+#ldap_user_filter_groups: "{{ ldap_group_filter_groups }}"
 ldap_user_filter_class: person

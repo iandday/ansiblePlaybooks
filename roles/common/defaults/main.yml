@@ -5,10 +5,10 @@
 
 vcenter_validate: false
 vcenter_vmtemplate: ubuntuTemplate 
-vcenter_datacenter: Daynet
+vcenter_datacenter: Datacenter
 vcenter_folder: '{{ vcenter_datacenter }}/vm'
 vcenter_lan_network: 
-  - {"name": "DPortGroupLAN", "start_connected": true, "allow_guest_control": true}
+  - {"name": "dpLAN", "start_connected": true, "allow_guest_control": true}
 vcenter_datastore: NAS-VM
 vcenter_template_disk_size: 32
 vcenter_esxi_hostname: 10.168.1.117

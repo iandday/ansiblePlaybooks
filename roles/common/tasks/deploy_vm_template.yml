@@ -73,6 +73,11 @@
   delegate_to: localhost
   when: inventory_hostname not in vm_check.virtual_machines
 
+- name: pause
+  pause: 
+    prompt: check IP address in vCenter
+  when: inventory_hostname not in vm_check.virtual_machines
+
 - name: wait for reboot
   wait_for_connection:
     delay: 15
@@ -85,7 +90,6 @@
     dest: /etc/ntp.conf
     backup: yes
   become: true
-  when: inventory_hostname not in vm_check.virtual_machines
 
 - name: start ntp service
   service:
@@ -93,4 +97,3 @@
     state: started
     enabled: yes
   become: true
-  when: inventory_hostname not in vm_check.virtual_machines
