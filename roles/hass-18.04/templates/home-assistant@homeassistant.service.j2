@@ -1,0 +1,13 @@
+#{{ ansible_managed }}
+
+[Unit]
+Description=Home Assistant
+After=network.target
+
+[Service]
+Type=simple
+User=%i
+ExecStart={{ hass_install_dir }}/bin/hass -c "/home/{{ hass_user }}/.homeassistant"
+
+[Install]
+WantedBy=multi-user.target

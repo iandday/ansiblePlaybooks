@@ -1,0 +1,189 @@
+---
+#
+# roles/hass/tasks/install_hass.yml
+#
+
+- name: install packages
+  include_role:
+    name: common
+    tasks_from: install_packages
+  vars:
+    packages: '{{ hass_apt_packages }}'
+
+- name: install venv in python 3.6
+  shell: 'python3 -m pip install virtualenv'
+  become: true
+
+- name: create homeassistant group
+  group:
+    name: '{{ hass_user }}'
+    state: present  
+  become: true
+
+- name: create hass user
+  user:
+    name: '{{ hass_user}}'
+    group: '{{ hass_user }}'
+    shell: /bin/bash
+    groups: 
+      - dialout
+    append: yes
+    system: yes   
+  become: true 
+ 
+- name: create install directory
+  file:
+    path: '{{ hass_install_dir }}' 
+    state: directory
+    owner: '{{ hass_user }}'
+    group: '{{ hass_user }}'   
+  become: yes
+
+- name: install pip packages
+  pip: 
+    name: '{{ item }}'
+    virtualenv: '{{ hass_install_dir }}'
+    virtualenv_python: '/usr/bin/python3.6'
+    state: latest
+  with_items:
+    - 'homeassistant'
+    - 'websocket-client'
+    - 'appdaemon'  
+  notify: restart hass
+  become: yes
+  become_user: '{{ hass_user }}'
+
+- name: create config directory
+  file: 
+    path: '{{ hass_config_dir }}' 
+    state: directory
+    owner: '{{ hass_user}}'
+    group: '{{ hass_user}}'
+  become: yes
+
+- name: clone config repo
+  command: '{{ item }}'
+  args:
+    chdir: '{{ hass_config_dir }}'
+    creates: '{{ hass_config_dir }}/README.md'
+  with_items:
+    - 'git init'
+    - 'git remote add origin https://github.com/iandday/hassConfig.git'
+    - 'git fetch'
+    - 'git checkout -f -t origin/master'
+  notify: restart hass
+  become: yes
+  become_user: '{{ hass_user }}'
+
+- name: create vault credential
+  template:
+    src: vaultCredential.j2
+    dest: '{{ hass_config_dir }}/.vaultCredential'
+    owner: '{{ hass_user}}'
+    group: '{{ hass_user}}'
+    mode: '0600'
+  notify: restart hass
+  become: true
+  
+- name: decrypt encrypted config files
+  shell: 'cp {{ item }}.vault {{ item }} && ansible-vault --vault-password-file .vaultCredential decrypt {{ item }}'
+  args:
+    chdir: '{{ hass_config_dir }}'
+    creates: '{{ hass_config_dir }}/{{ item }}'
+  ignore_errors: true
+  changed_when: false
+  with_items:
+    - '{{ hass_vault_files }}'
+  become_user: '{{ hass_user }}'
+  become: true
+
+- name: link pre-commit hook
+  command: ln -s ../../pre-commit.sh .git/hooks/pre-commit
+  args:
+    chdir: '{{ hass_config_dir }}'
+    creates: '{{ hass_config_dir }}/.git/hooks/pre-commit'
+  become_user: '{{ hass_user }}'
+  become: true
+   
+- name: set protected file permissions
+  file:
+    path: '{{ hass_config_dir }}/{{ item }}'
+    owner: '{{ hass_user}}'
+    group: '{{ hass_user}}'
+    mode: '0700'    
+  with_items:
+    - '{{ hass_vault_files }}'  
+  become: true
+
+- name: create backup directory mount path
+  file:
+    path: '/mnt/backup_{{ hass_backup_path }}'
+    state: directory
+  become: true
+
+- name: check if backup directory is mounted
+  command: '/bin/mountpoint /mnt/backup_{{ hass_backup_path }}'
+  register: hass_backup_checked
+  ignore_errors: true
+  changed_when: 'hass_backup_checked.rc != 0'
+  become: true
+
+- name: mount backup directory
+  include_role:
+    name: common
+    tasks_from: mount_backup
+  vars:
+    - username: '{{ hass_service_username }}'
+    - password: '{{ hass_service_password }}'
+    - path: '{{ hass_backup_path }}'
+    - uid: '{{ hass_user }}'
+    - gid: '{{ hass_user }}'
+  when: hass_backup_checked.stdout.find('is a mountpoint') == -1
+     
+- name: copy autostart templates
+  template:
+    src: '{{ item }}.j2'
+    dest: '/etc/systemd/system/{{ item }}'
+    owner: root
+    group: root
+    mode: 0777
+  with_items:
+    - '{{ hass_service }}'
+    - '{{ hass_appdameon_service }}'
+  become: true
+ 
+- name: enable autostart
+  service:
+    name: '{{ item }}'
+    enabled: yes
+    state: started
+  with_items:
+    - '{{ hass_service }}'
+    - '{{ hass_appdameon_service }}'
+  become: true
+ 
+- name: copy backup script
+  template:
+    src: backup_hass.sh.j2
+    dest: /usr/local/bin/backup_hass.sh
+    mode: 'a+x'
+  become: true
+
+- name: setup backup cronjob
+  cron:
+    name: 'Backup hass'
+    job: '/usr/local/bin/backup_hass.sh'
+    user: '{{ hass_user }}'
+    cron_file: 'backup_hass'
+    hour: '3'
+    minute: '5'
+  become: true
+
+- name: configure backup rotation
+  include_role:
+    name: common
+    tasks_from: rotate_backups
+  vars:
+    - cron_user: '{{ hass_user }}'
+    - backup_path: '{{ hass_backup_path }}' 
+ 
