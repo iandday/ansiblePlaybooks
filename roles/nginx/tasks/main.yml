@@ -1,12 +1,13 @@
 ---
+#
 # roles/nginx/tasks/main.yml
-    
+#
+
 - name: Install nginx
-  become: yes
-  become_user: root
   apt: 
     pkg: '{{ item }}'
     state: latest
+  become: yes
   with_items:
     - nginx
     - nginx-extras
@@ -15,10 +16,10 @@
   file:
     path: "/etc/nginx/sites-enabled/default"
     state: absent    
+  become: yes
     
 - name: restart nginx
-  become: yes
-  become_user: root
   service: 
     name: nginx
     state: restarted
+  become: yes
