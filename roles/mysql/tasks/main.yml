@@ -1,4 +1,8 @@
 ---
+#
+# roles/mysql/tasks/main.yml 
+#
+
 - name: Specify MySQL root password before installing to disable auth_socket
   debconf: 
     name: mysql-server
@@ -20,6 +24,7 @@
     - mariadb-server
     - mariadb-client
     - python-mysqldb
+    - libmysqlclient-dev
 
 - name: Start mariadb
   service: 
@@ -37,13 +42,13 @@
     mode: 0600
 
 - name: Update root password for all root accounts
-  become: true
   mysql_user: 
     name: root 
     host: "{{ item }}" 
     password: "{{ mysql_root_password }}" 
     priv: "*.*:ALL,GRANT"
   with_items: "{{ mysql_hosts }}"
+  become: true
 
 - name: check and remove anonymous users
   mysql_user: 
@@ -51,6 +56,7 @@
     host: "{{ item }}" 
     state: absent
   with_items: "{{ mysql_hosts }}"    
+  become: true
         
 - name: Create databases
   mysql_db: 
@@ -58,6 +64,7 @@
     state: present 
     login_user: root 
     login_password: "{{ mysql_root_password }}"
+  become: true
     
 - name: create users
   mysql_user: 
@@ -67,3 +74,4 @@
     state: present 
     login_user: root 
     login_password: "{{ mysql_root_password }}"
+  become: true
