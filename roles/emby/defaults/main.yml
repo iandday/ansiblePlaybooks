@@ -8,7 +8,6 @@ backup_path: 'emby'
 required_variables:
   - service_username
   - service_password
-  - mount_domain
   - backup_path
   - emby_user
   - package_repo 
