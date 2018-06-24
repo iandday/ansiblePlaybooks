@@ -15,12 +15,24 @@
     repo: '{{ le_dehydrated_repo }}'
     dest: '{{ le_dehydrated_dest }}'
   become: true
+- name: copy requirements file
+  copy:
+    src: requirements.txt
+    dest: /tmp/requirements.txt
 
-- name: install godaddypy python module
+- name: install python modules
   pip:
-    name: godaddypy  
+    requirements: /tmp/requirements.txt 
   become: true
- 
+
+- name: create output directory
+  file:
+    path: '{{ le_cert_out_directory }}'
+    owner: '{{ le_web_user }}'
+    group: '{{ le_web_user }}'
+    state: directory
+  become: true
+
 - name: create godaddy api key file
   ini_file:
     path: '{{ le_dehydrated_dest }}/.gdkeys'
@@ -80,9 +92,7 @@
   become: true
 
 - name: generate initial certificates
-  shell: '{{ le_dehydrated_dest }}/dehydrated --cron --accept-terms --config {{ le_dehydrated_dest }}/config --hook {{ le_dehydrated_dest }}/godaddy.py' 
-  args: 
-    creates: '{{ le_cert_out_directory }}/{{ le_domains[0] }}'
+  command: '{{ le_dehydrated_dest }}/dehydrated --cron --accept-terms --config {{ le_dehydrated_dest }}/config --hook {{ le_dehydrated_dest }}/godaddy.py' 
   become: true
   notify: restart apache
 
