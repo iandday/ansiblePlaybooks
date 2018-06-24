@@ -26,8 +26,8 @@
         snapshot_name: "Pre Build" 
       when: inventory_hostname not in vm_check.virtual_machines
   roles:
-    - apache_reverse_proxy 
     - lets_encrypt
+    - apache_reverse_proxy 
     - splunk_forwarder
   post_tasks:
     - name: take post play snapshot

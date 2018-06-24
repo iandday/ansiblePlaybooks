@@ -17,8 +17,7 @@
   with_items: 
     - '{{ apache_modules }}'
   become: true
-  notify:
-    - restart apache
+  notify: restart apache
 
 - name: copy site configs
   template:
@@ -30,8 +29,7 @@
   with_items: 
     - '{{ apache_websites }}'
   become: true
-  notify:
-    - restart apache
+  notify: restart apache
 
 - name: enable sites
   file:  
@@ -43,16 +41,14 @@
   with_items: 
     - '{{ apache_websites }}'
   become: true
-  notify:
-    - restart apache
+  notify: restart apache
 
 - name: copy apache logrotate.d config
   template:
     src: apache2.j2
     dest: /etc/logrotate.d/apache2 
   become: true
-  notify:
-    - restart apache
+  notify: restart apache
 
 - name: remove log format lines
   lineinfile:
@@ -63,8 +59,7 @@
     - 'LogFormat \"%h %l %u %t \\\"%r\\\" %>s %O \\\"%{Referer}i\\\" \\\"%{User-Agent}i\\\"\" combined'
     - 'LogFormat \"%h %l %u %t \\\"%r\\\" %>s %O\" common' 
   become: yes
-  notify:
-    - restart apache
+  notify: restart apache
 
 - name: modify combined and common log formats for splunk apache add-on app
   lineinfile:
@@ -75,18 +70,19 @@
     - {  l: 'LogFormat "%h %v %l %u %{local}p %t \"%r\" \"%q\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\" %I %O %D" combined', a: 'LogFormat "%{Referer}i -> %U" referer'}
     - {  l: 'LogFormat "%h %l %u %t \"%r\" %>s %b" common', a: 'LogFormat "%{User-agent}i" agent'}  
   become: true
-  notify:
-    - restart apache
-    
+  notify: restart apache
+
 - name: mount log directory
-  mount:
-    name: '{{ apache_log_dir }}'
-    src:  '{{ apache_log_share }}'
-    opts: 'username={{ apache_service_username }},password={{ apache_service_password }},domain=home,uid={{ apache_web_user }},gid={{ apache_web_user }}'
-    fstype: 'cifs'
-    state: 'mounted'
-  no_log: true
-  become: true
+  include_role:
+    name: common
+    tasks_from: mount_share
+  vars:
+    mount_src: '{{ apache_log_share }}'
+    mount_dest: '{{ apache_log_dir }}'
+    mount_username: '{{ apache_service_username }}'
+    mount_password: '{{ apache_service_password }}'
+    mount_uid: '{{ apache_web_user }}'
+    mount_gid: '{{ apache_web_user }}'
 
 - name: start apache at boot
   service:

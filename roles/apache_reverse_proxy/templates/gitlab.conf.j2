@@ -1,0 +1,39 @@
+# Emby
+#   {{ ansible_managed }}  
+
+<VirtualHost *:80>
+    ServerName {{ item.sub_domain }}.{{ item.domain }}
+    ServerAdmin {{ apache_server_admin }}
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+    RewriteEngine on
+  	RewriteCond %{HTTPS} !=on
+    RewriteRule .* https://%{SERVER_NAME}%{REQUEST_URI} [NE,R,L]
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName {{ item.sub_domain }}.{{ item.domain }}
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+    SSLEngine on
+    SSLCertificateFile /etc/apache2/ssl/{{ item.sub_domain }}.{{ item.domain }}/fullchain.pem
+    SSLCertificateKeyFile /etc/apache2/ssl/{{ item.sub_domain }}.{{ item.domain }}/privkey.pem
+
+    <Proxy *>
+        Order deny,allow
+        Allow from all
+    </Proxy>
+
+    SSLProxyEngine on
+    ProxyRequests Off
+    ProxyPass / https://{{ item.target_host }}:443/
+    ProxyPassReverse / https:/{{ item.target_host }}/
+
+    Header edit Location ^http://{{ item.target_host }}/ https:/{{ item.target_host }}/
+    RequestHeader set X-Forwarded-Proto "https"
+
+</VirtualHost>
