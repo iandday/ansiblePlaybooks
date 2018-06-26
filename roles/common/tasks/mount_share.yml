@@ -3,24 +3,23 @@
 # roles/common/tasks/mount_share.yml
 #
 
-- name: check log directory entry in fstab
+- name: check for entry in fstab
   mount:
     src:  '{{ mount_src }}'
     path: '{{ mount_dest }}'
-    opts: 'username={{ mount_username }},password={{ mount_password}},domain={{ mount_domain }},uid={{ mount_uid }},gid={{ mount_gid }}'
+    opts: 'username={{ mount_username }},password={{ mount_password}},domain={{ mount_share_domain }},uid={{ mount_uid }},gid={{ mount_gid }}'
     fstype: 'cifs'
     state: 'present'
   no_log: true
-  register: mount_status
   become: true
+  register: mount_status
 
-- name: mount log directory
+- name: mount
   mount:
-    src:  '{{ syslog_share }}'
-    path: '{{ syslog_log_dir }}'
-    opts: 'username={{ mount_username }},password={{ mount_password}},domain={{ mount_domain }},uid={{ mount_uid }},gid={{ mount_gid }}'
+    src:  '{{ mount_src }}'
+    path: '{{ mount_dest }}'
+    opts: 'username={{ mount_username }},password={{ mount_password}},domain={{ mount_share_domain }},uid={{ mount_uid }},gid={{ mount_gid }}'
     fstype: 'cifs'
     state: 'mounted'
   no_log: true
   become: true
-  when: mount_status.changed
