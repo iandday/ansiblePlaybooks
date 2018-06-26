@@ -20,9 +20,15 @@
     src: requirements.txt
     dest: /tmp/requirements.txt
 
+- name: clone godaddy hook repo
+  git:
+    repo: '{{ le_godaddy_dns_repo }}'
+    dest: '{{ le_godaddy_dns_dest }}'
+  become: true
+
 - name: install python modules
   pip:
-    requirements: /tmp/requirements.txt 
+    requirements: '{{ le_godaddy_dns_dest }}/requirements.txt' 
   become: true
 
 - name: create output directory
@@ -33,19 +39,21 @@
     state: directory
   become: true
 
-- name: create godaddy api key file
-  ini_file:
-    path: '{{ le_dehydrated_dest }}/.gdkeys'
-    owner: '{{ le_web_user }}'
-    group: '{{ le_web_user }}'
-    mode: 0600
-    section: API
-    option: '{{ item.o }}'
-    value: '{{ item.v }}'
+- name: set godaddy key and secret variables
+  lineinfile: 
+    path: '/etc/environment'
+    line: '{{ item }}'
   with_items:
-    - {o: 'key', v: '{{ le_godaddy_key }}'}
-    - {o: 'secret', v: '{{ le_godaddy_secret }}'} 
+    - 'GD_KEY={{ le_godaddy_key }}'
+    - 'GD_SECRET={{ le_godaddy_secret }}'
   become: true
+  register: env_vars
+
+- name: restart to set env vars
+  include_role:
+    name: common
+    tasks_from: reboot
+  when: env_vars is changed
 
 - name: create domain list
   lineinfile:
@@ -56,13 +64,13 @@
   with_items: '{{ le_domains }}'
   become: true
 
-- name: copy godaddy dns hook script
-  copy:
-    src: godaddy.py
-    dest: '{{ le_dehydrated_dest }}'
+- name: link godaddy dns hook script
+  file:
+    src: '{{ le_godaddy_dns_dest }}/godaddy.py'
+    dest: '{{ le_dehydrated_dest }}/godaddy.py'
     owner: '{{ le_web_user }}'
     group: '{{ le_web_user }}'
-    mode: 0755
+    state: link
   become: true
 
 - name: copy dehydrated config files
@@ -93,6 +101,9 @@
 
 - name: generate initial certificates
   command: '{{ le_dehydrated_dest }}/dehydrated --cron --accept-terms --config {{ le_dehydrated_dest }}/config --hook {{ le_dehydrated_dest }}/godaddy.py' 
+  environment:
+    GD_KEY: '{{ le_godaddy_key }}'
+    GD_SECRET: '{{ le_godaddy_secret }}'
   become: true
   notify: restart apache
 
