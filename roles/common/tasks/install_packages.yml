@@ -19,6 +19,7 @@
 
 - name: wait for dpkg lock to release
   shell: '/usr/local/bin/check_lock.sh'
+  become: true
   changed_when: false
 
 - name: install packages
