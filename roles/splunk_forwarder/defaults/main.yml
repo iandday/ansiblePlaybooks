@@ -3,8 +3,8 @@
 # roles/splunk_forwarder/defaults/main.yml
 #
 
-uf_splunk_user: splunk
-uf_splunk_group: splunk
+uf_splunk_user: root
+uf_splunk_group: root
 uf_splunk_path: /opt/splunkforwarder
 uf_required_variables:
   - uf_deb_file
