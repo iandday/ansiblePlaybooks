@@ -225,14 +225,17 @@
     creates: '/home/{{ hts_user }}/.xmltv/tv_grab_file.xmltv'
   become: true
 
-- name: mount recordings directory
-  mount:
-    name: '/mnt/tvh'
-    src:  '{{ recordings_share }}'
-    opts: 'username={{ service_username }},password={{ service_password }},domain=home,uid={{ hts_user }},gid={{ hts_user }}'
-    fstype: 'cifs'
-    state: 'mounted'
-  become: true
+- name: mount log directory
+  include_role:
+    name: common
+    tasks_from: mount_share
+  vars:
+    mount_src:  '{{ recordings_share }}'
+    mount_dest: '/mnt/tvh'
+    mount_username: '{{ service_username }}'
+    mount_password: '{{ service_password }}'
+    mount_uid: '{{ hts_user }}'
+    mount_gid: '{{ hts_user }}'
 
 - name: check if backup directory is mounted
   command: '/bin/mountpoint /mnt/backup_{{ backup_path }}'
