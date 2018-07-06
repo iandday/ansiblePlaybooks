@@ -16,7 +16,7 @@ vcenter_memory_mb: 2048
 snapshot_details: 
 common_packages: python2.7 python-simplejson python3-apt python3-pip python-apt aptitude ntp
 backup_days: 14
-domain: HOME
+domain: DAYNET
 ad_packages:
   - python3-pip
   - sssd
