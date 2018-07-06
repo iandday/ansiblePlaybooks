@@ -6,10 +6,15 @@
 splunk_user: splunk
 splunk_group: splunk
 splunk_dir: /opt/splunk
-required_variables:
-  - '{{ splunk_url }}'
-  - '{{ network_path }}'
-  - '{{ splunk_admin_password }}'
-  - '{{ license_filename }}'
-  - '{{ apt_packages }}'
-  - '{{ splunk_app_share }}'
+splunk_apt_packages:
+  - nfs-common
+  - cifs-utils
+  - git
+splunk_required_variables:
+  - splunk_url
+  - network_path
+  - splunk_admin_password
+  - splunk_license_filename
+  - splunk_app_share
+cifs_path: '{{ splunk_dir }}'
+cifs_comments: Splunk

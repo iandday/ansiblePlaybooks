@@ -1,0 +1,41 @@
+---
+#
+# buildPlays/splunk.yml
+#
+
+- hosts: splunk
+  gather_facts: false
+  pre_tasks:
+    - name: deploy new VM from template
+      include_role: 
+        name: common
+        tasks_from: deploy_vm_template
+    - name: gather facts
+      setup:
+    - name: join domain
+      include_role: 
+        name: common
+        tasks_from: join_domain
+    - name: take clean snapshot
+      include_role:
+        name: common
+        tasks_from: snapshot
+      vars:
+        snapshot_details: "base snapshot after vm deployment from template"
+        snapshot_name: "Pre Build" 
+      when: inventory_hostname not in vm_check.virtual_machines
+  roles:
+    - splunk
+    - cifs_server
+  post_tasks:
+    - name: reboot
+      include_role:
+        name: common
+        tasks_from: reboot
+    - name: take post play snapshot
+      include_role:
+        name: common
+        tasks_from: snapshot
+      vars:
+        snapshot_details: "base snapshot after completion of ansible play"
+        snapshot_name: "Post Build" 

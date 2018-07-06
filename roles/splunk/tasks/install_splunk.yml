@@ -6,11 +6,16 @@
 - name: install packages
   include_role:
     name: common
-  tasks_from: install_packages
+    tasks_from: install_packages
   vars:
-    packages: '{{ apt_packages }}'
+    packages: '{{ splunk_apt_packages }}'
 
-- name: checking if splunk is installed
+- name: upgrade all packages
+  include_role:
+    name: common
+    tasks_from: update_packages
+
+- name: check if splunk is installed
   stat: 
     path: /opt/splunk
   register: splunk_path
@@ -45,83 +50,46 @@
   become: true
 
 - name: initial splunk start
-  command: '{{ splunk_dir }}/bin/splunk start --accept-license'
+  command: '{{ splunk_dir }}/bin/splunk start --accept-license --answer-yes --no-prompt --seed-passwd {{ splunk_admin_password }}'
+  args:
+    creates: '{{ splunk_dir }}/etc/licenses'
   become: true
   become_user: '{{ splunk_user }}'
-  when: splunk_path.stat.exists == false
   
 - name: start splunk at boot
   command: '{{ splunk_dir }}/bin/splunk enable boot-start -user {{ splunk_user }}' 
   become: true
   when: splunk_path.stat.exists == false
 
-- name: change splunk admin credentials
-  shell: '{{ splunk_dir }}/bin/splunk edit user admin -password {{ splunk_admin_password }} -auth admin:changeme'
-  become: true
-  become_user: '{{ splunk_user }}'
-  when: splunk_path.stat.exists == false
-
 - name: transfer license file
   copy:
-    src: '{{ license_filename }}' 
-    dest: '{{ splunk_dir }}/{{ license_filename }}'
+    src: '{{ splunk_license_filename }}' 
+    dest: '{{ splunk_dir }}/{{ splunk_license_filename }}'
     owner: '{{ splunk_user }}'
     group: '{{ splunk_group }}'
   become: true
   register: license_status
 
 - name: register license 
-  shell: '{{ splunk_dir }}/bin/splunk add licenses {{ splunk_dir }}/{{ license_filename }} -auth admin:{{ splunk_admin_password }}'
+  shell: '{{ splunk_dir }}/bin/splunk add licenses {{ splunk_dir }}/{{ splunk_license_filename }} -auth admin:{{ splunk_admin_password }}'
   become: true
   become_user: '{{ splunk_user }}'
   when: license_status is changed
+  notify: restart splunk
 
 - name: enable universal forwarder listener on tcp 9997
   shell: '{{ splunk_dir }}/bin/splunk enable listen 9997 -auth admin:{{ splunk_admin_password }}'
+  no_log: true
   become: true
   become_user: '{{ splunk_user }}'
   when: splunk_path.stat.exists == false
-
-- name: mount splunk app share
-  mount:
-    src: '{{ splunk_app_share }}'
-    name: /tmp/splunkapps
-    state: mounted
-    fstype: cifs
-    opts: guest
-  become: true
-
-- name: identify apps to install
-  find: 
-    paths: /tmp/splunkapps
-  register: splunk_apps
-
-- name: debug
-  debug:
-    var: splunk_apps
-
-- name: install apps
-  unarchive:
-    src: '{{ item.path }}'
-    dest: '{{ splunk_dir }}/etc/apps/'
-    remote_src: yes
-  become: true
-  become_user: '{{ splunk_user }}'
-  with_items:
-    - '{{ splunk_apps.files }}'
   
 - name: clone apps from github
   git:
-    repo: '{{ item }}'
-    dest: '{{ splunk_dir }}/etc/apps/'
+    repo: '{{ item.r }}'
+    dest: '{{ splunk_dir }}/etc/apps/{{ item.n }}'
   become: true
   become_user: '{{ splunk_user }}'
+  notify: restart splunk
   with_items:
     - '{{ splunk_app_repos }}'
-
-- name: restart splunk
-  shell: '{{ splunk_dir }}/bin/splunk restart'
-  become: true
-  become_user: '{{ splunk_user }}'
-
-# Backup splunk??
