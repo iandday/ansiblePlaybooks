@@ -18,7 +18,7 @@
   mount:
     src:  '{{ mount_src }}'
     path: '{{ mount_dest }}'
-    opts: 'username={{ mount_username }},password={{ mount_password}},domain={{ mount_share_domain }},uid={{ mount_uid }},gid={{ mount_gid }}'
+    opts: 'username={{ mount_username }},password={{ mount_password}},domain={{ mount_share_domain }},uid={{ mount_uid }},gid={{ mount_gid }}{{ mount_options }}'
     fstype: 'cifs'
     state: 'mounted'
   no_log: true

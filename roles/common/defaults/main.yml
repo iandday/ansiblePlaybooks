@@ -22,5 +22,6 @@ ad_packages:
   - sssd
   - adcli
   - realmd
+mount_options: ''
 
 
