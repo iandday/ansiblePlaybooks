@@ -27,7 +27,7 @@ comskip_repo: 'git://github.com/erikkaashoek/Comskip'
 autoedit_repo: 'git://github.com/IfThenERROR/autoedit'
 homerun_ip: 
   - 192.168.2.2
-  - 192.168.2.4
+  - 192.168.2.5
 tvheadend_username: 'svcTvh'
 tvheadend_password: '{{ vault_tvheadend_password }}' 
 recordings_share: '//freenas/dvr'

@@ -225,7 +225,7 @@
     creates: '/home/{{ hts_user }}/.xmltv/tv_grab_file.xmltv'
   become: true
 
-- name: mount log directory
+- name: mount recordings directory
   include_role:
     name: common
     tasks_from: mount_share
@@ -236,6 +236,7 @@
     mount_password: '{{ service_password }}'
     mount_uid: '{{ hts_user }}'
     mount_gid: '{{ hts_user }}'
+    mount_options: ',file_mode=0770,dir_mode=0770,nounix'
 
 - name: check if backup directory is mounted
   command: '/bin/mountpoint /mnt/backup_{{ backup_path }}'
