@@ -12,13 +12,14 @@ backup_mount_user: "{{ vault_backup_mount_user }}"
 backup_mount_pass: "{{ vault_backup_mount_pass }}" 
 vm_user: '{{ vault_vm_user }}'
 vm_pass: '{{ vault_vm_pass }}'
-domain: daynet.ianday.me
-domain_controller: 'dc-02.{{ domain }}'
-ntp_server: '{{ domain_controller }}'
+common_domain: daynet.ianday.me
+common_domain_controller: 'dc-02.{{ common_domain }}'
+common_ntp_server: '{{ common_domain_controller }}'
 domain_join_user: '{{ vault_domain_join_user }}'
 domain_join_password: '{{ vault_domain_join_password }}'
 mount_share_domain: daynet
 domain_sudo_group: domainsudo
+common_domain_base_dn: '{{ vault_domain_base_dn }}'
 ian_user: ian
 ian_user_dn: '{{ vault_ian_user_dn }}'
 ian_domain_password: '{{ vault_ian_domain_password }}'
