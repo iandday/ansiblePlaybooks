@@ -3,14 +3,12 @@
 # roles/nginx/tasks/main.yml
 #
 
-- name: Install nginx
-  apt: 
-    pkg: '{{ item }}'
-    state: latest
-  become: yes
-  with_items:
-    - nginx
-    - nginx-extras
+- name: install packages
+  include_role:
+    name: common
+    tasks_from: install_packages
+  vars:
+    packages: '{{ nginx_apt_packages }}'
 
 - name: disable default site
   file:
