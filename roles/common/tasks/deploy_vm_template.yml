@@ -65,8 +65,9 @@
     vm_shell_args: '{{ item }}'
     vm_shell_cwd: '/tmp'
   with_items: 
-    - "sed -i 's/ubuntuTemplate/{{ inventory_hostname }}/g' /etc/hosts"
-    - "sed -i 's/ubuntuTemplate/{{ inventory_hostname }}/g' /etc/hostname"
+    - "sed -i 's/ansible/{{ inventory_hostname }}/g' /etc/hosts"
+    - "sed -i 's/ansible/{{ inventory_hostname }}/g' /etc/hostname"
+    - "sed -i 's/preserve_hostname: false/preserve_hostname: true/g' /etc/cloud/cloud.cfg"
     - "apt-get update"
     - "apt-get install -y {{ common_packages }}"
     - "/sbin/reboot"
@@ -83,6 +84,9 @@
     delay: 15
     timeout: 300
   when: inventory_hostname not in vm_check.virtual_machines
+  
+- name: gather facts
+  setup:
 
 - name: Configure ntp service
   template:
