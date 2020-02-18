@@ -1,0 +1,65 @@
+---
+#
+# roles/common/tasks/create_kvm.yml
+#
+
+
+- name: create kvm from template
+  proxmox_kvm:
+    api_user: '{{ all_pve_api_user }}' 
+    api_password: '{{ all_pve_api_password }}' 
+    api_host: '{{ all_pve_api_host }}' 
+    node: '{{ kvm_node }}' 
+    name:  '{{ inventory_hostname }}'
+    clone:  '{{ all_kvm_template_name }}' 
+    agent: yes
+    full: yes
+    reboot: yes
+    state: present
+    timeout: 900
+  delegate_to: localhost
+  register: kvm_create
+
+- name: pause for creation to finish
+  pause:
+    seconds: 10
+  when: kvm_create.changed
+
+- name: update kvm configuration
+  proxmox_kvm:
+    api_user: '{{ all_pve_api_user }}' 
+    api_password: '{{ all_pve_api_password }}' 
+    api_host: '{{ all_pve_api_host }}' 
+    name:  '{{ inventory_hostname }}'
+    cores: '{{ kvm_cores | default("1") }}'
+    memory: '{{ kvm_memory | default("1024") }}' 
+    net: '{{ kvm_net }}'
+    node: '{{ kvm_node }}'
+    update: yes
+    agent: yes
+    full: yes
+    reboot: yes
+    description: docker host
+    state: present
+    timeout: 900
+  delegate_to: localhost
+  when: kvm_create.changed
+    
+- name: start kvm
+  proxmox_kvm:
+    name: '{{ inventory_hostname }}'
+    api_user: '{{ all_pve_api_user }}' 
+    api_password: '{{ all_pve_api_password }}' 
+    api_host: '{{ all_pve_api_host }}' 
+    state: started
+    timeout: 300
+  delegate_to: localhost
+  
+- name: wait for host to respond
+  wait_for:
+    port: 22
+    host: '{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}'
+    search_regex: OpenSSH
+    delay: 10
+  connection: local
+  when: kvm_create.changed

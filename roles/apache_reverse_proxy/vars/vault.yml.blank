@@ -1,7 +1,0 @@
----
-#
-# roles/apache_reverse_proxy/vars/vault.yml
-#
-
-vault_apache_websites:
-  - {config_file: '', file_name: '', sub_domain: '', domain:  '{{ domain }}', target_host: ''}

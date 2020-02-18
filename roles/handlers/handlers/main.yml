@@ -1,0 +1,51 @@
+---
+#
+# roles/handlers/handlers/main.yml
+#
+
+- name: restart nginx
+  service:
+    name: nginx
+    state: restarted
+  become: true
+
+- name: restart php
+  service:
+    name: php*
+    state: restarted
+  become: true
+
+- name: reboot
+  reboot:
+  become: true
+
+- name: restart elasticsearch
+  service: 
+    name: elasticsearch
+    state: restarted
+  become: true
+
+- name: restart hass
+  service:
+    name: home-assistant@homeassistant.service
+    state: restarted
+  notify: restart appdaemon
+  become: true
+
+- name: restart appdaemon
+  service:
+    name: appdaemon@appdaemon.service
+    state: restarted
+  become: true
+
+- name: restart syslog
+  service:
+    name: syslog-ng
+    state: restarted
+  become: true
+
+- name: restart cifs
+  service:
+    name: smbd
+    state: restarted
+  become: true

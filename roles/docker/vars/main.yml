@@ -1,0 +1,7 @@
+---
+#
+# roles/docker/vars/main.yml
+#
+
+docker_compose_ver: 1.24.0
+

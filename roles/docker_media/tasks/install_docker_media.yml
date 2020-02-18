@@ -1,0 +1,36 @@
+---
+#
+# roles/docker_media/tasks/main.yml
+#
+
+- name: mount media share
+  include_role:
+    name: common
+    tasks_from: mount_share
+  vars:
+    mount_src:  '{{ docker_media_path }}'
+    mount_dest: '{{ docker_media_dest }}'
+    mount_username: '{{ docker_media_service_username }}'
+    mount_password: '{{ docker_media_service_password }}'
+    mount_uid: '{{ docker_user }}'
+    mount_gid: '{{ docker_user }}'
+    mount_options: ',file_mode=0770,dir_mode=0770,nounix'
+  no_log: true
+
+- name: create compose directory
+  file:
+    path: '{{ docker_media_docker_builds }}/media'
+    state: directory
+  become: true
+
+- name: copy compose files
+  template:
+    src: '{{ item }}.j2' 
+    dest: '{{ docker_media_docker_builds }}/media/{{ item }}'
+    owner: '{{ docker_uid }}'
+    group: '{{ docker_gid }}'
+    mode: 0600
+  loop:
+    - docker-compose.yml
+  become: true
+ 

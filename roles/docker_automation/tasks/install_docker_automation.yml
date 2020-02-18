@@ -1,0 +1,34 @@
+---
+#
+# roles/docker_automation/tasks/main.yml
+#
+
+
+- name: create compose directory
+  file:
+    path: '{{ docker_automation_docker_builds }}/automation'
+    state: directory
+    owner: '{{ docker_uid }}'
+    group: '{{ docker_gid }}'
+    mode: 0700
+  become: true
+
+- name: copy compose files
+  template:
+    src: '{{ item }}.j2' 
+    dest: '{{ docker_automation_docker_builds }}/automation/{{ item }}'
+    owner: '{{ docker_uid }}'
+    group: '{{ docker_gid }}'
+    mode: 0600
+  loop:
+    - docker-compose.yml
+  become: true
+ 
+- name: copy mosquitto config
+  template:
+    src: mosquitto.conf.j2 
+    dest: '{{ docker_automation_mqtt_storage }}/config/mosquitto.conf'
+    owner: '{{ docker_uid }}'
+    group: '{{ docker_gid }}'
+    mode: 0600
+  become: true

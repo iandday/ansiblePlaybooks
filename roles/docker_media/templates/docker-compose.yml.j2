@@ -1,0 +1,36 @@
+# {{ ansible_managed }}
+
+version: "3.6"
+services:
+  emby:
+    container_name: emby
+    restart: always
+    image:  emby/embyserver:latest
+    volumes:
+      - {{ docker_media_emby_conf }}:/config
+      - {{ docker_media_dest }}:/mnt/media
+    environment:
+      - UID={{ docker_uid }}
+      - GID={{ docker_gid }}
+    networks:
+      - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=media"
+      - "traefik.frontend.rule=Host:{{ docker_media_emby_url }}"
+      - "traefik.port=8096"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"
+networks:
+  traefik_proxy:
+    external:
+      name: traefik_proxy
+  default:
+    driver: bridge

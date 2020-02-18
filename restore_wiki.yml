@@ -1,0 +1,14 @@
+---
+#
+#  Nextcloud LXC PENDING
+#
+
+- name: configure container
+  hosts: wiki
+  vars:
+    wiki_backup: '/mnt/backup_wiki/20190816/wiki-20190816.tar.gz'
+  pre_tasks:
+  - name: change hostname
+    include_role:
+      name: wiki
+      tasks_from: dokuwiki_restore.yml

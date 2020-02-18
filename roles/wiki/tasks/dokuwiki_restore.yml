@@ -9,13 +9,14 @@
     state: stopped 
   with_items:
     - nginx
-    - php7.0-fpm  
+    - '{{ wiki_php }}'
   become: True
 
 - name: inflate backup
   unarchive:
     src: '{{ wiki_backup }}'
     dest: '/'
+    remote_src: true
   become: True
 
 - name: purge cache
@@ -30,5 +31,5 @@
     state: started 
   with_items:
     - nginx
-    - php7.0-fpm  
+    - '{{ wiki_php }}' 
   become: True

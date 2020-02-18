@@ -3,12 +3,12 @@
 # roles/wiki/tasks/wiki_install.yml
 #
 
-- name: install packages
-  include_role:
-    name: common
-    tasks_from: install_packages
-  vars:
-    packages: '{{ wiki_apt_packages }}'
+- name: update apt cache and install required packages
+  apt: 
+    name: '{{ wiki_apt_packages }}'
+    state: present
+    update_cache: yes
+  become: true
 
 - name: remove apache
   apt:
@@ -58,7 +58,7 @@
   with_items:
     - '{{ wiki_content_dirs }}'
   become: true
-#
+
 - name: create config directories
   file:
     path: '{{ wiki_template_conf_directory }}'
@@ -321,13 +321,14 @@
 - name: mount backup directory
   include_role:
     name: common
-    tasks_from: mount_backup
+    tasks_from: mount_share
   vars:
-    - username: '{{ wiki_svc_account_username }}'
-    - password: '{{ wiki_svc_account_password }}'
-    - path: '{{ wiki_backup_path }}'
-    - uid: '{{ wiki_web_user }}'
-    - gid: '{{ wiki_web_user }}'
+    - mount_username: '{{ wiki_svc_account_username }}'
+    - mount_password: '{{ wiki_svc_account_password }}'
+    - mount_src: '{{ wiki_backup_path }}'
+    - mount_uid: '{{ wiki_web_user }}'
+    - mount_gid: '{{ wiki_web_user }}'
+    - mount_dest: '{{ wiki_backup_dir }}'
   when: wiki_backup_checked.stdout.find('is a mountpoint') == -1
 
 - name: copy backup script

@@ -1,0 +1,26 @@
+---
+#
+# roles/docker/defaults/main.yml
+#
+
+docker_user: docker
+docker_uid: 3333
+docker_gid: 3333
+docker_compose_url: 'https://github.com/docker/compose/releases/download/{{ docker_compose_ver }}/docker-compose-Linux-x86_64'
+docker_required_vars:
+  - docker_compose_ver
+docker_apt_packages: 
+  - cifs-utils
+  - nfs-common 
+  - apt-transport-https 
+  - ca-certificates 
+  - curl 
+  - software-properties-common
+  - docker-ce
+  - python3-pip
+docker_package_repo: 
+  - 'deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable'
+docker_repo_key: 
+  - 'https://download.docker.com/linux/ubuntu/gpg'
+docker_python_packages:
+  - docker

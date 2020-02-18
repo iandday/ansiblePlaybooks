@@ -2,13 +2,14 @@
 #
 # roles/syslog/tasks/install_syslog.yml
 #
-    
-- name: install packages
-  include_role:
-    name: common
-    tasks_from: install_packages
-  vars:
-    packages: '{{ syslog_apt_packages }}'
+
+- name: update apt cache and install required packages
+  apt:
+    name: '{{ item }}'
+    state: present
+    update_cache: yes
+  loop: '{{ syslog_apt_packages }}'
+  become: true
 
 - name: copy syslog config file(s)
   template:
@@ -17,11 +18,11 @@
     owner: root
     group: root
     mode: 0644
-  with_items:
+ loop:
    - '{{ syslog_config }}'
   notify: restart syslog
   become: true
-
+!!!!!!!
 - name: mount log directory
   include_role:
     name: common

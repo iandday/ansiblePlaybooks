@@ -1,0 +1,19 @@
+---
+#
+# roles/docker_utility/vars/main.yml
+#
+
+docker_utility_timezone: America/New_York
+docker_utility_godaddy_key: '{{ vault_docker_utility_godaddy_key }}' 
+docker_utility_godaddy_secret: '{{ vault_docker_utility_godaddy_secret }}'
+docker_utility_idrac_host: '{{ vault_docker_utility_idrac_host }}'
+docker_utility_idrac_user: '{{ vault_docker_utility_idrac_user }}'
+docker_utility_idrac_password: '{{ vault_docker_utility_idrac_password }}'
+docker_utility_traefik_ver: 1.7
+docker_utility_duo_svc_username: '{{ vault_docker_utility_duo_svc_username }}'
+docker_utility_duo_svc_pass: '{{ vault_docker_utility_duo_svc_pass }}'
+docker_utility_duo_svc_dn: '{{ vault_docker_utility_duo_svc_dn }}'
+docker_utility_duo_utm_group: '{{ vault_docker_utility_duo_utm_group }}'
+docker_utility_duo_utm_ikey: '{{ vault_docker_utility_duo_utm_ikey }}'
+docker_utility_duo_utm_skey: '{{ vault_docker_utility_duo_utm_skey }}'
+docker_utility_duo_utm_api:  '{{ vault_docker_utility_duo_utm_api }}'

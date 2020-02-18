@@ -6,15 +6,16 @@
 wiki_sitename: 'Daynet Wiki'
 wiki_shortname: 'Daynet'
 wiki_admin_password: '{{ vault_wiki_admin_password }}'
-wiki_server_name: 192.168.181.133
-base_dn: '{{ common_domain_base_dn }}'
-domain_controllers: '{{ common_domain_controller }}'
+wiki_server_name: '{{ ansible_host }}'
+base_dn: '{{ all_base_dn }}'
+domain_controllers: '{{ all_domain_controller }}'
 account_suffix: '@daynet.ianday.me'
 wiki_backup_dir: '/home/ansible/backup/'
+wiki_tika_version: '1.22'
 wiki_user_group: 
   - { group: 'sgWiki', acl: '{{ wiki_acl_user }}' }
 wiki_svc_account_username: 'svcWiki'
-wiki_svc_account_password: '{{ vault_svc_account_password }}'
+wiki_svc_account_password: '{{ vault_wiki_svc_account_password }}'
 wiki_templates:
   - { name: 'bootstrap3', src: 'https://github.com/LotarProject/dokuwiki-template-bootstrap3/archive/master.tar.gz'}
 wiki_plugins: 
@@ -40,12 +41,11 @@ wiki_plugins:
   - { name: 'text', src: 'https://github.com/michitux/dokuwiki-plugin-text/tarball/master'}
   - { name: 'docsearch', src: 'https://github.com/cosmocode/docsearch/tarball/master'}  
   - { name: 'confmanager', src: 'https://github.com/cosmocode/confmanager/tarball/master'}
-  - { name: 'scrollticker', src: 'https://github.com/medmen/dokuwiki-plugin-scrollticker/tarball/master'}
   - { name: 'upgrade', src: 'https://github.com/splitbrain/dokuwiki-plugin-upgrade/tarball/master'}
   - { name: 'vshare', src: 'https://github.com/splitbrain/dokuwiki-plugin-vshare/tarball/master'}
   - { name: 'toolbox', src: 'https://github.com/splitbrain/dokuwiki-plugin-toolbox/tarball/master'}
 wiki_zip_plugins:
-  - { name: 'syntaxhighlighter4', src: 'https://github.com/crazy-max/dokuwiki-plugin-syntaxhighlighter4/releases/download/20180301/syntaxhighlighter4.zip'} 
+  - { name: 'syntaxhighlighter4', src: 'https://github.com/crazy-max/dokuwiki-plugin-syntaxhighlighter4/releases/download/20180916/syntaxhighlighter4.zip'} 
 wiki_upload_extensions:
   - { extension: 'oft', mime: 'application/vnd.ms-outlook'}
   - { extension: 'pub', mime: 'application/x-mspublisher'}

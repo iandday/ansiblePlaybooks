@@ -3,21 +3,17 @@
 # roles/nginx/tasks/main.yml
 #
 
-- name: install packages
-  include_role:
-    name: common
-    tasks_from: install_packages
-  vars:
-    packages: '{{ nginx_apt_packages }}'
+- name: Install nginx package
+  apt: 
+    pkg: '{{ item }}' 
+    state: latest
+    force: yes
+  loop: '{{ nginx_apt_packages }}'
+  become: true
 
 - name: disable default site
   file:
-    path: "/etc/nginx/sites-enabled/default"
+    path: '/etc/nginx/sites-enabled/default'
     state: absent    
-  become: yes
-    
-- name: restart nginx
-  service: 
-    name: nginx
-    state: restarted
-  become: yes
+  notify: restart nginx
+  become: true

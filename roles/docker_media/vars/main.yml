@@ -1,0 +1,11 @@
+---
+#
+# roles/docker_media/vars/main.yml
+#
+
+docker_media_service_username: svcEmby
+docker_media_service_password: '{{ vault_docker_media_service_password }}'
+docker_media_path: '//freenas/Media'
+docker_media_dest: '/mnt/media'
+docker_media_emby_conf: '{{ docker_media_docker_storage }}/emby'
+docker_media_emby_url: 'media.{{ all_ext_domain }}'

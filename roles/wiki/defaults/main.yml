@@ -70,6 +70,8 @@ wiki_apt_packages:
   - libapache2-mod-php
   - unzip
   - whois
+  - aptitude
+  - cifs-utils
 wiki_local:
   - { name: "['passcrypt']", value: 'sha512' }
   - { name: "['template']",  value: 'bootstrap3' }
@@ -131,8 +133,8 @@ wiki_local_protected:
   - { name: "['plugin']['authad']['update_mail']", value:  '0'}
 wiki_upload_size: 75
 wiki_php_sock: '/var/run/php/php7.2-fpm.sock'
-wiki_tika_version: '1.18'
 wiki_tika_url: 'http://archive.apache.org/dist/tika/tika-app-{{ wiki_tika_version }}.jar'
 wiki_tika_path: '/usr/local/apache-tika'
-wiki_backup_path: 'wiki'
+wiki_backup_path: '//freenas/backup/wiki'
 wiki_php: 'php7.2-fpm'
+cron_user: root

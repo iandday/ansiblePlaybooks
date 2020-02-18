@@ -1,0 +1,24 @@
+---
+#
+# roles/docker_utility/defaults/main.yml
+#
+
+docker_utility_required_vars:
+  - docker_utility_godaddy_key
+  - docker_utility_godaddy_secret
+  - vault_docker_utility_idrac_host
+  - vault_docker_utility_idrac_user
+  - vault_docker_utility_idrac_password
+  - docker_utility_traefik_ver
+  - docker_utility_duo_svc_username
+  - docker_utility_duo_svc_pass
+  - docker_utility_duo_svc_dn
+  - docker_utility_duo_utm_group
+  - docker_utility_duo_utm_ikey
+  - docker_utility_duo_utm_skey
+  - docker_utility_duo_utm_api
+
+docker_utility_docker_builds: /mnt/docker/builds/
+docker_utility_docker_storage: /mnt/docker/storage/
+docker_uid: 3333
+docker_gid: 3333

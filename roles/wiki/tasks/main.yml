@@ -4,23 +4,12 @@
 # Ubuntu 18.04.01
 #
 
-- name: import vault
-  include_vars: vault.yml
-  no_log: true
-
-- name: load common role variables
-  include_vars: '{{ playbook_dir }}/roles/common/vars/{{ item }}.yml'
-  with_items:
-    - main
-    - vault
-  no_log: true
 
 - name: check required variables
-  include_role: 
-    name: common
-    tasks_from: check_vars.yml 
-  vars:
-    req_vars: '{{ wiki_required_vars }}'
-  
+  fail:
+    msg: "Variable '{{ item }}' is not defined"
+  when: item not in vars
+  loop: '{{ wiki_required_vars }}'
+
 - name: load dokuwiki install tasks
   include_tasks: wiki_install.yml

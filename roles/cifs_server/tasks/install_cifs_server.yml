@@ -1,14 +1,14 @@
 ---
 #
-# roles/cifsServer/tasks/main.yml
+# roles/cifs_server/tasks/main.yml
 #
 
 - name: install packages
-  include_role:
-    name: common
-    tasks_from: install_packages
-  vars:
-    packages: '{{ cifs_server_apt_pkgs }}'
+  apt:
+    name: '{{ item }}'
+    update-cache: true
+  loop: '{{ cifs_server_apt_packages }}'
+  become: true
 
 - name: copy config file
   template: 

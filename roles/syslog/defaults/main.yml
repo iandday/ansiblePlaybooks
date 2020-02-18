@@ -5,10 +5,12 @@
 
 log_group: syslog
 syslog_required_variables:
-  - syslog_apt_packages
   - syslog_config
   - syslog_pfsense_receive_port
-  - syslog_log_dir
   - syslog_share
   - syslog_service_password
   - syslog_service_username
+syslog_apt_packages:
+  - syslog-ng-core
+  - cifs-utils
+syslog_log_dir: /var/log/syslog-ng/
