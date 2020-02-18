@@ -1,9 +1,0 @@
----
-#roles/unifi/vars/main.yml
-username: Admin
-password: '{{vault_password}}'
-baseurl: https://10.168.1.2:8443
-cookie: /tmp/unifi_cookie
-site: default
-backup_path: /mnt/backup
-unifi_repo: 'deb http://www.ubnt.com/downloads/unifi/debian stable ubiquiti'
