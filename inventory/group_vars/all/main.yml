@@ -4,7 +4,7 @@
 #
 
 all_ansible_password: '{{ vault_all_ansible_password }}'
-all_template_hostname: template
+all_template_hostname: 1804LTS-Ansible
 all_system_timezone: America/New_York
 all_pve_api_user: root@pam
 all_pve_api_password: '{{ vault_all_pve_api_password }}'
@@ -12,7 +12,7 @@ all_pve_api_host: 10.168.1.111
 all_gateway: 10.168.1.1
 all_ansible_python_interpreter: /usr/bin/python3
 all_kvm_template_name: ubuntu18template
-all_lxc_template_name: 'shared:vztmpl/ansibleLXC.tar.gz'
+all_lxc_template_name: 'shared:vztmpl/ubuntu_1804LTS_ansible.tar.gz'
 all_domain: IANDAY
 all_ext_domain: ianday.me
 all_domain_controller: '{{ vault_all_domain_controller }}'

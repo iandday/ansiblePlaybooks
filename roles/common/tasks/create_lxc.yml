@@ -16,6 +16,7 @@
     memory: '{{ lxc_memory | default("1024") }}' 
     disk: '{{ lxc_disk }}'
     storage: '{{ lxc_storage }}'
+    mounts: '{"mp0":"/mnt/pve/backup,mp=/home/ansible/backup"}'
     onboot: yes
     state: present
     timeout: 900
@@ -25,6 +26,7 @@
   pause:
     seconds: 10
   when: lxc_create.changed
+
     
 - name: start lxc
   proxmox:
@@ -37,10 +39,6 @@
   when: lxc_create.changed
   
 - name: wait for host to respond
-  wait_for:
-    port: 22
-    host: '{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}'
-    search_regex: OpenSSH
+  wait_for_connection:
     delay: 10
-  connection: local
   when: lxc_create.changed

@@ -9,8 +9,8 @@ wiki_admin_password: '{{ vault_wiki_admin_password }}'
 wiki_server_name: '{{ ansible_host }}'
 base_dn: '{{ all_base_dn }}'
 domain_controllers: '{{ all_domain_controller }}'
-account_suffix: '@daynet.ianday.me'
-wiki_backup_dir: '/home/ansible/backup/'
+account_suffix: '@ianday.me'
+wiki_backup_dir: '/home/ansible/backup/wiki'
 wiki_tika_version: '1.22'
 wiki_user_group: 
   - { group: 'sgWiki', acl: '{{ wiki_acl_user }}' }

@@ -305,31 +305,9 @@
 
 - name: create backup directory
   file:
-    path: '/mnt/backup_{{ wiki_backup_path }}'
-    state: directory
-    owner: '{{ wiki_web_user }}'
-    group: '{{ wiki_web_user }}'    
+    path: '{{ wiki_backup_dir }}'
+    state: directory 
   become: true
-
-- name: check if backup directory is mounted
-  command: '/bin/mountpoint /mnt/backup_{{ wiki_backup_path }}'
-  register: wiki_backup_checked
-  changed_when: 'wiki_backup_checked.rc != 0'
-  ignore_errors: true
-  become: true
-
-- name: mount backup directory
-  include_role:
-    name: common
-    tasks_from: mount_share
-  vars:
-    - mount_username: '{{ wiki_svc_account_username }}'
-    - mount_password: '{{ wiki_svc_account_password }}'
-    - mount_src: '{{ wiki_backup_path }}'
-    - mount_uid: '{{ wiki_web_user }}'
-    - mount_gid: '{{ wiki_web_user }}'
-    - mount_dest: '{{ wiki_backup_dir }}'
-  when: wiki_backup_checked.stdout.find('is a mountpoint') == -1
 
 - name: copy backup script
   template:
@@ -342,7 +320,7 @@
   cron:
     name: 'Backup wiki'
     job: '/usr/local/bin/backup_wiki.sh'
-    user: '{{ wiki_web_user }}'
+    user: root
     cron_file: backup_wiki
     hour: '3'
     minute: '5'
@@ -353,5 +331,5 @@
     name: common
     tasks_from: rotate_backups
   vars:
-    - cron_user: '{{ wiki_web_user }}'
-    - backup_path: '{{ wiki_backup_path }}'
+    - cron_user: root
+    - backup_path: '{{ wiki_backup_dir }}'

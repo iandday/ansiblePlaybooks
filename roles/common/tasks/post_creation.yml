@@ -1,8 +1,3 @@
-- name: change hostname
-  include_role:
-    name: common
-    tasks_from: change_hostname.yml
-
 - name: change ansible user password
   user:
     name: ansible

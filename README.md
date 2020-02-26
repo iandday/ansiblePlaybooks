@@ -18,18 +18,19 @@ Clone Ubuntu 18.04 LTS KVM template and install Docker and Docker-Compose to run
 * AppDaemon
 * [Docker idrac6](https://github.com/DomiStyle/docker-idrac6)
   
-### deploy_nextcloud.yml
-Clone Ubuntu 18.04 LXC template and install Nextcloud, MariaDB, and Nginx
+
 
 ### deploy_wiki.yml
-Clone Ubuntu 18.04 LXC template and install Dokuwiki and Nginx
+Clone Ubuntu 18.04 LTS LXC template and install Dokuwiki and Nginx
+
+### deploy_nextcloud.yml
+Clone Ubuntu 18.04 LXC template and install Nextcloud, MariaDB, and Nginx
 
 ### restore_wiki.yml
 Restore wiki content and settings from backup
 
 
 ## TODO
-* Dokuwiki
 * Splunk
 * Syslog Receiver
 * Guacamole
