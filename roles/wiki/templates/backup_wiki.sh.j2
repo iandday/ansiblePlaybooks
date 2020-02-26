@@ -6,11 +6,11 @@
 /etc/init.d/{{ wiki_php }} stop
 
 src="{{ wiki_root_path }} {{ wiki_content }}" 
-dest="/mnt/backup_{{ wiki_backup_path }}"
+dest="{{ wiki_backup_dir }}"
 day=$(date +%Y%m%d)
 
 /bin/mkdir "$dest/$day"
-/bin/tar -czf "$dest/$day/{{ wiki_backup_path }}-$day.tar.gz" --exclude {{ wiki_root_path }}/data/cache --exclude {{ wiki_content }}/cache $src
+/bin/tar -czf "$dest/$day/wiki-$day.tar.gz" --exclude {{ wiki_root_path }}/data/cache --exclude {{ wiki_content }}cache
 
 # start services
 /etc/init.d/nginx start
