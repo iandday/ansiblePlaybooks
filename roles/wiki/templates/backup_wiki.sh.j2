@@ -9,8 +9,7 @@ src="{{ wiki_root_path }} {{ wiki_content }}"
 dest="{{ wiki_backup_dir }}"
 day=$(date +%Y%m%d)
 
-/bin/mkdir "$dest/$day"
-/bin/tar -czf "$dest/$day/wiki-$day.tar.gz" --exclude {{ wiki_root_path }}/data/cache --exclude {{ wiki_content }}cache
+/bin/tar -czf "$dest/wiki-$day.tar.gz" --exclude {{ wiki_root_path }}/data/cache --exclude {{ wiki_content }}cache $src
 
 # start services
 /etc/init.d/nginx start
