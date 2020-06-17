@@ -57,7 +57,7 @@ nextcloud_apt_packages:
     - php-apcu
     - php-redis
     - php-dompdf
-    - php-smbclient
+    - smbclient
     - php-ldap
     - curl
     - memcached
@@ -73,8 +73,14 @@ nextcloud_apt_packages:
     - nginx-extras
     - cifs-utils
     - redis-server
+    - libbz2-dev 
+    - libc-client-dev
+    - libkrb5-dev
+    - libsmbclient-dev
 nextcloud_python_packages:
   - PyMySQL
+nextcloud_pecl_packages:
+  - smbclient
 nextcloud_admin_username: admin
 nextcloud_data_dir: /mnt/nextcloud
 nextcloud_tar_url: https://download.nextcloud.com/server/releases/nextcloud-{{ nextcloud_version }}.tar.bz2

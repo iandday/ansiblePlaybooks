@@ -18,5 +18,4 @@ mysql_repo: 'deb [arch=amd64,arm64,ppc64el] http://sfo1.mirrors.digitalocean.com
 mysql_apt_packages:
   - mariadb-server
   - mariadb-client
-  - python-mysqldb
   - python3-mysqldb

@@ -11,12 +11,25 @@
   loop: '{{ nextcloud_apt_packages }}'
   become: true
 
-- name: Installing pip dependencies
+- name: Install pip dependencies
   pip:
     name: '{{ item }}'
     state: present
   loop: '{{ nextcloud_python_packages }}'
   become: true
+- name: remove apache
+  apt:
+    name: apache*
+    state: absent
+  become: true
+
+- name: Installing pecl packges
+  pear:
+    name: 'pecl/{{ item }}'
+    state: present
+  loop: '{{ nextcloud_pecl_packages }}'
+  become: true
+
 - name: remove apache
   apt:
     name: apache*
@@ -42,7 +55,7 @@
     mount_uid: '{{ nextcloud_user }}'
     mount_gid: '{{ nextcloud_user }}'
     mount_options: ',file_mode=0770,dir_mode=0770,nounix'
-  become: true
+  #become: true
   no_log: true
 
 - name: enable shell for nextcloud user
@@ -132,6 +145,15 @@
   notify: restart nginx
   become: true
 
+- name: touch redis sock
+  copy:
+    content: ''
+    dest: '/var/run/redis/redis-server.sock'
+    force: no
+    group: redis
+    owner: redis
+  become: true
+
 - name: start redis
   service:
     name: redis-server
@@ -174,21 +196,20 @@
   notify: restart php
   become: true
 
-- name: remove unix sockets in php-fpm pool
-  lineinfile:
-    path: '{{ nextcloud_php_pool_path }}'
-    line: 'listen = /run/php/php{{ nextcloud_php_version }}-fpm.sock'
-    state: absent
-  notify: restart php
-  become: true
+# - name: remove unix sockets in php-fpm pool
+#   lineinfile:
+#     path: '{{ nextcloud_php_pool_path }}'
+#     line: 'listen = /run/php/php{{ nextcloud_php_version }}-fpm.sock'
+#     state: absent
+#   notify: restart php
+#   become: true
 
-- name: add environment variables and tcp socket to php-fpm pool
+- name: add environment variables and php-fpm pool
   lineinfile:
     path: '{{ nextcloud_php_pool_path }}'
     line: '{{ item }}'
     state: present
   loop:
-    - 'listen = 127.0.0.1:9000'
     - 'env[HOSTNAME] = $HOSTNAME'
     - 'env[PATH] = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
     - 'env[TMP] = /tmp'
@@ -217,20 +238,28 @@
   become: true
 
 - name: check if nextcloud is installed
-  shell: "php occ status | grep -c 'installed:\ false'"
+  shell: su -c "php occ status | grep -c 'installed:\ false'" www-data
   args:
     chdir: '{{ nextcloud_install_path }}'
   become: true
-  become_user: www-data
   register: installStatus
   failed_when: installStatus.rc == 2
 
+- name: create instal data directory
+  file:
+    path: '{{ nextcloud_data_dir }}/{{ inventory_hostname }}'
+    state: directory
+    owner: www-data
+    group: www-data
+  become: true
+
+#HERE
 - name: configure nextcloud
   command: '{{ item }}'
   args:
     chdir: '{{ nextcloud_install_path }}'
   with_items:
-      - 'php occ maintenance:install --database mysql --database-name "{{ mysql_database }}" --database-user "{{ mysql_user }}" --database-pass "{{ mysql_password }}" --admin-user "{{ nextcloud_admin_username }}" --admin-pass "{{ nextcloud_admin_password }}" --data-dir "{{ nextcloud_data_dir }}"'
+      - 'php occ maintenance:install --database mysql --database-name "{{ mysql_database }}" --database-user "{{ mysql_user }}" --database-pass "{{ mysql_password }}" --admin-user "{{ nextcloud_admin_username }}" --admin-pass "{{ nextcloud_admin_password }}" --data-dir "{{ nextcloud_data_dir }}/{{ inventory_hostname }}"'
       - 'php occ config:system:set trusted_domains 1 --value={{ server_name }}'
       - 'php occ config:system:set trusted_domains 2 --value={{ inventory_hostname }}'
       - 'php occ config:system:set trusted_domains 3 --value={{ hostvars[inventory_hostname]["ansible_default_ipv4"]["address"] }}'
@@ -240,6 +269,9 @@
       - 'php occ app:disable survey_client'
       - 'php occ app:disable firstrunwizard'
       - 'php occ background:cron'
+      - 'php occ db:add-missing-indices'
+  vars:
+    ansible_ssh_pipelining: true
   become: true
   become_user: www-data
   notify: restart php
@@ -291,6 +323,20 @@
   notify: restart php
   become: true
 
+- name: update default nextcloud apps
+  command: 'php console.php app:update {{ item }}'
+  args:
+    chdir: '{{ nextcloud_install_path }}'
+  loop:
+    - user_ldap
+    - files_external
+    - admin_audit
+    - files_pdfviewer
+  vars:
+    ansible_ssh_pipelining: true
+  become: true
+  become_user: www-data
+
 - name: enable default nextcloud apps
   command: 'php console.php app:enable {{ item }}'
   args:
@@ -300,6 +346,19 @@
     - files_external
     - admin_audit
     - files_pdfviewer
+  vars:
+    ansible_ssh_pipelining: true
+  become: true
+  become_user: www-data
+
+- name: update nextcloud apps
+  command: 'php console.php app:update {{ item.name }}'
+  args:
+    chdir: '{{ nextcloud_install_path }}'
+  with_items:
+    - '{{ nextcloud_apps }}'
+  vars:
+    ansible_ssh_pipelining: true
   become: true
   become_user: www-data
 
@@ -309,6 +368,8 @@
     chdir: '{{ nextcloud_install_path }}'
   with_items:
     - '{{ nextcloud_apps }}'
+  vars:
+    ansible_ssh_pipelining: true
   become: true
   become_user: www-data
 
@@ -336,6 +397,8 @@
       - 'php occ ldap:set-config s01  ldapExpertUsernameAttr SAMAccountName'
       - 'php occ ldap:test-config s01'
       - 'php occ ldap:set-config s01  ldapConfigurationActive 1' 
+  vars:
+    ansible_ssh_pipelining: true
   become: true
   become_user: www-data
 
@@ -353,6 +416,8 @@
   args:
     chdir: /var/www/nextcloud
   ignore_errors: yes  
+  vars:
+    ansible_ssh_pipelining: true
   become: true
   become_user: www-data
 
@@ -387,6 +452,8 @@
     name: nextcloud cron
     minute: '*/5'
     job: php -f {{ nextcloud_install_path }}/cron.php > /dev/null 2>&1
+  vars:
+    ansible_ssh_pipelining: true
   become: true
   become_user: www-data  
 

@@ -26,7 +26,6 @@
   pause:
     seconds: 10
   when: lxc_create.changed
-
     
 - name: start lxc
   proxmox:
@@ -41,4 +40,6 @@
 - name: wait for host to respond
   wait_for_connection:
     delay: 10
+    sleep: 10
+    connect_timeout: 10
   when: lxc_create.changed

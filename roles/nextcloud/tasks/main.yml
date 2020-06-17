@@ -10,4 +10,4 @@
   loop: '{{ nextcloud_required_vars }}'
   
 - name: load nextcloud install tasks
-  include_tasks: hass_install.yml
+  include_tasks: nextcloud_install.yml
