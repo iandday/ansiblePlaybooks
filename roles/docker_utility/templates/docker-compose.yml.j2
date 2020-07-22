@@ -58,31 +58,6 @@ services:
       - "traefik.frontend.headers.STSIncludeSubdomains=true"
       - "traefik.frontend.headers.STSPreload=true"
       - "traefik.frontend.headers.frameDeny=true"
-  # idrac:
-  #   # https://github.com/DomiStyle/docker-idrac6
-  #   container_name: idrac
-  #   restart: always
-  #   image: domistyle/idrac6
-  #   environment:
-  #     - IDRAC_HOST={{ docker_utility_idrac_host }}
-  #     - IDRAC_USER={{ docker_utility_idrac_user }}
-  #     - IDRAC_PASSWORD={{ docker_utility_idrac_password }}
-  #   networks:
-  #     - traefik_proxy
-  #   labels:
-  #     - "traefik.enable=true"
-  #     - "traefik.backend=idrac"
-  #     - "traefik.frontend.rule=Host:idrac.{{ all_ext_domain }}"
-  #     - "traefik.port=5800"
-  #     - "traefik.docker.network=traefik_proxy"
-  #     - "traefik.frontend.headers.SSLRedirect=true"
-  #     - "traefik.frontend.headers.STSSeconds=315360000"
-  #     - "traefik.frontend.headers.browserXSSFilter=true"
-  #     - "traefik.frontend.headers.contentTypeNosniff=true"
-  #     - "traefik.frontend.headers.forceSTSHeader=true"
-  #     - "traefik.frontend.headers.STSIncludeSubdomains=true"
-  #     - "traefik.frontend.headers.STSPreload=true"
-  #     - "traefik.frontend.headers.frameDeny=true"
   unifi:
     hostname: unifi
     image: jacobalberty/unifi:stable
