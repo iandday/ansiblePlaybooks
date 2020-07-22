@@ -3,13 +3,55 @@
 # roles/docker_media/tasks/main.yml
 #
 
-- name: mount media share
+- name: mount movies share
   include_role:
     name: common
     tasks_from: mount_share
   vars:
-    mount_src:  '{{ docker_media_path }}'
-    mount_dest: '{{ docker_media_dest }}'
+    mount_src:  '{{ docker_media_movies_path }}'
+    mount_dest: '{{ docker_media_movies_dest }}'
+    mount_username: '{{ docker_media_service_username }}'
+    mount_password: '{{ docker_media_service_password }}'
+    mount_uid: '{{ docker_user }}'
+    mount_gid: '{{ docker_user }}'
+    mount_options: ',file_mode=0770,dir_mode=0770,nounix'
+  no_log: true
+
+- name: mount music share
+  include_role:
+    name: common
+    tasks_from: mount_share
+  vars:
+    mount_src:  '{{ docker_media_music_path }}'
+    mount_dest: '{{ docker_media_music_dest }}'
+    mount_username: '{{ docker_media_service_username }}'
+    mount_password: '{{ docker_media_service_password }}'
+    mount_uid: '{{ docker_user }}'
+    mount_gid: '{{ docker_user }}'
+    mount_options: ',file_mode=0770,dir_mode=0770,nounix'
+  no_log: true
+
+- name: mount tv share
+  include_role:
+    name: common
+    tasks_from: mount_share
+  vars:
+    mount_src:  '{{ docker_media_tv_path }}'
+    mount_dest: '{{ docker_media_tv_dest }}'
+    mount_username: '{{ docker_media_service_username }}'
+    mount_password: '{{ docker_media_service_password }}'
+    mount_uid: '{{ docker_user }}'
+    mount_gid: '{{ docker_user }}'
+    mount_options: ',file_mode=0770,dir_mode=0770,nounix'
+  no_log: true
+
+- name: mount dvr share
+  include_role:
+    name: common
+    tasks_from: mount_share
+  vars:
+    mount_src:  '{{ docker_media_dvr_path }}'
+    mount_dest: '{{ docker_media_dvr_dest }}'
     mount_username: '{{ docker_media_service_username }}'
     mount_password: '{{ docker_media_service_password }}'
     mount_uid: '{{ docker_user }}'
@@ -34,3 +76,10 @@
     - docker-compose.yml
   become: true
  
+- name: create cache directory
+  file:
+    path: '{{ docker_cache_partition }}/jellyfin'
+    state: directory
+    owner: '{{ docker_uid }}'
+    group: '{{ docker_gid }}'
+  become: true

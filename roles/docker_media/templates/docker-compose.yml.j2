@@ -2,35 +2,22 @@
 
 version: "3.6"
 services:
-  emby:
-    container_name: emby
+  jellyfin:
+    container_name: jellyfin
     restart: always
-    image:  emby/embyserver:latest
+    image:  linuxserver/jellyfin
     volumes:
-      - {{ docker_media_emby_conf }}:/config
-      - {{ docker_media_dest }}:/mnt/media
+      - {{ docker_media_jf_conf }}:/config
+      - {{ docker_media_music_dest }}:/mnt/music
+      - {{ docker_media_movies_dest }}:/mnt/movies
+      - {{ docker_media_tv_dest }}:/mnt/tv
+      - {{ docker_media_dvr_dest }}:/mnt/dvr
+      - {{ docker_cache_partition }}/jellyfin:/cache
     environment:
-      - UID={{ docker_uid }}
-      - GID={{ docker_gid }}
-    networks:
-      - traefik_proxy
-    labels:
-      - "traefik.enable=true"
-      - "traefik.backend=media"
-      - "traefik.frontend.rule=Host:{{ docker_media_emby_url }}"
-      - "traefik.port=8096"
-      - "traefik.docker.network=traefik_proxy"
-      - "traefik.frontend.headers.SSLRedirect=true"
-      - "traefik.frontend.headers.STSSeconds=315360000"
-      - "traefik.frontend.headers.browserXSSFilter=true"
-      - "traefik.frontend.headers.contentTypeNosniff=true"
-      - "traefik.frontend.headers.forceSTSHeader=true"
-      - "traefik.frontend.headers.STSIncludeSubdomains=true"
-      - "traefik.frontend.headers.STSPreload=true"
-      - "traefik.frontend.headers.frameDeny=true"
+      - PUID={{ docker_uid }}
+      - PGID={{ docker_gid }}
+      - TZ={{ all_system_timezone }}
+    network_mode: host
 networks:
-  traefik_proxy:
-    external:
-      name: traefik_proxy
   default:
     driver: bridge

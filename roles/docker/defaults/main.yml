@@ -9,6 +9,7 @@ docker_gid: 3333
 docker_compose_url: 'https://github.com/docker/compose/releases/download/{{ docker_compose_ver }}/docker-compose-Linux-x86_64'
 docker_required_vars:
   - docker_compose_ver
+  - docker_cache_partition
 docker_apt_packages: 
   - cifs-utils
   - nfs-common 
@@ -24,4 +25,3 @@ docker_repo_key:
   - 'https://download.docker.com/linux/ubuntu/gpg'
 docker_python_packages:
   - docker
-docker_cache_partition: /dev/sdb1'
