@@ -24,3 +24,4 @@ docker_repo_key:
   - 'https://download.docker.com/linux/ubuntu/gpg'
 docker_python_packages:
   - docker
+docker_cache_partition: /dev/sdb1'

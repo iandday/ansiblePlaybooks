@@ -75,11 +75,25 @@
   when: docker_networks is defined
   become: true
 
-- name: mount docker network share
+- name: mount docker share
+  include_role:
+    name: common
+    tasks_from: mount_share
+  vars:
+    mount_src: '{{ docker_cifs_path }}' 
+    mount_dest: '{{ /mnt/docker }}'
+    mount_username: '{{ docker_service_username }}'
+    mount_password: '{{ docker_service_password }}'
+    mount_uid: '{{ docker_uid }}'
+    mount_gid: '{{ docker_gid }}'
+    mount_options: ',file_mode=0770,dir_mode=0770,nounix,vers=2.1'
+  no_log: true
+
+- name: mount cache drive
   mount:
-    src: '{{ docker_nfs_path }}'
-    path: /mnt/docker
+    path: /mnt/cache
+    src: '{{ docker_cache_partition }}'
+    opts: defaults
     state: mounted
-    fstype: nfs
-  when: docker_nfs_path is defined
+    fstype: ext4
   become: true
