@@ -59,6 +59,8 @@ nextcloud_apt_packages:
     - php-dompdf
     - smbclient
     - php-ldap
+    - php-bcmath
+    - php-gmp
     - curl
     - memcached
     - unzip
