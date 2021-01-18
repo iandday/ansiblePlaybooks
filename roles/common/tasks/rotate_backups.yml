@@ -6,7 +6,7 @@
 - name: copy rotation script
   template:
     src: rotate_backups.sh.j2
-    dest: /usr/local/bin/rotate_backups_{{ backup_path|basename }}.sh
+    dest: '/usr/local/bin/rotate_backups_{{ backup_path|basename }}.sh'
     mode: 'a+x'
   become: true
 
