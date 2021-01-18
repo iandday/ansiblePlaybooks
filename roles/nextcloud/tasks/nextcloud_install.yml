@@ -95,6 +95,7 @@
     dest: /etc/mysql/mariadb.conf.d/50-server.cnf
     insertafter: EOF
     block: |
+      [mysqld]
       log-bin        = /var/log/mysql/mariadb-bin
       log-bin-index  = /var/log/mysql/mariadb-bin.index
       binlog_format  = mixed
@@ -479,7 +480,35 @@
     job: /root/nextcloud_cron.sh > /dev/null 2>&1
   become: true
 
-# - name: create elasticsearch index
-#   command: 'curl -X PUT "localhost:9200/{{ nextcloud_index_name }}"'
-#   become: true
+
+- name: create backup directory
+  file:
+    path: '{{ nextcloud_backup_dir }}'
+    state: directory 
+  become: true
+
+- name: copy backup script
+  template:
+    src: backup_nextcloud.sh.j2
+    dest: /usr/local/bin/backup_nextcloud.sh
+    mode: 'a+x'
+  become: true
+
+- name: setup backup cronjob
+  cron:
+    name: 'Backup nc database'
+    job: '/usr/local/bin/backup_mextcloud.sh'
+    user: root
+    cron_file: backup_nextcloud
+    hour: '3'
+    minute: '5'
+  become: true
+
+- name: configure backup rotation
+  include_role:
+    name: common
+    tasks_from: rotate_backups
+  vars:
+    - cron_user: root
+    - backup_path: '{{ nextcloud_backup_dir }}'
 

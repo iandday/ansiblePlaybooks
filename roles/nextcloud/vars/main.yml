@@ -16,7 +16,7 @@ nextcloud_apps:
   - {name: twofactor_totp, url: 'https://github.com/nextcloud/twofactor_totp/releases/download/v{{ nextcloud_totp_version }}/twofactor_totp.tar.gz', path: '/tmp/totp.tgz'}
 nextcloud_service_username: svcNextcloud
 nextcloud_service_password: '{{ nextcloud_ldap_bind_password }}'
-nextcloud_network_path: '//freenas/nextcloud-03'
+nextcloud_network_path: '//freenas/nextcloud'
 nextcloud_external_share_config: /tmp/externalShares
 nextcloud_ldap_bind_name: '{{ vault_nextcloud_ldap_bind_name }}'
 nextcloud_ldap_bind_password: '{{ vault_nextcloud_ldap_bind_password }}'
@@ -32,3 +32,4 @@ nextcloud_ldap_display_name: 'displayname'
 nextcloud_ldap_display_name2: 'mail'
 nextcloud_ldap_user_filter: '{{ vault_nextcloud_ldap_user_filter }}'
 nextcloud_ldap_user_filter_class: person
+nextcloud_backup_dir: '/home/ansible/backup/nextcloud'
