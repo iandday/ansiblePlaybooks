@@ -1,0 +1,18 @@
+---
+#
+# roles/docker_automation/defaults/main.yml
+#
+
+docker_automation_required_vars:
+  - docker_automation_ha_url
+  - docker_automation_hass_ver
+
+
+
+
+docker_automation_docker_builds: '{{ all_docker_builds }}'
+#docker_automation_docker_storage: '{{ all_docker_storage }}'
+docker_automation_hass_config: '{{ all_docker_storage }}/hass'
+docker_automation_mqtt_storage: '{{ all_docker_storage }}/mqtt'
+docker_automation_appdaemon_storage: '{{ all_docker_storage }}/appdaemon'
+docker_automation_mosquitto_port: 1883

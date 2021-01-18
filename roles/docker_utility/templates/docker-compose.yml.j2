@@ -1,0 +1,180 @@
+# {{ ansible_managed }}
+
+version: "3.6"
+services:
+  portainer:
+    image: portainer/portainer
+    container_name: portainer
+    restart: always
+    command: -H unix:///var/run/docker.sock
+    ports:
+      - target: 9000
+        published: 9000
+        protocol: tcp
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /mnt/docker/storage/portainer/:/data
+    environment:
+      - TZ={{ docker_utility_timezone }}
+    networks:
+      - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=portainer"
+      - "traefik.frontend.rule=Host:portainer.{{ all_ext_domain }}"
+      - "traefik.port=9000"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"  
+  heimdall:
+    container_name: heimdall
+    restart: always
+    image: linuxserver/heimdall
+    volumes:
+      - /mnt/docker/storage/heimdall:/config
+    environment:
+      - PUID={{ docker_uid }}
+      - PGID={{ docker_gid }}
+      - TZ={{ docker_utility_timezone }}
+    networks:
+      - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=heimdall"
+      - "traefik.frontend.rule=Host:start.{{ all_ext_domain }}"
+      - "traefik.port=80"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"
+  unifi:
+    hostname: unifi
+    image: jacobalberty/unifi:stable
+    restart: always
+    container_name: "unifi"
+    volumes:
+      - /mnt/docker/storage/unifi:/unifi
+    ports:
+      - target: 3478
+        published: 3478
+        protocol: udp
+        mode: host
+      - target: 10001
+        published: 10001
+        protocol: udp
+        mode: host
+      - target: 8080
+        published: 8080
+        protocol: tcp
+        mode: host
+      - target: 8081
+        published: 8081
+        protocol: tcp
+        mode: host
+      - target: 8443
+        published: 8443
+        protocol: tcp
+        mode: host
+      - target: 8880
+        published: 8880
+        protocol: tcp
+        mode: host
+      - target: 6789
+        published: 6789
+        protocol: tcp
+        mode: host
+    networks:
+      - traefik_proxy
+    environment:
+      - TZ={{ docker_utility_timezone }}
+      - RUNAS_UID0=false
+      - UNIFI_UID={{ docker_uid }}
+      - UNIFI_GID={{ docker_gid }}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tags=frontend"
+      - "traefik.frontend.passHostHeader=true"
+      - "traefik.admin.backend=unifi"
+      - "traefik.admin.frontend.rule=Host:unifi.{{ all_ext_domain }}"
+      - "traefik.admin.port=8443"
+      - "traefik.admin.protocol=https"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"
+  watchtower:
+    container_name: watchtower
+    hostname: watchtower
+    restart: always
+    image: v2tec/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --schedule "0 0 4 * * *" --cleanup
+  duo_auth:
+    container_name: duo_auth
+    restart: always
+    image: jumanjiman/duoauthproxy:latest
+    volumes:
+      - /mnt/docker/storage/duo:/opt/duoauthproxy/conf/
+      - /mnt/docker/storage/logs/duo:/opt/duoauthproxy/log/
+    ports:
+      - 1812
+      - 18120
+    user: "{{ docker_uid }}"
+    networks:
+      - traefik_proxy
+  traefik:
+    hostname: traefik
+    image: traefik:v{{ docker_utility_traefik_ver }}
+    container_name: traefik
+    restart: always
+    domainname: {{ all_ext_domain }}
+    networks:
+      - default
+      - traefik_proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - DOMAINNAME={{ all_ext_domain }}
+      - GODADDY_API_KEY={{ docker_utility_godaddy_key }} 
+      - GODADDY_API_SECRET={{ docker_utility_godaddy_secret }}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=traefik"
+      - "traefik.frontend.rule=Host:traefik.{{ all_ext_domain }}"
+      - "traefik.port=8080"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /mnt/docker/storage/traefik:/etc/traefik
+      - /mnt/docker/storage/logs/traefik:/logs/
+networks:
+  traefik_proxy:
+    external:
+      name: traefik_proxy
+  default:
+    driver: bridge

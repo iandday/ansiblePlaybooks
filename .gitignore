@@ -1,0 +1,10 @@
+# visual studio code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.DS_Store
+
+# unwanted ansible files
+*.retry

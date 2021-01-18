@@ -1,0 +1,99 @@
+---
+#
+# roles/docker/tasks/main.yml
+#
+
+- name: add package repo key(s)
+  apt_key:
+    url: '{{ item }}'
+    state: present
+  loop: '{{ docker_repo_key }}'    
+  become: true
+
+- name: add package repo source(s)
+  apt_repository:
+    repo: '{{ item }}'
+    state: present
+  loop: '{{ docker_package_repo }}'
+  become: true
+
+- name: install packages
+  apt:
+    name: '{{ item }}'
+    update-cache: true
+  loop: '{{ docker_apt_packages }}'
+  become: true
+
+- name: install python packages
+  pip:
+    name: '{{ docker_python_packages }}'
+    state: present
+  become: true
+
+- name: change docker group id
+  group:
+    name: docker
+    state: present
+    gid: '{{ docker_gid }}'
+  become: true
+
+- name: create docker user
+  user: 
+    name: '{{ docker_user }}'
+    group: '{{ docker_gid }}' 
+    system: yes
+    append: yes
+  become: true
+
+- name: start docker at boot  
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+  become: true
+
+- name: download docker compose
+  get_url:
+    url: '{{ docker_compose_url }}'
+    dest: /usr/local/bin/docker-compose
+    mode: a+x
+  become: true
+
+- name: symlink docker compose
+  file:
+    src: /usr/local/bin/docker-compose
+    dest: /usr/bin/docker-compose
+    state: link
+    owner: '{{ docker_user }}'
+    group: '{{ docker_gid }}' 
+  become: true
+
+- name: create docker networks
+  docker_network:
+    name: '{{ item }}'
+  with_items: '{{ docker_networks }}'
+  when: docker_networks is defined
+  become: true
+
+- name: mount docker share
+  include_role:
+    name: common
+    tasks_from: mount_share
+  vars:
+    mount_src: '{{ docker_cifs_path }}' 
+    mount_dest: '{{ /mnt/docker }}'
+    mount_username: '{{ docker_service_username }}'
+    mount_password: '{{ docker_service_password }}'
+    mount_uid: '{{ docker_uid }}'
+    mount_gid: '{{ docker_gid }}'
+    mount_options: ',file_mode=0770,dir_mode=0770,nounix,vers=2.1'
+  no_log: true
+
+- name: mount cache drive
+  mount:
+    path: /mnt/cache
+    src: '{{ docker_cache_partition }}'
+    opts: defaults
+    state: mounted
+    fstype: ext4
+  become: true

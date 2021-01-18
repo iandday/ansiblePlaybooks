@@ -1,0 +1,37 @@
+---
+#
+# roles/syslog/tasks/install_syslog.yml
+#
+
+- name: update apt cache and install required packages
+  apt:
+    name: '{{ item }}'
+    state: present
+    update_cache: yes
+  loop: '{{ syslog_apt_packages }}'
+  become: true
+
+- name: copy syslog config file(s)
+  template:
+    src: '{{ item }}.j2'
+    dest: '/etc/syslog-ng/conf.d/{{ item }}'
+    owner: root
+    group: root
+    mode: 0644
+ loop:
+   - '{{ syslog_config }}'
+  notify: restart syslog
+  become: true
+!!!!!!!
+- name: mount log directory
+  include_role:
+    name: common
+    tasks_from: mount_share
+  vars:
+    mount_src:  '{{ syslog_share }}'
+    mount_dest: '{{ syslog_log_dir }}'
+    mount_username: '{{ syslog_service_username }}'
+    mount_password: '{{ syslog_service_password }}'
+   # mount_share_domain: '{{ domain }}'
+    mount_uid: root
+    mount_gid: root

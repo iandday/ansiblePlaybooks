@@ -1,0 +1,57 @@
+---
+#
+# roles/handlers/handlers/main.yml
+#
+
+- name: restart nginx
+  service:
+    name: nginx
+    state: restarted
+  become: true
+
+- name: restart php
+  service:
+    name: php7.4-fpm
+    state: restarted
+  become: true
+
+- name: reboot
+  reboot:
+    msg: 'Reboot initiated by Ansible'
+    connect_timeout: 5
+    reboot_timeout: 600
+    pre_reboot_delay: 0
+    post_reboot_delay: 30
+    test_command: whoami
+  become: true
+
+- name: restart elasticsearch
+  service: 
+    name: elasticsearch
+    state: restarted
+  become: true
+
+- name: restart hass
+  service:
+    name: home-assistant@homeassistant.service
+    state: restarted
+  notify: restart appdaemon
+  become: true
+
+- name: restart appdaemon
+  service:
+    name: appdaemon@appdaemon.service
+    state: restarted
+  become: true
+
+- name: restart syslog
+  service:
+    name: syslog-ng
+    state: restarted
+  become: true
+
+- name: restart cifs
+  service:
+    name: smbd
+    state: restarted
+  become: true
