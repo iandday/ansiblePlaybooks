@@ -1,9 +1,0 @@
----
-#
-# roles/splunk_forwarder/handlers/main.yml
-#
-
-- name: restart splunk
-  shell: '{{ uf_splunk_path }}/bin/splunk restart'
-  become: true
-  become_user: '{{ uf_splunk_user }}'

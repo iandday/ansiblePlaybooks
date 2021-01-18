@@ -1,9 +1,0 @@
----
-#
-# roles/common/tasks/check_vars.yml
-#
-
-  - fail: 
-      msg='{{ item }} is not defined'
-    when: item not in vars
-    with_items: '{{ req_vars }}'

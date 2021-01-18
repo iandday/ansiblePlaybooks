@@ -1,7 +1,0 @@
----
-#
-# roles/wiki/defaults/vault.yaml.blank
-#
-
-vault_wiki_admin_password:  
-vault_svc_account_password:

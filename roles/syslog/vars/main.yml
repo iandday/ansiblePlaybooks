@@ -1,9 +1,0 @@
----
-#
-# roles/syslog/vars/main.yml
-#
-
-syslog_apt_packages: 
-  - syslog-ng-core
-  - cifs-utils
-syslog_log_dir: /var/log/syslog-ng/

@@ -1,9 +1,0 @@
-# {{ ansible_managed }}
-
-[tcpout]
-defaultGroup = default-autolb-group
-
-[tcpout:default-autolb-group]
-server = {{ uf_server_host }}:{{ uf_server_port }}
-
-[tcpout-server://{{ uf_server_host }}:{{ uf_server_port }}]

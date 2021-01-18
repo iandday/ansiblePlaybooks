@@ -1,8 +1,0 @@
----
-#
-# roles/_/defaults/main.yml
-#
-
-required_variables: 
- - apt_packages
-
