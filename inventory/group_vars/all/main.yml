@@ -23,3 +23,5 @@ docker_gid: 3333
 all_docker_builds: /mnt/docker/builds
 all_docker_storage: /mnt/docker/storage
 all_docker_logs: '{{ all_docker_storage }}/logs'
+all_backup_root: /home/ansible/backup
+all_nas_backup: '//freenas/backup'

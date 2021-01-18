@@ -18,11 +18,13 @@ Clone Ubuntu 18.04 LTS KVM template and install Docker and Docker-Compose to run
   
 ### deploy_nextcloud.yml
 Clone Ubuntu 20.04 LXC template and install Nextcloud, MariaDB, and Nginx
-
+TODO: 
+- configure database backup
+- bump version to current
 
 ### deploy_jellyfin.yml
 Clone Ubuntu 20.04 LXC template and install Jellyfin
-
+TODO: configure database backup
 
 
 
@@ -40,4 +42,5 @@ Restore wiki content and settings from backup
 * Syslog Receiver
 * Guacamole
 * Gitlab
+* Backup rotation
 
