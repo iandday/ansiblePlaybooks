@@ -19,3 +19,6 @@ jellyfin_apt_packages:
 jellyfin_gpg_key: 'https://repo.jellyfin.org/debian/jellyfin_team.gpg.key'
 jellyfin_user: 110
 jellyfin_group: 117
+jellyfin_data_dir: '/var/lib/jellyfin'
+jellyfin_config_dir: '/etc/jellyfin'
+jellyfin_backup_dir: '/home/ansible/backup/jellyfin'
