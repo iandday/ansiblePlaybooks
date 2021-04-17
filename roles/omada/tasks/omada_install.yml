@@ -1,0 +1,17 @@
+---
+#
+# roles/omada/tasks/omada_install.yml
+#
+
+- name: update apt cache and install required packages
+  apt: 
+    name: '{{ omada_apt_packages }}'
+    state: present
+    update_cache: yes
+  become: true
+
+- name: install controller
+  apt:
+    deb: '{{ omada_controller_url }}'
+    state: present
+  become: true

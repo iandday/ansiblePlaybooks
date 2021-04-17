@@ -1,11 +1,11 @@
 # {{ ansible_managed }}
 
-pid_file /var/run/mosquitto.pid
+pid_file /mosquitto/data/mosquitto.pid
 
 user {{ docker_user }}
 
 # Port to use for the default listener.
-port {{ docker_automation_mosquitto_port }}
+listener {{ docker_automation_mosquitto_port }}
 
 persistence true
 persistence_location /mosquitto/data/

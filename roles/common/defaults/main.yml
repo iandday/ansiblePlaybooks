@@ -23,5 +23,8 @@ ad_packages:
   - adcli
   - realmd
 mount_options: ''
-
-
+common_apt_poackages:
+  - python3-pip
+  - python-pexpect
+common_pip_packages:
+  - pexpect

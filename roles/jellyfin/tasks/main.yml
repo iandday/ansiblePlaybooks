@@ -4,11 +4,11 @@
 #
 
 
-# - name: check required variables
-#   fail:
-#     msg: "Variable '{{ item }}' is not defined"
-#   when: item not in vars
-#   loop: '{{ jellyfin_required_vars }}'
+- name: check required variables
+  fail:
+    msg: "Variable '{{ item }}' is not defined"
+  when: item not in vars
+  loop: '{{ jellyfin_required_vars }}'
 
 - name: load jellyfin install tasks
   include_tasks: jellyfin_install.yml

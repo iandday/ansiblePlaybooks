@@ -1,0 +1,14 @@
+---
+#
+# roles/omada/tasks/main.yml
+#
+
+
+- name: check required variables
+  fail:
+    msg: "Variable '{{ item }}' is not defined"
+  when: item not in vars
+  loop: '{{ omada_required_vars }}'
+
+- name: load omada install tasks
+  include_tasks: omada_install.yml
