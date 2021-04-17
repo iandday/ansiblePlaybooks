@@ -16,6 +16,17 @@
     name: '{{ all_system_timezone }}'
   become: true
 
+- name: Install apt packages
+  apt:
+    update_cache: yes
+    name: '{{ common_apt_poackages }}'
+  become: true
+
+- name: Install pip pakcages
+  pip:
+    name: '{{ common_pip_packages }}'
+  become: true
+
 - name: update packages
   apt:
     name: "*"
