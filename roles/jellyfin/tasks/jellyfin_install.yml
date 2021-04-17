@@ -40,61 +40,47 @@
     enabled: true
   become: true
 
-# - name: mount movies share
-#   include_role:
-#     name: common
-#     tasks_from: mount_share
-#   vars:
-#     mount_src:  '{{ jellyfin_movies_path }}'
-#     mount_dest: '{{ jellyfin_movies_dest }}'
-#     mount_username: '{{ jellyfin_service_username }}'
-#     mount_password: '{{ jellyfin_service_password }}'
-#     mount_uid: '{{ jellyfin_user }}'
-#     mount_gid: '{{ jellyfin_group }}'
-#     mount_options: ',file_mode=0770,dir_mode=0770,nounix'
-#   no_log: true
+- name: mount movies share
+  include_role:
+    name: common
+    tasks_from: mount_share
+  vars:
+    mount_src:  '{{ jellyfin_movies_path }}'
+    mount_dest: '{{ jellyfin_movies_dest }}'
+    mount_username: '{{ jellyfin_service_username }}'
+    mount_password: '{{ jellyfin_service_password }}'
+    mount_uid: '{{ jellyfin_user }}'
+    mount_gid: '{{ jellyfin_group }}'
+    mount_options: ',file_mode=0770,dir_mode=0770,nounix'
+  no_log: true
 
-# - name: mount music share
-#   include_role:
-#     name: common
-#     tasks_from: mount_share
-#   vars:
-#     mount_src:  '{{ jellyfin_music_path }}'
-#     mount_dest: '{{ jellyfin_music_dest }}'
-#     mount_username: '{{ jellyfin_service_username }}'
-#     mount_password: '{{ jellyfin_service_password }}'
-#     mount_uid: '{{ jellyfin_user }}'
-#     mount_gid: '{{ jellyfin_group }}'
-#     mount_options: ',file_mode=0770,dir_mode=0770,nounix'
-#   no_log: true
+- name: mount music share
+  include_role:
+    name: common
+    tasks_from: mount_share
+  vars:
+    mount_src:  '{{ jellyfin_music_path }}'
+    mount_dest: '{{ jellyfin_music_dest }}'
+    mount_username: '{{ jellyfin_service_username }}'
+    mount_password: '{{ jellyfin_service_password }}'
+    mount_uid: '{{ jellyfin_user }}'
+    mount_gid: '{{ jellyfin_group }}'
+    mount_options: ',file_mode=0770,dir_mode=0770,nounix'
+  no_log: true
 
-# - name: mount tv share
-#   include_role:
-#     name: common
-#     tasks_from: mount_share
-#   vars:
-#     mount_src:  '{{ jellyfin_tv_path }}'
-#     mount_dest: '{{ jellyfin_tv_dest }}'
-#     mount_username: '{{ jellyfin_service_username }}'
-#     mount_password: '{{ jellyfin_service_password }}'
-#     mount_uid: '{{ jellyfin_user }}'
-#     mount_gid: '{{ jellyfin_group }}'
-#     mount_options: ',file_mode=0770,dir_mode=0770,nounix'
-#   no_log: true
-
-# - name: mount dvr share
-#   include_role:
-#     name: common
-#     tasks_from: mount_share
-#   vars:
-#     mount_src:  '{{ jellyfin_dvr_path }}'
-#     mount_dest: '{{ jellyfin_dvr_dest }}'
-#     mount_username: '{{ jellyfin_service_username }}'
-#     mount_password: '{{ jellyfin_service_password }}'
-#     mount_uid: '{{ jellyfin_user }}'
-#     mount_gid: '{{ jellyfin_group }}'
-#     mount_options: ',file_mode=0770,dir_mode=0770,nounix'
-#   no_log: true
+- name: mount tv share
+  include_role:
+    name: common
+    tasks_from: mount_share
+  vars:
+    mount_src:  '{{ jellyfin_tv_path }}'
+    mount_dest: '{{ jellyfin_tv_dest }}'
+    mount_username: '{{ jellyfin_service_username }}'
+    mount_password: '{{ jellyfin_service_password }}'
+    mount_uid: '{{ jellyfin_user }}'
+    mount_gid: '{{ jellyfin_group }}'
+    mount_options: ',file_mode=0770,dir_mode=0770,nounix'
+  no_log: true
 
 - name: create backup directory
   file:
