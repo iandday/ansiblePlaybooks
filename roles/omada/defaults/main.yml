@@ -1,0 +1,15 @@
+---
+#
+# roles/omada/defaults/main.yaml
+#
+
+omada_required_vars:
+  - omada_controller_url
+omada_apt_packages:
+  - openjdk-8-jre-headless
+  - jsvc
+  - curl
+
+
+
+
