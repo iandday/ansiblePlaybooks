@@ -52,3 +52,9 @@
     name: smbd
     state: restarted
   become: true
+
+- name: restart mopidy
+  service:
+    name: mopidy
+    state: restarted
+  become: true

@@ -1,0 +1,24 @@
+---
+#
+# roles/spotify_connect/tasks/spotify_connect_install.yml
+#
+
+
+- name: update apt cache and install required packages
+  ansible.builtin.apt: 
+    name: '{{ spotify_connect_apt_packages }}'
+    state: present
+    update_cache: yes
+  become: true
+
+- name: install librespot
+  command: cargo install librespot
+  become: true
+
+- name: symlink file
+  ansible.builtin.file:
+    src: '/root/.cargo/bin/librespot'
+    dest: '/usr/local/bin/librespot'
+    state: link
+  become: true
+

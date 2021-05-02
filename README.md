@@ -36,6 +36,8 @@ Clone Ubuntu 18.04 LTS LXC template and install Dokuwiki and Nginx
 ### restore_wiki.yml
 Restore wiki content and settings from backup
 
+### deploy_music_server.yml
+Clone Ubuntu 20.04 LXC template, install mopidy, snapcast server, and spotify connect client for distributed audio
 
 ## TODO
 * Splunk
