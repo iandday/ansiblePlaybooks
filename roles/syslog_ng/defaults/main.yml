@@ -8,10 +8,11 @@ syslog_ng_required_vars:
   - syslog_ng_log_service_password
   - syslog_ng_log_path
   - syslog_ng_pfsense_receive_port
+  - syslog_ng_omada_receive_port
   - syslog_ng_config
 syslog_ng_apt_packages:
   - syslog-ng
-syslog_ng_log_dest: '/var/log/syslog-ng/'
+syslog_ng_log_dest: '/var/log/syslog-ng'
 syslog_ng_conf_dir: '/etc/syslog-ng/conf.d/'
 syslog_ng_conf_file: '/etc/syslog-ng/syslog-ng.conf'
 syslog_ng_log_user: 0

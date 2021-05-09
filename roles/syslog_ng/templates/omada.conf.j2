@@ -18,11 +18,11 @@ options {
 # Source #
 ##########
 
-source s_udp_pfsense {
+source s_udp_omada {
  network( 
          ip(0.0.0.0) 
          transport("udp")
-         port({{ syslog_ng_pfsense_receive_port }})
+         port({{ syslog_ng_omada_receive_port }})
          );
 };
 
@@ -34,9 +34,9 @@ source s_udp_pfsense {
 ###############
 # Destination #
 ###############
-destination d_file_pfsense {
+destination d_file_omada {
  file( 
-         "{{ syslog_ng_log_dest }}/pfsense/${YEAR}/${MONTH}/pfsense-${YEAR}${MONTH}${DAY}.log" 
+         "{{ syslog_ng_log_dest }}/omada/${YEAR}/${MONTH}/omada-${YEAR}${MONTH}${DAY}.log" 
      );
 };
 
@@ -46,7 +46,7 @@ destination d_file_pfsense {
 ##############
 
 log {
- source(s_udp_pfsense);
-  destination(d_file_pfsense);
+ source(s_udp_omada);
+  destination(d_file_omada);
 };
 
