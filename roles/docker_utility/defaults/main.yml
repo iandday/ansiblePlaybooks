@@ -17,6 +17,10 @@ docker_utility_required_vars:
   - docker_utility_duo_utm_ikey
   - docker_utility_duo_utm_skey
   - docker_utility_duo_utm_api
+  - docker_utility_bitwarden_admin_token
+  - docker_utility_bitwarden_duo_ikey
+  - docker_utility_bitwarden_duo_skey
+  - docker_utility_bitwarden_duo_api
 
 docker_utility_docker_builds: /mnt/docker/builds/
 docker_utility_docker_storage: /mnt/docker/storage/

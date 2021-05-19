@@ -18,8 +18,11 @@
 - name: reboot
   reboot:
     msg: 'Reboot initiated by Ansible'
-    connect_timeout: 5
-    reboot_timeout: 600
+  become: true
+
+- name: reboot LXC
+  reboot:
+    boot_time_command: uptime --since ; cat /proc/sys/kernel/random/boot_id
   become: true
 
 - name: restart elasticsearch

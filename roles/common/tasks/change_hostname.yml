@@ -9,7 +9,7 @@
     path: /etc/hosts    
     regexp: '{{ all_template_hostname }}'
     state: absent
-  notify: reboot
+  notify: '{{ reboot_handler }}'
   become: true
 
 - name: change hostname part A
@@ -17,11 +17,11 @@
     path: /etc/hosts
     line: '127.0.1.1       {{ inventory_hostname }}'
     insertafter: '127.0.0.1       localhost'
-  notify: reboot
+  notify: '{{ reboot_handler }}'
   become: true
 
 - name: change hostname part B
   hostname:
     name: '{{ inventory_hostname }}'
-  notify: reboot
+  notify: '{{ reboot_handler }}'
   become: true

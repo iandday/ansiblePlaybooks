@@ -1,0 +1,52 @@
+# {{ ansible_managed }}
+
+###########
+# Options #
+###########
+
+options {
+        create_dirs(yes);
+        owner(root);
+        group(root);
+        perm(0640);
+        dir_owner(root);
+        dir_group(root);
+        dir_perm(0750);
+};
+
+##########
+# Source #
+##########
+
+source s_udp_pfsense {
+ network( 
+         ip(0.0.0.0) 
+         transport("udp")
+         port({{ syslog_ng_pfsense_receive_port }})
+         );
+};
+
+############
+# Template #
+############
+
+
+###############
+# Destination #
+###############
+destination d_file_pfsense {
+ file( 
+         "{{ syslog_ng_log_dest }}/pfsense/${YEAR}/${MONTH}/pfsense-${YEAR}${MONTH}${DAY}.log" 
+     );
+};
+
+
+##############
+# Log Action #
+##############
+
+log {
+ source(s_udp_pfsense);
+  destination(d_file_pfsense);
+};
+

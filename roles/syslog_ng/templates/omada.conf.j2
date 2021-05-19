@@ -1,3 +1,5 @@
+# {{ ansible_managed }}
+
 ###########
 # Options #
 ###########
@@ -16,8 +18,12 @@ options {
 # Source #
 ##########
 
-source s_udp_pfsense {
- udp( ip(0.0.0.0) port({{ syslog_pfsense_receive_port }}));
+source s_udp_omada {
+ network( 
+         ip(0.0.0.0) 
+         transport("udp")
+         port({{ syslog_ng_omada_receive_port }})
+         );
 };
 
 ############
@@ -28,8 +34,10 @@ source s_udp_pfsense {
 ###############
 # Destination #
 ###############
-destination d_file {
- file( "{{ syslog_log_dir }}/pfsense/${YEAR}/${MONTH}/pfsense-${YEAR}${MONTH}${DAY}.log" );
+destination d_file_omada {
+ file( 
+         "{{ syslog_ng_log_dest }}/omada/${YEAR}/${MONTH}/omada-${YEAR}${MONTH}${DAY}.log" 
+     );
 };
 
 
@@ -38,7 +46,7 @@ destination d_file {
 ##############
 
 log {
- source(s_udp_pfsense);
-  destination(d_file);
+ source(s_udp_omada);
+  destination(d_file_omada);
 };
 
