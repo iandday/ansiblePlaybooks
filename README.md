@@ -13,6 +13,7 @@ Clone Ubuntu 18.04 LTS KVM template and install Docker and Docker-Compose to run
 * Bitwarden
 * Unifi Controller
 * Duo Auth Proxy
+* SMTP Relay
 * Watchtower
 * Home Assistant
 * Mosquito
