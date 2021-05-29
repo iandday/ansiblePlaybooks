@@ -15,10 +15,11 @@
   command: cargo install librespot
   become: true
 
-- name: symlink file
-  ansible.builtin.file:
+- name: copy
+  ansible.builtin.copy:
     src: '/root/.cargo/bin/librespot'
     dest: '/usr/local/bin/librespot'
-    state: link
+    mode: 777
+    remote_src: true
   become: true
 
