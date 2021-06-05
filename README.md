@@ -59,10 +59,12 @@ Clone Ubuntu 20.04 LXC template, install syslog-ng to collect logs from:
 - PfSense
 - TPLink WAP Controller
 
+---
+
+### deploy_splunk.yml
+Clone Ubuntu 20.04 LXC template, install Splunk Enterprise using a NFS bind mount for bucket storage
 
 ## TODO
-* Splunk
-
 * Guacamole
 * Gitlab
 * Backup rotation
