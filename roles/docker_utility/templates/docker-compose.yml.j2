@@ -167,8 +167,8 @@ services:
       - uid={{ docker_uid }}
       - gid={{ docker_gid }}
       - WEBSOCKET_ENABLED=true
-      - EXTENDED_LOGGING=true
-      - LOG_FILE=/log/
+      - EXTENDED_LOGGING=false
+      - LOG_FILE=/log/bitwarden.log
       - SIGNUPS_ALLOWED=false
       - ADMIN_TOKEN={{ docker_utility_bitwarden_admin_token }}
       - DOMAIN=https://vault.{{ all_ext_domain }}
