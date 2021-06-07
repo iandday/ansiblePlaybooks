@@ -184,6 +184,9 @@ services:
       - "traefik.admin.frontend.rule=Host:vault.{{ all_ext_domain }}"
       - "traefik.admin.port=80"
       - "traefik.admin.protocol=http"
+      - traefik.hub.frontend.rule=Host:vault.{{ all_ext_domain }};Path:/notifications/hub
+      - traefik.hub.port=3012
+      - traefik.hub.protocol=ws
       - "traefik.frontend.headers.SSLRedirect=true"
       - "traefik.frontend.headers.STSSeconds=315360000"
       - "traefik.frontend.headers.browserXSSFilter=true"
@@ -204,6 +207,7 @@ services:
     ports:
       - "80:80"
       - "443:443"
+      - "3012:3012"
     environment:
       - DOMAINNAME={{ all_ext_domain }}
       - GODADDY_API_KEY={{ docker_utility_godaddy_key }} 
